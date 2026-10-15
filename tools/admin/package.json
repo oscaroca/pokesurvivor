@@ -1,0 +1,8 @@
+{
+  "name": "pokesurvivor-plus-admin",
+  "private": true,
+  "description": "Herramientas de administración de PokéSurvivor Plus+ (sólo en tu ordenador).",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}
