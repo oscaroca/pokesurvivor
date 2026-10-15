@@ -616,7 +616,7 @@ G.I18n.add({
   'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.',
   // ---------------- mejoras por familia ----------------
   'Las mejoras son de cada familia: valen para todas sus evoluciones.': 'Upgrades belong to each family: they count for all its evolutions.',
-  'Familia': 'Family', 'Todas': 'All', 'Viendo a {x}': 'Watching {x}', 'Q / E para cambiar': 'Q / E to switch', 'Seguir sin objeto': 'Keep going without an item', 'Ponerme {x}': 'Equip {x}',
+  'Familia': 'Family', 'Todas': 'All', 'Buffado hoy: {x}': 'Buffed today: {x}', 'Viendo a {x}': 'Watching {x}', 'Q / E para cambiar': 'Q / E to switch', 'Seguir sin objeto': 'Keep going without an item', 'Ponerme {x}': 'Equip {x}',
   'No te pones nada. Puedes coger otro más adelante.': 'You don\'t equip anything. You can pick up another one later.', 'Estoy listo': 'I\'m ready', '✓ ¡Listo! (pulsa para quitar)': '✓ Ready! (tap to undo)',
   '✓ Listo': '✓ Ready', 'No está listo': 'Not ready', 'Esperando a que todos estén listos ({x}/{x}).': 'Waiting for everyone to be ready ({x}/{x}).', 'Los mejores · histórico': 'The best · all-time', 'Solitario': 'Solo',
   'En grupo': 'In a group', 'Aún nadie': 'Nobody yet', 'Mejoras de la familia: cuentan para {x}.': 'Family upgrades: they count for {x}.', 'Mejoras de {x}.': 'Upgrades for {x}.',

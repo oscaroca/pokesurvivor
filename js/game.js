@@ -117,6 +117,8 @@ G.Game = (() => {
     G.Curses.begin(save, coop);
     if (coop && G.Curses.points()) G.Spawner.say('Maldiciones del grupo: ' + G.Curses.points() + ' puntos', 3.5, true);
     if (G.Curses.on('fragile')) { pl.maxHp = Math.round(pl.maxHp * 0.7); pl.hp = pl.maxHp; }
+    // Familia buffada hoy (systems/buffs.js): más vida, daño, velocidad y monedas.
+    const buffed = G.Buffs.apply(pl, mon.dex);
     banked = { t1: 0, t10: 0 };
     caught = [];
     // Atajos: movimientos con hueco fijo (save.pbind[dex] = [id del 1, id del 2, ...]),
@@ -142,6 +144,7 @@ G.Game = (() => {
     preloadEvos();
     G.Family.runStart(); famT = 0;
     if (pl.ability && pl.ability.fam) G.Spawner.say('Habilidad · ' + pl.ability.name + ': ' + pl.ability.desc, 4, true);
+    if (buffed) G.Spawner.say('¡Familia buffada hoy! ' + G.Buffs.TEXT, 4, true);
     G.Audio.music(G.BIOME_MUSIC[0]);
     // Para el ranking: el servidor apunta cuándo empieza la partida (anti-trampas).
     if (!coop || G.Coop.isHost) G.Ranking.runStarted(coop ? 'g' : 's');
@@ -319,7 +322,7 @@ G.Game = (() => {
     G.Audio.sfx(dead ? 'gameover' : 'back');
     const save = G.DB.save;
     const curse = G.Curses.points();
-    const mul = pl.coinMul * G.Curses.coinMul();
+    const mul = pl.coinMul * G.Curses.coinMul() * G.Buffs.coinMul(pl);
     // Maldiciones: +1 ticket cada 3 puntos si has aguantado 5 minutos.
     if (curse && time >= G.Curses.TICKET_MIN_TIME) pl.t1 += G.Curses.tickets();
     const parts = {
@@ -363,7 +366,8 @@ G.Game = (() => {
       moves: pl.moves, caught,
       breakdown: Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
                  (pl.coinMul > 1 ? ` · ×${pl.coinMul.toFixed(2)} Fortuna` : '') +
-                 (curse ? ` · ×${G.Curses.coinMul().toFixed(2)} Maldiciones` : '')
+                 (curse ? ` · ×${G.Curses.coinMul().toFixed(2)} Maldiciones` : '') +
+                 (pl.buffedToday ? ` · ×${G.Buffs.BONUS.coins.toFixed(2)} Buffado hoy` : '')
     }, () => { pl = null; G.Flow.afterRun(); });
   }
 

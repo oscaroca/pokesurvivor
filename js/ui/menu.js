@@ -72,6 +72,7 @@ G.MenuUI = (() => {
     $('menu-dex-count').textContent = `${owned} / ${G.DEX.length}` + (shinies ? ` · ${shinies} shiny` : '');
 
     topLine();
+    buffsLine();
     // En grupo, el menú muestra la sala encima (no se pierde al entrar en Pokémon y volver).
     if (G.Social.room && G.LobbyUI) setTimeout(() => { if (G.Social.room && G.UI.isOpen('scr-menu')) G.LobbyUI.open(); }, 0);
 
@@ -117,6 +118,27 @@ G.MenuUI = (() => {
     box.innerHTML = `<div class="mt-head">Los mejores · histórico</div><div class="mt-cols">${col('Solitario', solo)}${col('En grupo', group)}</div>`;
     box.classList.remove('hidden');
     box.onclick = () => G.RankingUI.open();
+  }
+
+  /** Las 3 familias buffadas hoy (systems/buffs.js); al pulsar una, su ficha. */
+  function buffsLine() {
+    const box = $('menu-buffs');
+    if (!box) return;
+    const s = G.DB.save, roots = G.Buffs.roots(s);
+    box.classList.toggle('hidden', !roots.length);
+    if (!roots.length) return;
+    box.innerHTML = `<div class="mb-head">${G.Icons.html('up', 12)} Buffados de hoy</div><div class="mb-sub">${G.Buffs.TEXT}</div><div class="mb-list"></div>`;
+    const list = box.querySelector('.mb-list');
+    for (const r of roots) {
+      const d = G.Buffs.face(r, s);
+      const el = document.createElement('div');
+      el.className = 'mb-mon';
+      el.title = 'Buffado hoy';
+      el.appendChild(G.UI.spriteCanvas(d, 44, 40, { scale: 1, shiny: d === s.partner && !!s.partnerShiny && G.DB.ownsShiny(d) }));
+      el.insertAdjacentHTML('beforeend', `<small>${G.DEX_BY[d].name}</small>`);
+      el.onclick = () => { dexSel = d; dexGen = 0; dexFilter = 'own'; openDex(); };
+      list.appendChild(el);
+    }
   }
 
   /** Menú lateral: las maldiciones elegidas, o que en grupo no cuentan. */
@@ -200,6 +222,8 @@ G.MenuUI = (() => {
       cell.insertAdjacentHTML('beforeend', `<span class="no">${String(p.dex).padStart(3, '0')}</span>`);
       if (p.dex === s.partner) cell.insertAdjacentHTML('beforeend', `<span class="badge-r" title="Compañero">${G.Icons.html('crown', 14)}</span>`);
       else if (sh) cell.insertAdjacentHTML('beforeend', `<span class="badge-r" title="Tienes su shiny">${G.Icons.html('shiny', 12)}</span>`);
+      // Familia buffada hoy (systems/buffs.js).
+      if (own && G.Buffs.isBuffed(p.dex, s)) { cell.classList.add('buffed'); cell.insertAdjacentHTML('beforeend', `<span class="badge-buff" title="Buffado hoy">${G.Icons.html('up', 14)}</span>`); }
       const useShiny = sh && p.dex === s.partner && s.partnerShiny;
       cell.appendChild(G.UI.spriteCanvas(p.dex, 92, 80, { scale: 2, silhouette: !own, shadow: own, shiny: useShiny }));
       cell.insertAdjacentHTML('beforeend', `<b>${own ? p.name : '???'}</b>${G.UI.stars(p.rarity, 9)}`);
@@ -294,6 +318,7 @@ G.MenuUI = (() => {
         <div style="color:${G.Gacha.RARITY_COLOR[p.rarity]}">${G.UI.stars(p.rarity, 24)} ${G.Gacha.RARITY_NAME[p.rarity]}</div>
         <div style="margin:6px 0">${own ? G.UI.typeChips(v.types) : ''}</div>
         ${evoLine ? `<div style="font-size:13px;margin:2px 0 6px">${evoLine}</div>` : ''}
+        ${own && G.Buffs.isBuffed(dex, s) ? `<div class="buff-line">${G.Icons.html('up', 14)} Buffado hoy: ${G.Buffs.TEXT}</div>` : ''}
         ${form ? `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">Vista previa: en partida, a partir del nivel 10 y en su forma final, puede salirte ${MEGA_HOW[form.item]} en las cartas de nivel (muy rara).</div>`
           : forms.length && !evos.length ? `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">Puede megaevolucionar en partida: pulsa el botón de arriba para verla.</div>` : ''}
       </div>

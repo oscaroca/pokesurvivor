@@ -34,6 +34,8 @@ G.CHANGELOG = [
      'Co-op: when the level-up cards or a choice (item, bond) close, the game waits half a second before resuming, so everyone is ready.'],
     ['Cooperativo: los enemigos tienen la misma vida que en solitario, pero salen bastantes más (+125 % por cada jugador extra). Los jefes siguen teniendo más vida en grupo. Cada gema da algo menos de experiencia para que el ritmo de subir de nivel se mantenga.',
      'Co-op: enemies have the same HP as in solo, but many more of them appear (+125% per extra player). Bosses still have more HP in a group. Each gem gives a bit less XP so the levelling pace stays the same.'],
+    ['Buffados de hoy: cada día te tocan 3 familias de tus Pokémon. Si juegas con uno de ellos tiene +15% de vida y daño, +10% de velocidad y ganas un 25% más de monedas. Salen en el menú y con un icono en la lista de Pokémon.',
+     'Buffed today: every day you get 3 families of your Pokémon. Playing with one of them gives +15% HP and damage, +10% speed and 25% more coins. They show in the menu and with an icon in the Pokémon list.'],
     ['Grupo: botón «Estoy listo» en la sala; el anfitrión sólo puede empezar cuando lo están todos. Mientras estás en un grupo, la sala se queda de fondo: puedes entrar en Pokémon, Mejoras, Maldiciones o Gacha desde ella y al volver sigue ahí.',
      'Group: an «I\'m ready» button in the room; the host can only start when everyone is. While you are in a group, the room stays in the background: you can open Pokémon, Upgrades, Curses or Gacha from it and it is still there when you come back.'],
     ['Menú: los 3 mejores del ranking histórico, en solitario y en grupo. Pokémon: se abre con todas las regiones y sólo los que tienes, y «Elegir de compañero» está arriba de la ficha.',
