@@ -379,6 +379,15 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .pcard .tag { font-size: 12px; margin-top: 2px; }
 .pcard .new { color: var(--gold); font-weight: 700; }
 .pcard .tag.nat { color: var(--muted); }
+.fam-box { margin: 4px 0 6px; }
+.fam-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; margin: 3px 0; border-radius: 8px; background: rgba(0,0,0,.22); }
+.fam-row.claimed { opacity: .5; }
+.fam-txt { flex: 1; font-size: 13px; }
+.fam-txt .bar { height: 5px; margin: 3px 0 2px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
+.fam-txt .bar i { display: block; height: 100%; background: var(--gold); }
+.fam-num { font-size: 11px; color: var(--muted); }
+.fam-ok { color: #5fe08a; font-weight: 700; }
+.fam-claim { padding: 4px 10px; font-size: 12px; }
 .nat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 4px 0 10px; }
 .nat-grid button { appearance: none; cursor: pointer; font: inherit; font-size: 13px; padding: 5px 2px; border-radius: 6px;
   border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.25); color: #dfe8ff; }

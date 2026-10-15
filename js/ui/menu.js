@@ -216,6 +216,15 @@ G.MenuUI = (() => {
       `<div class="stat"><span${natC(k)}>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span${natC(k)}>${txt}</span></div>`;
     const natHave = new Set(G.Natures.owned(s, dex));
     const ab = (form && form.ab && G.Abilities.byId(form.ab)) || G.Abilities.of(dex);
+    // Misiones de la familia (systems/family.js): progreso, premio y recoger.
+    const famVal = (m, v) => m.stat === 'time' ? G.U.mmss(v) + ' / ' + G.U.mmss(m.goal) : m.stat === 'final' ? (v ? '1 / 1' : '0 / 1') : v + ' / ' + m.goal;
+    const famBox = own ? `<div class="fam-box"><p style="font-size:14px;margin:10px 0 2px"><b class="gold">Misiones de la familia</b></p>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Avanzan jugando con cualquier Pokémon de su familia.</div>
+        ${G.Family.status(s, dex).map(st => `<div class="fam-row${st.claimed ? ' claimed' : ''}">
+          <div class="fam-txt">${st.def.text}<div class="bar"><i style="width:${Math.min(100, st.value / st.def.goal * 100)}%"></i></div>
+            <span class="fam-num">${famVal(st.def, st.value)} · ${G.Progress.rewardText(st.def.reward)}</span></div>
+          ${st.claimed ? `<span class="fam-ok">✓</span>` : st.done ? `<button class="btn gold fam-claim" data-fam="${st.def.id}">Recoger</button>` : ''}
+        </div>`).join('')}</div>` : '';
     const natGrid = G.Natures.ALL.map(n => natHave.has(n.id)
       ? `<button class="${n.id === nat ? 'on' : ''}" data-nat="${n.id}" title="${G.Natures.effect(n.id)}">${n.name}</button>`
       : `<button disabled title="Sácala con un repetido en el gacha">?</button>`).join('');
@@ -249,6 +258,7 @@ G.MenuUI = (() => {
         <div class="nat-grid">${natGrid}</div>
         ${ab ? `<p style="font-size:14px;margin:6px 0 4px">Habilidad <b class="gold">${ab.name}</b><br>
           <span style="color:${ab.fam ? 'var(--text, #dfe8ff)' : 'var(--muted)'};font-size:13px">${ab.desc}</span></p>` : ''}
+        ${famBox}
         <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.Moves.BY_ID[G.startMoveOf(dex)].name}</b>
           ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>
         <p class="move-icons" title="Movimientos que puede aprender">
@@ -266,6 +276,15 @@ G.MenuUI = (() => {
       { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny, mega: !!form, megaTint: !!form && !form.spr });
     box.querySelectorAll('.seg button[data-v]').forEach(b => {
       b.onclick = () => { viewShiny = b.dataset.v === '1'; showDetail(dex); };
+    });
+    box.querySelectorAll('.fam-claim').forEach(b => {
+      b.onclick = () => {
+        if (!G.Family.claim(s, dex, b.dataset.fam)) return;
+        G.DB.commit();
+        G.Audio.sfx('buy');
+        G.UI.toast('¡Premio recogido!');
+        showDetail(dex);
+      };
     });
     box.querySelectorAll('.mega-seg button').forEach(b => {
       b.onclick = () => { viewForm = b.dataset.form || null; G.Audio.sfx('select'); showDetail(dex); };

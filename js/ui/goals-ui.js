@@ -53,6 +53,10 @@
 
     function missions(box) {
       const M = G.DB.save.missions;
+      // Misiones de familia (systems/family.js): se recogen en la ficha de cada Pokémon.
+      const fam = G.Family.pending(G.DB.save);
+      if (fam) box.insertAdjacentHTML('beforeend', `<div class="mission ready"><div class="m-txt">
+        <b>Misiones de familia listas para recoger: ${fam}</b><div class="sub">Se recogen en la ficha de cada Pokémon (menú Pokémon).</div></div></div>`);
       const section = (title, list, weekly) => {
         box.insertAdjacentHTML('beforeend', `<div class="row between goals-h"><h3>${title}</h3>
           <span class="sub">Se renuevan en ${untilText(weekly ? 'w' : 'd')}</span></div>`);

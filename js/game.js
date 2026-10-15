@@ -136,6 +136,7 @@ G.Game = (() => {
     // Hojas de sprites locales: el compañero y los primeros enemigos.
     G.Sprites.preload([mon.dex], 8000, pl.shiny);
     preloadEvos();
+    G.Family.runStart(); famT = 0;
     if (pl.ability && pl.ability.fam) G.Spawner.say('Habilidad · ' + pl.ability.name + ': ' + pl.ability.desc, 4, true);
     G.Audio.music(G.BIOME_MUSIC[0]);
     // Para el ranking: el servidor apunta cuándo empieza la partida (anti-trampas).
@@ -316,6 +317,7 @@ G.Game = (() => {
     if (judge) G.Progress.event('judgeEnd', judge);
     G.Judgment.reset();
     G.Progress.event('runEnd', { time, level: pl.level, coins: pl.coins, types: pl.mon.types, group: coop });
+    G.Family.runEnd(pl, time);
     G.Progress.checkAch();
     // A la nube al acabar la partida (como mucho cada 30 min); si la marca entra
     // en un top (hoy, semana o mes), enseguida (abajo, tras subirla al ranking).
@@ -379,6 +381,8 @@ G.Game = (() => {
       state = 'playing';
     });
   }
+
+  let famT = 0;                  // cada cuánto se miran las misiones de familia
 
   // ---------------- evolución ----------------
 
@@ -712,6 +716,7 @@ G.Game = (() => {
     G.Audio.music(G.Judgment.active ? G.Judgment.music : G.Rift.inArena ? 'rift' : G.EnemyMgr.bossAlive() ? 'boss' : G.BIOME_MUSIC[biome % G.BIOME_MUSIC.length]);
     if (!coop || G.Coop.isHost) maybeLevelUp();
     maybeEvolve();
+    if ((famT += dt) > 1) { famT = 0; G.Family.tick(pl, time); }
     if (pl.bonds > 0) offerBond(true);
     if (G.Coop.isHost) checkAllDown(dt);
   }

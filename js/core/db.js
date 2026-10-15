@@ -129,6 +129,15 @@ G.DB = (() => {
     if (G.DEX_BY) for (const coll of ['owned', 'shiny']) {
       for (const d of Object.keys(s[coll] || {})) if (!G.DEX_BY[d]) delete s[coll][d];
     }
+    // Misiones de familia: números y lista de recogidas con buena forma.
+    if (s.fam && typeof s.fam === 'object') {
+      for (const d of Object.keys(s.fam)) {
+        const f = s.fam[d];
+        if (!f || typeof f !== 'object') { delete s.fam[d]; continue; }
+        for (const k of ['time', 'level', 'bosses', 'final']) f[k] = n(f[k]);
+        f.c = Array.isArray(f.c) ? f.c.filter(x => typeof x === 'string').slice(0, 10) : [];
+      }
+    } else delete s.fam;
     // Naturalezas: sólo de Pokémon que tienes y que existan.
     for (const coll of ['nat', 'pnat']) {
       if (!s[coll] || typeof s[coll] !== 'object') { delete s[coll]; continue; }
@@ -195,6 +204,13 @@ G.DB = (() => {
     }
     r.pupgDone = r.pupgDone || older.pupgDone;
     // Lo conseguido nunca se pierde: unión de legendarios, arenas, objetos, logros...
+    // Misiones de familia: lo mejor de cada una; las recogidas, unión.
+    r.fam = r.fam || {};
+    for (const d in older.fam || {}) {
+      const o = older.fam[d], m = r.fam[d] = r.fam[d] || { c: [] };
+      for (const k of ['time', 'level', 'bosses', 'final']) m[k] = Math.max(m[k] || 0, o[k] || 0);
+      m.c = [...new Set([...(m.c || []), ...(o.c || [])])];
+    }
     // Naturalezas: unión de las desbloqueadas; la elegida, la de la más reciente.
     r.nat = r.nat || {};
     for (const d in older.nat || {}) {
