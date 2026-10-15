@@ -11,6 +11,8 @@ G.Player = class Player {
   constructor(mon, perks = {}, shiny = false) {
     this.mon = mon;
     this.dex = mon.dex;
+    this.baseMon = mon;        // con el que empezaste (mejoras, movimientos y ranking son suyos)
+    this.evos = 0;             // evoluciones en esta run: cada una, +20% de vida y daño
     this.shiny = shiny && G.Sprites.hasShiny(mon.dex);
     this.anim = new G.Sprites.Animator(mon.dex, 1, this.shiny);
     this.x = 0; this.y = 0;
@@ -26,6 +28,7 @@ G.Player = class Player {
     this.xpMul = perks.xpMul || 1;
     this.coinMul = perks.coinMul || 1;
 
+    this.speciesHp = mon.hp;   // parte de la vida máxima que viene de la especie
     this.maxHp = mon.hp + (perks.hp || 0);
     this.hp = this.maxHp;
     this.baseSpd = mon.spd;
@@ -267,6 +270,37 @@ G.Player = class Player {
   }
 
   addMaxHp(amount) { this.maxHp += amount; this.hp += amount; }
+
+  // ---------------- evolución en la run ----------------
+  /** Bonus por haber empezado en una forma anterior: +20% por evolución. */
+  get evoMul() { return 1 + 0.2 * this.evos; }
+
+  /** Evoluciones disponibles a este nivel (data/evolutions.js). */
+  evoOptions() {
+    return (G.EVO && G.EVO[this.dex] || []).filter(e => e.lvl <= this.level && G.DEX_BY[e.to]);
+  }
+
+  /**
+   * Pasa a ser `mon`: stats y sprite de la nueva especie, más el bonus de
+   * evolución. Se conservan las mejoras de la run (Vigor, Potencia...) y los
+   * movimientos.
+   */
+  evolve(mon) {
+    this.evos++;
+    this.mon = mon;
+    this.dex = mon.dex;
+    this.shiny = this.shiny && G.Sprites.hasShiny(mon.dex);
+    this.anim = new G.Sprites.Animator(mon.dex, 1, this.shiny);
+    this.r = G.Sprites.bodyRadius(mon.dex);
+    this.bodyH = G.Sprites.bodyHeight(mon.dex);
+    const hp = Math.round(mon.hp * this.evoMul);
+    const gain = hp - this.speciesHp;
+    this.speciesHp = hp;
+    this.maxHp += gain;
+    this.hp = Math.min(this.maxHp, this.hp + Math.max(0, gain));
+    this.baseSpd = mon.spd;
+    this.baseAtk = mon.atk * this.evoMul;
+  }
 
   /** Devuelve cuántos niveles ha subido (pueden ser varios de golpe). */
   gainXp(amount) {

@@ -134,6 +134,7 @@ G.Game = (() => {
     G.Camera.x = pl.x; G.Camera.y = pl.y; G.Camera.shake = 0;
     // Hojas de sprites locales: el compañero y los primeros enemigos.
     G.Sprites.preload([mon.dex], 8000, pl.shiny);
+    preloadEvos();
     G.Audio.music(G.BIOME_MUSIC[0]);
     // Para el ranking: el servidor apunta cuándo empieza la partida (anti-trampas).
     if (!coop || G.Coop.isHost) G.Ranking.runStarted(coop ? 'g' : 's');
@@ -323,7 +324,7 @@ G.Game = (() => {
     const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills };
     // Si la partida se ha tocado (ver clean()), no sube al ranking (sin avisar); lo demás, sí.
     const ok = clean();
-    const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.dex, shiny: pl.shiny }))
+    const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.baseMon.dex, shiny: pl.shiny }))
                : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
     if (sent) sent.then(b => { if (b && b.some(p => p !== 'a')) G.DB.commit(true); }).catch(() => {});
 
@@ -375,6 +376,39 @@ G.Game = (() => {
       card.apply(pl);
       state = 'playing';
     });
+  }
+
+  // ---------------- evolución ----------------
+
+  /** Sprites de las formas en las que puede evolucionar (para que no parpadee). */
+  function preloadEvos() {
+    const to = (G.EVO[pl.dex] || []).map(e => e.to).filter(d => G.DEX_BY[d]);
+    if (to.length) G.Sprites.preload(to, 8000, pl.shiny);
+  }
+
+  /**
+   * Al llegar al nivel de evolución, tu Pokémon evoluciona (si hay varias
+   * opciones, una al azar), gana +20% de vida y daño por cada evolución en la
+   * run y la nueva forma se desbloquea en tu colección.
+   */
+  function maybeEvolve() {
+    if (state !== 'playing' || pl.dead) return;
+    const opts = pl.evoOptions();
+    if (!opts.length) return;
+    const from = pl.mon, to = G.DEX_BY[G.U.pick(opts).to];
+    pl.evolve(to);
+    preloadEvos();
+    let unlocked = false;
+    if (G.DB.save) {
+      unlocked = pl.shiny ? G.DB.grantShiny(to.dex, 'evo') : !G.DB.owns(to.dex);
+      if (!pl.shiny && unlocked) G.DB.grant(to.dex, 'evo');
+      if (unlocked) G.DB.commit(true);
+    }
+    G.Audio.sfx('legend');
+    G.FX.ring(pl.x, pl.y, 8, 150, '#ffffff', 0.9, 6);
+    G.FX.burst(pl.x, pl.y - pl.bodyH * 0.5, '#fff4b3', 50, 260);
+    G.Spawner.say('¡' + from.name + ' ha evolucionado en ' + to.name + '!' +
+      (unlocked ? ' (nuevo en tu colección)' : '') + ' +' + Math.round((pl.evoMul - 1) * 100) + '% vida y daño', 4, true);
   }
 
   // ---------------- vínculos ----------------
@@ -672,6 +706,7 @@ G.Game = (() => {
 
     G.Audio.music(G.Judgment.active ? G.Judgment.music : G.Rift.inArena ? 'rift' : G.EnemyMgr.bossAlive() ? 'boss' : G.BIOME_MUSIC[biome % G.BIOME_MUSIC.length]);
     if (!coop || G.Coop.isHost) maybeLevelUp();
+    maybeEvolve();
     if (pl.bonds > 0) offerBond(true);
     if (G.Coop.isHost) checkAllDown(dt);
   }

@@ -6,6 +6,12 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-15', title: ['Tu Pokémon evoluciona en la partida', 'Your Pokémon evolves during the run'], new: [
+    ['Al llegar a su nivel de evolución, tu compañero evoluciona en plena partida y la nueva forma se desbloquea en tu colección. Si tiene varias (Eevee...), sale una al azar. Los que evolucionan con piedra, intercambio o amistad lo hacen a nivel 22 (o 38 la segunda vez).',
+     'When it reaches its evolution level, your partner evolves mid-run and the new form is unlocked in your collection. If it has several (Eevee...), one is picked at random. Those that evolve by stone, trade or friendship do so at level 22 (or 38 the second time).'],
+    ['Empezar con la forma débil tiene premio: +20% de vida y daño por cada evolución durante esa partida. Los movimientos no cambian.',
+     'Starting with the weak form pays off: +20% HP and damage for each evolution during that run. Moves stay the same.']
+  ] },
   { d: '2026-10-14', title: ['Recupera tu cuenta con Gmail', 'Recover your account with Gmail'], new: [
     ['Si juegas con nombre y contraseña, puedes vincular tu Gmail: si un día olvidas la contraseña, entras con Google y es tu misma cuenta. Te lo ofrecemos al entrar.',
      'If you play with a name and password, you can link your Gmail: if you ever forget your password, sign in with Google and it is the same account. We offer it when you sign in.'],
