@@ -8,17 +8,17 @@
  *
  * Si se pone a null, el juego funciona en modo local (sólo en el navegador).
  */
-// Proyecto pokesurvivor-free (desde el 12-10-2026): autenticación normal de Firebase,
-// SIN Identity Platform, así las cuentas son gratis sin límite. ¡No pulsar nunca
-// "Actualizar a Identity Platform" en su consola! (El viejo era pokesurvivor-jpter.)
+// PokéSurvivor Plus+ (fork de oscaroca): proyecto propio pokesurvivor-oscaroca (plan
+// Spark, gratis). Autenticación normal, SIN Identity Platform: no pulsar nunca
+// "Actualizar a Identity Platform" en la consola, que cobra por usuario.
 G.FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyB1LpJcsnT7gj7c8cpRMGjhswLPr8-dnBw',
-  authDomain: 'pokesurvivor-free.firebaseapp.com',
-  projectId: 'pokesurvivor-free',
-  storageBucket: 'pokesurvivor-free.firebasestorage.app',
-  messagingSenderId: '798271504277',
-  appId: '1:798271504277:web:dcac4409f969239e87009c',
-  databaseURL: 'https://pokesurvivor-free-default-rtdb.europe-west1.firebasedatabase.app'
+  apiKey: 'AIzaSyCvRT2FmCh8Pr95v-REPCRkx7zlDWAWX7Q',
+  authDomain: 'pokesurvivor-oscaroca.firebaseapp.com',
+  projectId: 'pokesurvivor-oscaroca',
+  storageBucket: 'pokesurvivor-oscaroca.firebasestorage.app',
+  messagingSenderId: '471351636400',
+  appId: '1:471351636400:web:3d39752520069873f76675',
+  databaseURL: 'https://pokesurvivor-oscaroca-default-rtdb.europe-west1.firebasedatabase.app'
 };
 
 /* Ejemplo de cómo debe quedar:

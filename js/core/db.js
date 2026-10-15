@@ -381,12 +381,17 @@ G.DB = (() => {
    * cierra de verdad es la clave de la API restringida a estos dominios en
    * Google Cloud; esto frena las copias que ni lo miran (14-10-2026).
    */
-  const HOSTS = ['pokesurvivor.com', 'www.pokesurvivor.com', 'jpter78.github.io', 'localhost', '127.0.0.1'];
+  // PokéSurvivor Plus+: las webs de este fork (Vercel) y local, con el proyecto
+  // de Firebase propio (firebase-config.js). Los despliegues de prueba de Vercel
+  // acaban en -oscarocas-projects.vercel.app.
+  const HOSTS = ['localhost', '127.0.0.1'];
+  const HOST_SUFFIXES = ['-oscarocas-projects.vercel.app'];
+  const hostOk = h => HOSTS.includes(h) || HOST_SUFFIXES.some(s => h.endsWith(s));
 
   async function initCloud() {
     const cfg = G.FIREBASE_CONFIG;
     if (!/^https?:$/.test(location.protocol)) { localReason = 'file'; return false; }
-    if (cfg && !cfg.emulator && !HOSTS.includes(location.hostname)) { localReason = 'host'; return false; }
+    if (cfg && !cfg.emulator && !hostOk(location.hostname)) { localReason = 'host'; return false; }
     if (!cfg || !cfg.apiKey || !cfg.projectId) { localReason = 'config'; return false; }
     await loadScript(SDK + 'firebase-app-compat.js');
     await loadScript(SDK + 'firebase-auth-compat.js');

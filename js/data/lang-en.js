@@ -613,5 +613,17 @@ G.I18n.add({
   'la Megapiedra': 'the Mega Stone', 'el Orbe Rojo': 'the Red Orb', 'el Orbe Azul': 'the Blue Orb',
   'Vista previa: en partida, a partir del nivel 10 y en su forma final, puede salirte {x} en las cartas de nivel (muy rara).':
     'Preview: during a run, from level 10 and in its final form, {x} can show up in the level-up cards (very rare).',
-  'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.'
+  'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.',
+  // ---------------- aviso legal del fork (PokéSurvivor Plus+) ----------------
+  'Versión no oficial del juego original (pokesurvivor.com) · gratis: si alguien te pide pagar, no somos nosotros':
+    'Unofficial version of the original game (pokesurvivor.com) · free: if anyone asks you to pay, it isn\'t us',
+  'es una versión modificada de': 'is a modified version of',
+  ', el juego de JPTER78, con evoluciones en partida, naturalezas, habilidades, megaevoluciones, misiones por familia y maldiciones.':
+    ', the game by JPTER78, with in-run evolutions, natures, abilities, Mega Evolutions, family missions and curses.',
+  'Es un juego hecho por fans,': 'It is a game made by fans,', 'gratuito y sin ánimo de lucro': 'free and non-profit',
+  ': no tiene anuncios, compras ni donaciones.': ': it has no ads, purchases or donations.',
+  'La web oficial del juego original es pokesurvivor.com. PokéSurvivor Plus+ es una versión aparte y no oficial; las dos son gratis: si alguien te pide pagar, no somos nosotros.':
+    'The official website of the original game is pokesurvivor.com. PokéSurvivor Plus+ is a separate, unofficial version; both are free: if anyone asks you to pay, it isn\'t us.',
+  'Si eres titular de derechos y quieres que retiremos algo, abre una incidencia y lo quitaremos lo antes posible:':
+    'If you are a rights holder and want something removed, open an issue and we\'ll take it down as soon as possible:'
 });

@@ -101,14 +101,16 @@ G.UI = (() => {
 
   // ---------------- aviso legal ----------------
 
-  const CONTACT = 'jpieratorregrosa@gmail.com';
-  const REPO = 'https://github.com/JPTER78/pokesurvivor';
+  // PokéSurvivor Plus+: contacto por las incidencias del repositorio del fork
+  // (sin publicar ningún correo). El juego original es de JPTER78.
+  const CONTACT = 'https://github.com/oscaroca/pokesurvivor/issues';
+  const REPO = 'https://github.com/oscaroca/pokesurvivor';
   let legalBack = null;
 
   function openLegal() {
     legalBack = SCREENS.find(s => isOpen(s)) || null;
-    $('legal-mail').textContent = CONTACT;
-    $('legal-mail').href = 'mailto:' + CONTACT + '?subject=Pok%C3%A9Survivor';
+    $('legal-mail').textContent = CONTACT.replace('https://', '');
+    $('legal-mail').href = CONTACT;
     $('legal-repo').textContent = REPO.replace('https://', '');
     $('legal-repo').href = REPO;
     const canDelete = G.DB.loggedIn && !G.DB.guest;
