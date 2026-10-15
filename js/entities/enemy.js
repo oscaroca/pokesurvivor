@@ -247,7 +247,8 @@
           G.FX.twinkle(this.x + G.U.rand(-this.r, this.r) * 1.2, this.y - G.U.rand(4, this.bodyH * 1.1));
         }
       }
-      if (this.touchCd > 0) this.touchCd -= dt;
+      // Presión (habilidad): cerca de ti, todo lo suyo va más lento.
+      if (this.touchCd > 0) this.touchCd -= dt * G.Abilities.enemyCdMul(pl, G.U.dist2(this.x, this.y, pl.x, pl.y));
       this.bob += dt * 6;
 
       // --- estados ---
@@ -313,7 +314,7 @@
       }
       if (this.behavior === 'bomber' && dist < this.r + pl.r + 26) { this.startFuse(); return; }
       if (this.behavior === 'shielder' || this.behavior === 'jumper') {
-        this.skillCd -= dt;
+        this.skillCd -= dt * G.Abilities.enemyCdMul(pl, dist * dist);
         if (this.skillCd <= 0) {
           if (this.behavior === 'shielder') { this.skillCd = 6; this.castShields(); }
           else if (dist < 250) { this.skillCd = G.U.rand(5, 7); this.startJump(pl); return; }
@@ -365,7 +366,7 @@
         const [ddx, ddy] = G.U.norm(pl.x - this.x, pl.y - this.y);
         if (dist < keep * 0.75) { vx = -ddx * spd * 0.8; vy = -ddy * spd * 0.8; }
         else if (dist < keep) { vx *= 0.1; vy *= 0.1; animBase = 'Idle'; }
-        this.shotCd -= dt;
+        this.shotCd -= dt * G.Abilities.enemyCdMul(pl, dist * dist);
         if (this.shotCd <= 0 && dist < range) {
           this.shotCd = this.def.shotCd || 2;
           this.special(pl, ddx, ddy);
@@ -907,6 +908,7 @@
         if (e.remote) continue;
         if (e.dead) {
           pl.kills++;
+          G.Abilities.onKill(pl);
           if (e.boss && !e.judge) pl.bosses++;
           G.Progress.kill(e);
           corpses.push(e);

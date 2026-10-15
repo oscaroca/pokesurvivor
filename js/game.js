@@ -136,6 +136,7 @@ G.Game = (() => {
     // Hojas de sprites locales: el compañero y los primeros enemigos.
     G.Sprites.preload([mon.dex], 8000, pl.shiny);
     preloadEvos();
+    if (pl.ability && pl.ability.fam) G.Spawner.say('Habilidad · ' + pl.ability.name + ': ' + pl.ability.desc, 4, true);
     G.Audio.music(G.BIOME_MUSIC[0]);
     // Para el ranking: el servidor apunta cuándo empieza la partida (anti-trampas).
     if (!coop || G.Coop.isHost) G.Ranking.runStarted(coop ? 'g' : 's');
@@ -397,6 +398,7 @@ G.Game = (() => {
     const opts = pl.evoOptions();
     if (!opts.length) return;
     const from = pl.mon, to = G.DEX_BY[G.U.pick(opts).to];
+    const abBefore = pl.ability && pl.ability.id;
     pl.evolve(to);
     preloadEvos();
     let unlocked = false;
@@ -411,6 +413,7 @@ G.Game = (() => {
     G.FX.burst(pl.x, pl.y - pl.bodyH * 0.5, '#fff4b3', 50, 260);
     G.Spawner.say('¡' + from.name + ' ha evolucionado en ' + to.name + '!' +
       (unlocked ? ' (nuevo en tu colección)' : '') + ' +' + Math.round((pl.evoMul - 1) * 100) + '% vida y daño', 4, true);
+    if (pl.ability && pl.ability.id !== abBefore) G.Spawner.say('Nueva habilidad · ' + pl.ability.name + ': ' + pl.ability.desc, 4, true);
   }
 
   // ---------------- vínculos ----------------
@@ -530,7 +533,7 @@ G.Game = (() => {
       return;
     }
     if (p.kind === 'heal') {
-      if (mine) pl.heal(pl.maxHp * 0.3);
+      if (mine) pl.heal(pl.maxHp * 0.3 * G.Abilities.berryMul(pl));
       G.FX.ring(who.x, who.y, 6, 60, '#5fe08a', 0.4, 3);
       return;
     }

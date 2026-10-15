@@ -191,6 +191,7 @@ G.MenuUI = (() => {
     const bar = (label, v, m, txt, k) =>
       `<div class="stat"><span${natC(k)}>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span${natC(k)}>${txt}</span></div>`;
     const natHave = new Set(G.Natures.owned(s, dex));
+    const ab = G.Abilities.of(dex);
     const natGrid = G.Natures.ALL.map(n => natHave.has(n.id)
       ? `<button class="${n.id === nat ? 'on' : ''}" data-nat="${n.id}" title="${G.Natures.effect(n.id)}">${n.name}</button>`
       : `<button disabled title="Sácala con un repetido en el gacha">?</button>`).join('');
@@ -216,6 +217,8 @@ G.MenuUI = (() => {
         <p style="font-size:14px;margin:10px 0 4px">Naturaleza <b class="gold">${G.Natures.BY[nat].name}</b>
           <span style="color:var(--muted)">· ${G.Natures.effect(nat)} · ${natHave.size}/${G.Natures.ALL.length}</span></p>
         <div class="nat-grid">${natGrid}</div>
+        ${ab ? `<p style="font-size:14px;margin:6px 0 4px">Habilidad <b class="gold">${ab.name}</b><br>
+          <span style="color:${ab.fam ? 'var(--text, #dfe8ff)' : 'var(--muted)'};font-size:13px">${ab.desc}</span></p>` : ''}
         <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.Moves.BY_ID[G.startMoveOf(dex)].name}</b>
           ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>
         <p class="move-icons" title="Movimientos que puede aprender">

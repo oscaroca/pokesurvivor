@@ -81,6 +81,12 @@ G.Player = class Player {
     this.sashT = -999;         // última vez que salvó la Banda Focus
     this.bellHeal = 0;         // curación pendiente del Cascabel Concha
     this.statsTaken = {};      // mejoras de stat cogidas (condición de evolución)
+
+    // Habilidad (data/abilities.js): la de la especie; cambia al evolucionar.
+    this.ability = G.Abilities.of(mon.dex);
+    this.abT = 0;              // segundos de run (Impulso)
+    this.sturdyT = -1e9;       // última vez que salvó Robustez
+    G.Abilities.applyStatic(this, 1);
   }
 
   /** Segundos que hay que estar junto a un compañero caído para levantarlo. */
@@ -97,15 +103,16 @@ G.Player = class Player {
   get atk() { return this.baseAtk * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
   get spa() { return this.baseSpa * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
   /** Multiplicador de daño de un movimiento: Ataque si es físico, Ataque Especial si es especial. */
-  atkFor(m) { return m && m.cat === 'special' ? this.spa : this.atk; }
+  atkFor(m) { return (m && m.cat === 'special' ? this.spa : this.atk) * G.Abilities.dmgMul(this, m); }
   get spd() {
-    const s = this.baseSpd * this.spdMul * (1 + this.buffs.spd.n * this.buffs.spd.amount) * (this.slowT > 0 ? 0.5 : 1);
+    const free = G.Abilities.noSlow(this);
+    const s = this.baseSpd * this.spdMul * (1 + this.buffs.spd.n * this.buffs.spd.amount) * (this.slowT > 0 && !free ? 0.5 : 1);
     const w = G.Weather.speedFor(this.mon.types);
-    const slow = this.inLiquid ? G.World.liquidEffect(this.mon.types).slow || 1 : 1;
-    return s * slow * w;
+    const slow = this.inLiquid && !free ? G.World.liquidEffect(this.mon.types).slow || 1 : 1;
+    return s * slow * w * G.Abilities.spdMul(this);
   }
-  get reduction() { return Math.min(0.8, this.dmgReduce + this.buffs.def.n * this.buffs.def.amount); }
-  get regen() { return this.regenFlat + this.buffs.regen.n * this.buffs.regen.amount; }
+  get reduction() { return Math.min(0.8, this.dmgReduce + this.buffs.def.n * this.buffs.def.amount + G.Abilities.guard(this)); }
+  get regen() { return this.regenFlat + this.buffs.regen.n * this.buffs.regen.amount + G.Abilities.regen(this); }
 
   // ---------------- movimientos ----------------
   addMove(id) {
@@ -238,6 +245,13 @@ G.Player = class Player {
    */
   hurt(amount, type = null, pure = false) {
     if (this.invuln > 0 || this.dead) return;
+    // Habilidad: Absorbe Agua, Electricidad... te curan en vez de dañarte.
+    if (type && !pure && G.Abilities.absorbs(this, type)) {
+      this.heal(amount * 0.5);
+      this.invuln = 0.3;
+      return;
+    }
+    if (!pure) amount *= G.Abilities.takenMul(this, type);
     let eff = null;
     if (type) {
       const k = G.Types.mult(type, this.mon.types);
@@ -262,6 +276,14 @@ G.Player = class Player {
       G.FX.dmgText(this.x, this.y - this.bodyH - 16, '¡Banda Focus!', '#ff9a3d', true);
       G.FX.ring(this.x, this.y, 6, 70, '#ff9a3d', 0.5, 4);
     }
+    // Robustez: lo mismo, como habilidad.
+    if (this.hp <= 0 && G.Abilities.sturdy(this) && performance.now() - this.sturdyT > 60000) {
+      this.sturdyT = performance.now();
+      this.hp = 1; this.invuln = 1.2;
+      G.FX.dmgText(this.x, this.y - this.bodyH - 16, '¡' + this.ability.name + '!', '#ffd23f', true);
+      G.FX.ring(this.x, this.y, 6, 70, '#ffd23f', 0.5, 4);
+    }
+    if (this.hp > 0) G.Abilities.onHurt(this);
     if (this.hp <= 0) {
       this.hp = 0; this.dead = true;
       this.anim.play('Faint', { hold: true });
@@ -309,6 +331,9 @@ G.Player = class Player {
     this.baseSpd = mon.spd * this.natMul.spd;
     this.baseAtk = mon.atk * this.natMul.atk * this.evoMul;
     this.baseSpa = (mon.spa ?? mon.atk) * this.natMul.atk * this.evoMul;
+    G.Abilities.applyStatic(this, -1);
+    this.ability = G.Abilities.of(mon.dex);
+    G.Abilities.applyStatic(this, 1);
   }
 
   /** Devuelve cuántos niveles ha subido (pueden ser varios de golpe). */
@@ -358,6 +383,7 @@ G.Player = class Player {
   update(dt) {
     this.anim.update(dt);
     if (this.dead) return;
+    this.abT += dt;
     if (this.invuln > 0) this.invuln -= dt;
     if (this.flash > 0) this.flash -= dt;
     if (this.attackFace > 0) this.attackFace -= dt;
@@ -386,10 +412,10 @@ G.Player = class Player {
     if (this.walking) this.moveAngle = Math.atan2(ay, ax);
 
     // --- terreno líquido ---
-    this.inLiquid = G.World.isLiquid(this.x, this.y);
+    this.inLiquid = !G.Abilities.floats(this) && G.World.isLiquid(this.x, this.y);
     if (this.inLiquid) {
       const le = G.World.liquidEffect(this.mon.types);
-      if (le.dmg) {
+      if (le.dmg && !G.Abilities.lavaProof(this)) {
         this.lavaTick -= dt;
         if (this.lavaTick <= 0) {
           this.lavaTick = le.every; this.invuln = 0;
