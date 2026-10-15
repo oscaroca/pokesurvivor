@@ -400,6 +400,21 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .menu-top .mt-row { display: flex; gap: 4px; align-items: baseline; font-size: 12px; line-height: 1.5; }
 .menu-top .mt-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .menu-top .mt-t { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* En pantallas anchas va fijo a la izquierda, estrecho y fuera del flujo: el
+   título y el compañero siguen centrados como siempre. Abajo a la izquierda (al
+   lado de la ficha del compañero, donde hay hueco); arriba sólo si la pantalla
+   es tan ancha que no toca el título. En móvil vertical va en su sitio, arriba. */
+@media (min-width: 761px) {
+  .menu-left { position: relative; }
+  .menu-top { position: absolute; bottom: 34px; left: 10px; width: 170px; margin: 0; padding: 8px 10px !important; }
+  .menu-top .mt-head { font-size: 10px; margin-bottom: 4px; }
+  .menu-top .mt-cols { grid-template-columns: 1fr; gap: 4px; }
+  .menu-top .mt-col b { font-size: 11px; }
+  .menu-top .mt-row { font-size: 11px; line-height: 1.4; }
+}
+@media (min-width: 1400px) {
+  .menu-top { bottom: auto; top: 66px; }
+}
 @media (max-height: 520px) { .menu-top { display: none; } }
 .curse-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; }
 @media (max-width: 520px) { .curse-list { grid-template-columns: 1fr; } }
