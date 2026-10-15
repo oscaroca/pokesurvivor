@@ -384,7 +384,7 @@ G.DB = (() => {
   // PokéSurvivor Plus+: las webs de este fork (Vercel) y local, con el proyecto
   // de Firebase propio (firebase-config.js). Los despliegues de prueba de Vercel
   // acaban en -oscarocas-projects.vercel.app.
-  const HOSTS = ['localhost', '127.0.0.1'];
+  const HOSTS = ['oscaroca-pokesurvivor.vercel.app', 'localhost', '127.0.0.1'];
   const HOST_SUFFIXES = ['-oscarocas-projects.vercel.app'];
   const hostOk = h => HOSTS.includes(h) || HOST_SUFFIXES.some(s => h.endsWith(s));
 
