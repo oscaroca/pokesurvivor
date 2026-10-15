@@ -135,6 +135,7 @@ G.LevelUp = (() => {
         apply: p => {
           p.megaEvolve(f);
           G.Sprites.preload([p.dex], 8000, p.shiny);
+          G.Coop.formChanged(p);         // que los compañeros vean la mega
           G.FX.ring(p.x, p.y, 10, 170, it.color, 1, 7);
           G.FX.burst(p.x, p.y - p.bodyH * 0.5, '#ffffff', 60, 300);
           G.Audio.sfx('legend');

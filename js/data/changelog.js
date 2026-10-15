@@ -37,7 +37,9 @@ G.CHANGELOG = [
     ['Menú: los 3 mejores del ranking histórico, en solitario y en grupo. Pokémon: se abre con todas las regiones y sólo los que tienes, y «Elegir de compañero» está arriba de la ficha.',
      'Menu: the top 3 of the all-time ranking, solo and in a group. Pokémon: opens with all regions and only the ones you own, and «Choose as partner» is at the top of the page.'],
     ['Objetos: aunque no lleves ninguno, al coger uno te pregunta si te lo pones o sigues sin objeto (Vidasfera o una Cinta Elección pueden no venirte bien).',
-     'Items: even if you are not carrying one, picking one up asks whether to equip it or keep going without (Life Orb or a Choice Band may not suit you).']
+     'Items: even if you are not carrying one, picking one up asks whether to equip it or keep going without (Life Orb or a Choice Band may not suit you).'],
+    ['Cooperativo: si caes y queda alguien en pie, la cámara le sigue y puedes cambiar de compañero con Q/E, las flechas o los botones de arriba. Además, tus compañeros ya ven tus evoluciones y megaevoluciones.',
+     'Co-op: if you go down and someone is still standing, the camera follows them and you can switch with Q/E, the arrows or the buttons at the top. Your teammates now also see your evolutions and Mega Evolutions.']
   ] },
   { d: '2026-10-14', title: ['Recupera tu cuenta con Gmail', 'Recover your account with Gmail'], new: [
     ['Si juegas con nombre y contraseña, puedes vincular tu Gmail: si un día olvidas la contraseña, entras con Google y es tu misma cuenta. Te lo ofrecemos al entrar.',

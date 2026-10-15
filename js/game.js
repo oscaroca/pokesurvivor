@@ -431,6 +431,7 @@ G.Game = (() => {
     const from = pl.mon, to = G.DEX_BY[G.U.pick(opts).to];
     const abBefore = pl.ability && pl.ability.id;
     pl.evolve(to);
+    G.Coop.formChanged(pl);          // que los compañeros vean la nueva forma
     preloadEvos();
     let unlocked = false;
     if (G.DB.save) {
@@ -620,11 +621,55 @@ G.Game = (() => {
     }
     if (G.Input.tap('escape') || G.Input.tap('keyp')) { togglePause(); return; }
     if (state !== 'playing' || !pl) return;
+    // Caído en grupo: Q/E (o las flechas) cambian de compañero al que observas.
+    if (specTarget()) {
+      if (G.Input.tap('keyq') || G.Input.tap('arrowleft')) specCycle(-1);
+      if (G.Input.tap('keye') || G.Input.tap('tab') || G.Input.tap('arrowright')) specCycle(1);
+      return;
+    }
     for (let i = 0; i < 4; i++) {
       if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) pl.setActive(i);
     }
     if (G.Input.tap('keyq')) pl.cycle(-1);
     if (G.Input.tap('keye') || G.Input.tap('tab')) pl.cycle(1);
+  }
+
+  // ---------------- observar (caído en grupo) ----------------
+
+  let specUid = null;           // compañero al que sigue la cámara mientras estás caído
+  /** El compañero vivo que observas, o null si no estás caído en grupo o no queda nadie. */
+  function specTarget() {
+    if (!G.Coop.active || !pl || !pl.dead) { specUid = null; return null; }
+    const alive = G.Coop.puppets().filter(p => !p.dead);
+    if (!alive.length) return null;
+    let t = alive.find(p => p.uid === specUid);
+    if (!t) { t = alive[0]; specUid = t.uid; }
+    return t;
+  }
+  function specCycle(d) {
+    const alive = G.Coop.puppets().filter(p => !p.dead);
+    if (alive.length < 2) return;
+    const i = Math.max(0, alive.findIndex(p => p.uid === specUid));
+    specUid = alive[(i + d + alive.length) % alive.length].uid;
+    G.Audio.sfx('select');
+  }
+  /** Barra de arriba "Viendo a X" con flechas (también para el móvil). */
+  let specShown = '';
+  function specBar() {
+    const bar = document.getElementById('spec-bar');
+    if (!bar) return;
+    const t = (state === 'playing' || state === 'held') ? specTarget() : null;
+    const txt = t ? (t.tag || '') : '';
+    if (txt === specShown) return;
+    specShown = txt;
+    bar.classList.toggle('hidden', !t);
+    if (!t) return;
+    document.getElementById('spec-name').textContent = 'Viendo a ' + txt;
+    if (!bar.dataset.wired) {
+      bar.dataset.wired = '1';
+      document.getElementById('spec-prev').onclick = () => specCycle(-1);
+      document.getElementById('spec-next').onclick = () => specCycle(1);
+    }
   }
 
   // ---------------- bucle ----------------
@@ -674,6 +719,7 @@ G.Game = (() => {
     if (G.Coop.active && pl && state !== 'ui' && state !== 'over') G.Coop.tick(dt);
 
     if (pl && state !== 'ui') render(); else Backdrop.render(ctx, w, h, dpr, dt);
+    specBar();
     G.UI.tick(dt);
 
     G.Input.endFrame();
@@ -720,7 +766,9 @@ G.Game = (() => {
       for (const p of G.Coop.puppets()) { p.netUpdate(dt); G.Combat.ghostOrbit(p, dt, time); }
       if (pl.dead) reviveTick(dt);
     }
-    G.Camera.follow(pl.x, pl.y, dt);
+    // Caído en grupo: la cámara sigue al compañero que estés observando.
+    const cam = specTarget() || pl;
+    G.Camera.follow(cam.x, cam.y, dt);
     G.World.update(dt, G.Camera);
 
     const all = everyone();

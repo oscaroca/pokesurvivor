@@ -270,6 +270,10 @@ G.Coop = (() => {
           else if (ev[2] === 's') e.applySlow(ev[3]);
           break;
         }
+        case 'fm':
+          applyForm(m.pl, ev[1], ev[2], ev[3], ev[4]);
+          emit(['fm', from, ev[1], ev[2], ev[3], ev[4]], from);
+          break;
         case 'c':
           G.Combat.ghostCast(m.pl, ev[1], ev[2], ev[3], ev[4]);
           emit(['c', from, ev[1], ev[2], ev[3], ev[4]], from);
@@ -373,6 +377,7 @@ G.Coop = (() => {
       case 'hp': lastHo = (ev[1] || []).join('|'); api.hold && api.hold(ev[1]); break;
       case 'ha': hostAway = !!ev[1]; updateAway(); break;
       case 'sh': api.shiny(ev[1]); break;
+      case 'fm': { const m = mates.get(ev[1]); if (m) applyForm(m.pl, ev[2], ev[3], ev[4], ev[5]); break; }
       case 'ov': { const cb = api.over; const d = ev[1]; end(); cb(d); break; }
       case 'rift': case 'riftx': case 'arena': case 'aw': case 'al': G.Rift.onEvent(ev); break;
       case 'jd': case 'jk': G.Judgment.onEvent(ev); break;
@@ -424,6 +429,30 @@ G.Coop = (() => {
   }
 
   function shinyCaught(e) { emit(['sh', e.dex]); }
+
+  /**
+   * Evolución o megaevolución: cambia el sprite de ese jugador en las pantallas
+   * de los demás. ['fm', uid, clave del sprite, shiny, tinte de mega sin sprite]
+   * Invitado -> anfitrión (sin uid) -> el anfitrión lo aplica y lo reenvía.
+   */
+  function applyForm(p, key, shiny, tint, mega) {
+    if (!p) return;
+    p.dex = key;
+    p.shiny = !!shiny && G.Sprites.hasShiny(key);
+    p.anim = new G.Sprites.Animator(key, 1, p.shiny);
+    p.r = G.Sprites.bodyRadius(key);
+    p.bodyH = G.Sprites.bodyHeight(key);
+    p.mega = mega ? { key } : null;
+    p.megaTint = !!tint;
+    G.Sprites.preload([key], 8000, p.shiny);
+    G.FX.ring(p.x, p.y, 8, 120, '#ffffff', 0.7, 5);
+  }
+  function formChanged(pl) {
+    if (!active) return;
+    const ev = [pl.dex, pl.shiny ? 1 : 0, pl.megaTint ? 1 : 0, pl.mega ? 1 : 0];
+    if (host) emit(['fm', me].concat(ev));
+    else { outEv.push(['fm'].concat(ev)); flushClient(true); }
+  }
 
   // ---------------- subida de nivel compartida ----------------
 
@@ -494,6 +523,7 @@ G.Coop = (() => {
   return {
     ANIMS, COLORS, begin, end, leave, tick, players, puppets, xpFactor, scaleRate, scaleHp,
     cast, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
+    formChanged,
     propBroken, collected, shinyCaught, levelStart, localPicked, over, holdStart, holdEnd,
     /** Anfitrión: evento para todos. Invitado: evento para el anfitrión. */
     broadcast(ev) { emit(ev); },

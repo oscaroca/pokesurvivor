@@ -390,6 +390,11 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .pcard .tag.nat { color: var(--muted); }
 /* "Elegir de compañero" arriba de la ficha (en móvil iba pegado abajo). */
 #dex-detail .dex-pick-top { position: static !important; order: 0 !important; margin: 0 0 8px !important; }
+.spec-bar { position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 12; display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 12px; background: rgba(5,10,25,.75); border: 2px solid rgba(244,248,255,.2); }
+.spec-bar span { font-weight: 700; color: var(--gold); min-width: 110px; text-align: center; white-space: nowrap; }
+.spec-bar small { color: var(--muted); font-size: 11px; white-space: nowrap; }
+@media (pointer: coarse) { .spec-bar small { display: none; } }
 .lobby-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
 .lob-card .ready-tag { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .lob-card .ready-tag.on { color: #5fe08a; font-weight: 700; }
