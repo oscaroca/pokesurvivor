@@ -17,7 +17,7 @@
  * El juego lo llama desde js/net/net.js (TURN_URL). Pasos: docs/TURN-PLUS.md.
  */
 const PROJECTS = ['pokesurvivor-oscaroca'];
-const ORIGINS = ['https://oscaroca-pokesurvivor.vercel.app', 'http://localhost:8765', 'http://127.0.0.1:8765'];
+const ORIGINS = ['https://oscaroca-pokesurvivor.vercel.app'];
 const TTL = 4 * 3600;                         // segundos que valen las credenciales
 const TURN_CAP_GB = 900;                      // margen bajo los 1.000 GB gratis
 const JWKS = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
