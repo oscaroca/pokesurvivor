@@ -10,7 +10,9 @@ G.CHANGELOG = [
     ['Al llegar a su nivel de evolución, tu compañero evoluciona en plena partida y la nueva forma se desbloquea en tu colección. Si tiene varias (Eevee...), sale una al azar. Los que evolucionan con piedra, intercambio o amistad lo hacen a nivel 22 (o 38 la segunda vez).',
      'When it reaches its evolution level, your partner evolves mid-run and the new form is unlocked in your collection. If it has several (Eevee...), one is picked at random. Those that evolve by stone, trade or friendship do so at level 22 (or 38 the second time).'],
     ['Empezar con la forma débil tiene premio: +20% de vida y daño por cada evolución durante esa partida. Los movimientos no cambian.',
-     'Starting with the weak form pays off: +20% HP and damage for each evolution during that run. Moves stay the same.']
+     'Starting with the weak form pays off: +20% HP and damage for each evolution during that run. Moves stay the same.'],
+    ['Naturalezas: cada Pokémon tiene una de 9 (3 neutras y 6 que suben un stat un 10% y bajan otro un 10%). Cada tirada del gacha trae una al azar, y si te sale un repetido con una naturaleza que no tenías, la desbloqueas en vez de llevarte monedas. Eliges cuál usar en la ficha del Pokémon.',
+     'Natures: each Pokémon has one of 9 (3 neutral and 6 that raise one stat by 10% and lower another by 10%). Every gacha pull comes with a random one, and if you get a duplicate with a nature you did not have, you unlock it instead of getting coins. Choose which one to use on the Pokémon’s page.']
   ] },
   { d: '2026-10-14', title: ['Recupera tu cuenta con Gmail', 'Recover your account with Gmail'], new: [
     ['Si juegas con nombre y contraseña, puedes vincular tu Gmail: si un día olvidas la contraseña, entras con Google y es tu misma cuenta. Te lo ofrecemos al entrar.',

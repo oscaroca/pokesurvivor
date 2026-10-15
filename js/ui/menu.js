@@ -42,7 +42,8 @@ G.MenuUI = (() => {
     $('menu-partner').style.setProperty('--stage-c', shiny ? '#9ae6ff' : G.U.TYPE_COLOR[mon.types[0]]);
     $('menu-partner').classList.toggle('shiny', shiny);
     $('menu-partner-name').innerHTML = mon.name + (shiny ? ' ' + G.Icons.html('shiny', 24) : '');
-    $('menu-partner-info').innerHTML = G.UI.typeChips(mon.types) + ' ' + G.UI.stars(mon.rarity);
+    $('menu-partner-info').innerHTML = G.UI.typeChips(mon.types) + ' ' + G.UI.stars(mon.rarity) +
+      `<div style="font-size:13px;color:var(--muted);margin-top:2px">${G.Natures.BY[G.Natures.chosen(s, mon.dex)].name}</div>`;
     // Normal / shiny a mano, aquí mismo (en el móvil no se encontraba en la ficha).
     const seg = $('menu-shiny');
     seg.classList.toggle('hidden', !G.DB.ownsShiny(mon.dex));
@@ -183,8 +184,16 @@ G.MenuUI = (() => {
     showDetail.last = dex;
 
     const max = { hp: 183, atk: 1.55, spd: 137 };
-    const bar = (label, v, m, txt) =>
-      `<div class="stat"><span>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${txt}</span></div>`;
+    // Stats con la naturaleza elegida: verde lo que sube, rojo lo que baja.
+    const nat = own ? G.Natures.chosen(s, dex) : 'fuerte';
+    const nm = G.Natures.mul(nat);
+    const natC = k => nm[k] > 1 ? ' style="color:#5fe08a"' : nm[k] < 1 ? ' style="color:#ff7b7b"' : '';
+    const bar = (label, v, m, txt, k) =>
+      `<div class="stat"><span${natC(k)}>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span${natC(k)}>${txt}</span></div>`;
+    const natHave = new Set(G.Natures.owned(s, dex));
+    const natGrid = G.Natures.ALL.map(n => natHave.has(n.id)
+      ? `<button class="${n.id === nat ? 'on' : ''}" data-nat="${n.id}" title="${G.Natures.effect(n.id)}">${n.name}</button>`
+      : `<button disabled title="Sácala con un repetido en el gacha">?</button>`).join('');
     const usingThis = isPartner && (!hasSh || !!s.partnerShiny === viewShiny);
 
     const box = $('dex-detail');
@@ -200,9 +209,12 @@ G.MenuUI = (() => {
         <div style="margin:6px 0">${own ? G.UI.typeChips(p.types) : ''}</div>
       </div>
       ${own ? `
-        ${bar('Vida', p.hp, max.hp, p.hp)}
-        ${bar('Ataque', p.atk, max.atk, '×' + p.atk.toFixed(2))}
-        ${bar('Velocidad', p.spd, max.spd, p.spd)}
+        ${bar('Vida', p.hp * nm.hp, max.hp, Math.round(p.hp * nm.hp), 'hp')}
+        ${bar('Ataque', p.atk * nm.atk, max.atk, '×' + (p.atk * nm.atk).toFixed(2), 'atk')}
+        ${bar('Velocidad', p.spd * nm.spd, max.spd, Math.round(p.spd * nm.spd), 'spd')}
+        <p style="font-size:14px;margin:10px 0 4px">Naturaleza <b class="gold">${G.Natures.BY[nat].name}</b>
+          <span style="color:var(--muted)">· ${G.Natures.effect(nat)} · ${natHave.size}/${G.Natures.ALL.length}</span></p>
+        <div class="nat-grid">${natGrid}</div>
         <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.Moves.BY_ID[G.startMoveOf(dex)].name}</b></p>
         <p class="move-icons" title="Movimientos que puede aprender">
           ${G.Moves.poolFor(p).map(id => `<span title="${G.Moves.BY_ID[id].name}">${G.Icons.html('move:' + id, 16)}</span>`).join('')}</p>
@@ -217,6 +229,14 @@ G.MenuUI = (() => {
     G.UI.sprite($('dex-big'), dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny });
     box.querySelectorAll('.seg button').forEach(b => {
       b.onclick = () => { viewShiny = b.dataset.v === '1'; showDetail(dex); };
+    });
+    box.querySelectorAll('.nat-grid button[data-nat]').forEach(b => {
+      b.onclick = () => {
+        if (b.dataset.nat === nat || !G.Natures.choose(s, dex, b.dataset.nat)) return;
+        G.DB.commit();
+        G.Audio.sfx('select');
+        showDetail(dex);
+      };
     });
     const pick = $('dex-pick');
     if (pick) pick.onclick = () => {

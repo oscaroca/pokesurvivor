@@ -377,6 +377,12 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .pcard b { display: block; font-size: 16px; }
 .pcard .tag { font-size: 12px; margin-top: 2px; }
 .pcard .new { color: var(--gold); font-weight: 700; }
+.pcard .tag.nat { color: var(--muted); }
+.nat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 4px 0 10px; }
+.nat-grid button { appearance: none; cursor: pointer; font: inherit; font-size: 13px; padding: 5px 2px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.25); color: #dfe8ff; }
+.nat-grid button.on { background: rgba(255,210,63,.2); border-color: var(--gold); color: var(--gold); }
+.nat-grid button:disabled { cursor: default; opacity: .35; }
 .pcard.r5 { animation: pop .3s ease-out both, legend 1.4s ease-in-out infinite alternate; }
 @keyframes legend { to { box-shadow: 0 0 40px var(--rc), 0 0 80px var(--rc); } }
 

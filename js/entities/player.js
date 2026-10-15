@@ -28,11 +28,13 @@ G.Player = class Player {
     this.xpMul = perks.xpMul || 1;
     this.coinMul = perks.coinMul || 1;
 
-    this.speciesHp = mon.hp;   // parte de la vida máxima que viene de la especie
-    this.maxHp = mon.hp + (perks.hp || 0);
+    this.nature = perks.nature || 'fuerte';
+    this.natMul = G.Natures.mul(this.nature);   // ±10% de vida, daño o velocidad
+    this.speciesHp = Math.round(mon.hp * this.natMul.hp);   // parte de la vida máxima que viene de la especie
+    this.maxHp = this.speciesHp + (perks.hp || 0);
     this.hp = this.maxHp;
-    this.baseSpd = mon.spd;
-    this.baseAtk = mon.atk;
+    this.baseSpd = mon.spd * this.natMul.spd;
+    this.baseAtk = mon.atk * this.natMul.atk;
 
     this.moves = [];           // todos los movimientos aprendidos
     this.slots = [];           // huecos: cada uno, una lista de movimientos que se lanzan a la vez
@@ -282,8 +284,8 @@ G.Player = class Player {
 
   /**
    * Pasa a ser `mon`: stats y sprite de la nueva especie, más el bonus de
-   * evolución. Se conservan las mejoras de la run (Vigor, Potencia...) y los
-   * movimientos.
+   * evolución. Se conservan la naturaleza, las mejoras de la run (Vigor,
+   * Potencia...) y los movimientos.
    */
   evolve(mon) {
     this.evos++;
@@ -293,13 +295,13 @@ G.Player = class Player {
     this.anim = new G.Sprites.Animator(mon.dex, 1, this.shiny);
     this.r = G.Sprites.bodyRadius(mon.dex);
     this.bodyH = G.Sprites.bodyHeight(mon.dex);
-    const hp = Math.round(mon.hp * this.evoMul);
+    const hp = Math.round(mon.hp * this.natMul.hp * this.evoMul);
     const gain = hp - this.speciesHp;
     this.speciesHp = hp;
     this.maxHp += gain;
     this.hp = Math.min(this.maxHp, this.hp + Math.max(0, gain));
-    this.baseSpd = mon.spd;
-    this.baseAtk = mon.atk * this.evoMul;
+    this.baseSpd = mon.spd * this.natMul.spd;
+    this.baseAtk = mon.atk * this.natMul.atk * this.evoMul;
   }
 
   /** Devuelve cuántos niveles ha subido (pueden ser varios de golpe). */

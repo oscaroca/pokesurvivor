@@ -129,6 +129,15 @@ G.DB = (() => {
     if (G.DEX_BY) for (const coll of ['owned', 'shiny']) {
       for (const d of Object.keys(s[coll] || {})) if (!G.DEX_BY[d]) delete s[coll][d];
     }
+    // Naturalezas: sólo de Pokémon que tienes y que existan.
+    for (const coll of ['nat', 'pnat']) {
+      if (!s[coll] || typeof s[coll] !== 'object') { delete s[coll]; continue; }
+      for (const d of Object.keys(s[coll])) {
+        if (!s.owned[d]) { delete s[coll][d]; continue; }
+        if (coll === 'nat') s.nat[d] = (Array.isArray(s.nat[d]) ? s.nat[d] : []).filter(id => G.Natures.BY[id]);
+        else if (!G.Natures.BY[s.pnat[d]]) delete s.pnat[d];
+      }
+    }
     // Atajos: 4 huecos con un movimiento que exista (o null), sin repetir.
     if (s.pbind && typeof s.pbind === 'object') {
       for (const d of Object.keys(s.pbind)) {
@@ -186,6 +195,11 @@ G.DB = (() => {
     }
     r.pupgDone = r.pupgDone || older.pupgDone;
     // Lo conseguido nunca se pierde: unión de legendarios, arenas, objetos, logros...
+    // Naturalezas: unión de las desbloqueadas; la elegida, la de la más reciente.
+    r.nat = r.nat || {};
+    for (const d in older.nat || {}) {
+      r.nat[d] = [...new Set([...(r.nat[d] || []), ...(older.nat[d] || [])])];
+    }
     for (const coll of ['legends', 'arenas', 'itemsFound', 'evoMoves', 'ach']) {
       r[coll] = r[coll] || {};
       for (const k in older[coll] || {}) if (!r[coll][k]) r[coll][k] = older[coll][k];
@@ -735,8 +749,11 @@ G.DB = (() => {
 
   function owns(dex) { return !!(save && save.owned[dex]); }
 
-  function grant(dex, from) {
-    if (!save.owned[dex]) save.owned[dex] = { at: Date.now(), from };
+  /** Da el Pokémon (si no lo tenías) con su primera naturaleza: `nature` o una al azar. */
+  function grant(dex, from, nature) {
+    if (save.owned[dex]) return;
+    save.owned[dex] = { at: Date.now(), from };
+    G.Natures.first(save, dex, nature);
   }
 
   function ownsShiny(dex) { return !!(save && save.shiny && save.shiny[dex]); }
@@ -749,8 +766,8 @@ G.DB = (() => {
   }
 
   /** Da la versión shiny (y la normal, si no la tenía). Devuelve true si es nueva. */
-  function grantShiny(dex, from) {
-    grant(dex, from);
+  function grantShiny(dex, from, nature) {
+    grant(dex, from, nature);
     if (save.shiny[dex]) return false;
     save.shiny[dex] = { at: Date.now(), from };
     return true;

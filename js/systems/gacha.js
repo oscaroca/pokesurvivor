@@ -7,7 +7,9 @@
  *   - la tirada ×10 trae al menos un 4★ o superior
  *   - a las 70 tiradas sin 5★ en ese banner, el siguiente es 5★ seguro
  * Shiny: 1 de cada 100 tiradas sale en su versión shiny.
- * Repetidos: se convierten en Pokémonedas (los shiny repetidos, el triple).
+ * Naturaleza: cada tirada trae una de las 9 al azar (data/natures.js).
+ * Repetidos: si traen una naturaleza que no tenías, la desbloqueas; si no,
+ * se convierten en Pokémonedas (los shiny repetidos, el triple).
  *
  * Se tira con TICKETS (se consiguen jugando):
  *   ×1   1 ticket
@@ -106,7 +108,9 @@ G.Gacha = (() => {
         else shiny = false;
       }
 
-      let isNew = false, refund = 0;
+      const nature = G.Natures.random();
+      const hadMon = !!save.owned[mon.dex];
+      let isNew = false, refund = 0, newNature = false;
       if (shiny) {
         isNew = !save.shiny[mon.dex];
         if (isNew) save.shiny[mon.dex] = { at: Date.now(), from: 'gacha' };
@@ -117,8 +121,10 @@ G.Gacha = (() => {
         if (isNew) save.owned[mon.dex] = { at: Date.now(), from: 'gacha' };
         else refund = REFUND[rarity];
       }
+      if (!hadMon) G.Natures.first(save, mon.dex, nature);
+      else if (G.Natures.unlock(save, mon.dex, nature)) { newNature = true; refund = 0; }
       save.coins += refund;
-      out.push({ dex: mon.dex, rarity, shiny, isNew, refund });
+      out.push({ dex: mon.dex, rarity, shiny, isNew, refund, nature, newNature });
     }
     save.stats.pulls = (save.stats.pulls || 0) + n;
     return out;

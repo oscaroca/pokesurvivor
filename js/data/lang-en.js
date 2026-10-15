@@ -575,5 +575,9 @@ G.I18n.add({
   // ---------------- reportar marcas del ranking ----------------
   'Reportar marca sospechosa': 'Report suspicious record', 'Ya la has reportado': 'You already reported it',
   'Ya has reportado esta marca': 'You already reported this record',
-  '¿Reportar la marca de {x} como trampa?': "Report {x}'s record as cheating?", 'Gracias: la revisaremos': 'Thanks: we will review it'
+  '¿Reportar la marca de {x} como trampa?': "Report {x}'s record as cheating?", 'Gracias: la revisaremos': 'Thanks: we will review it',
+  // ---------------- naturalezas ----------------
+  'Fuerte': 'Hardy', 'Dócil': 'Docile', 'Seria': 'Serious', 'Huraña': 'Lonely', 'Audaz': 'Brave', 'Osada': 'Bold',
+  'Plácida': 'Relaxed', 'Miedosa': 'Timid', 'Activa': 'Hasty', 'Neutra': 'Neutral', 'Naturaleza': 'Nature',
+  '¡Naturaleza nueva!': 'New nature!', 'Sácala con un repetido en el gacha': 'Get it from a duplicate in the gacha'
 });

@@ -90,6 +90,7 @@ G.Game = (() => {
     const save = G.DB.save;
     const mon = G.DEX_BY[save.partner];
     const perks = G.Upgrades.perks(G.DB.upgradesOf(mon.dex));
+    perks.nature = G.Natures.chosen(save, mon.dex);
 
     G.UI.hideAll();
     G.UI.chrome(false);
@@ -400,8 +401,9 @@ G.Game = (() => {
     preloadEvos();
     let unlocked = false;
     if (G.DB.save) {
-      unlocked = pl.shiny ? G.DB.grantShiny(to.dex, 'evo') : !G.DB.owns(to.dex);
-      if (!pl.shiny && unlocked) G.DB.grant(to.dex, 'evo');
+      // La nueva forma llega con la naturaleza con la que juegas.
+      unlocked = pl.shiny ? G.DB.grantShiny(to.dex, 'evo', pl.nature) : !G.DB.owns(to.dex);
+      if (!pl.shiny && unlocked) G.DB.grant(to.dex, 'evo', pl.nature);
       if (unlocked) G.DB.commit(true);
     }
     G.Audio.sfx('legend');
