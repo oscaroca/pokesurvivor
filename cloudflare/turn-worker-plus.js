@@ -14,6 +14,10 @@
  * Si están, al llegar a TURN_CAP_GB en el mes se dejan de dar servidores TURN
  * (sólo STUN): el cooperativo sigue para quien pueda conectar directo.
  *
+ * GET /budget: ¿está activo el tope y cuántos GB de TURN van este mes? Sin
+ * secretos en la respuesta y con caché de 30 min (no gasta consultas aunque
+ * alguien lo llame mil veces).
+ *
  * El juego lo llama desde js/net/net.js (TURN_URL). Pasos: docs/TURN-PLUS.md.
  */
 const PROJECTS = ['pokesurvivor-oscaroca'];
@@ -62,6 +66,12 @@ export default {
     const h = cors(req.headers.get('Origin') || '');
     const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...h, 'content-type': 'application/json', 'cache-control': 'no-store' } });
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
+    if (new URL(req.url).pathname === '/budget') {
+      const u = await turnUsage(env);
+      return json({ capActive: u.configured && u.ok, configured: u.configured, readOk: u.ok,
+                    gbThisMonth: u.gb == null ? null : Math.round(u.gb * 1000) / 1000, capGb: TURN_CAP_GB, full: !!u.full,
+                    checkedAt: u.at || null });
+    }
     if (!env.TURN_KEY_ID || !env.TURN_KEY_API_TOKEN) return json({ error: 'faltan los secretos TURN_KEY_ID / TURN_KEY_API_TOKEN' }, 500);
     const uid = await verify((req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''));
     if (!uid) return json({ error: 'no autorizado' }, 401);
@@ -82,18 +92,18 @@ export default {
 };
 
 /**
- * ¿Se ha gastado ya casi todo el TURN gratis del mes? Mira el gasto real en la
- * API de analíticas de Cloudflare y lo guarda 30 min en la caché. Si no están
- * los secretos opcionales, o algo falla, no corta nada.
+ * Gasto de TURN del mes según la API de analíticas de Cloudflare, guardado 30 min
+ * en la caché: { configured, ok, gb, full, at }. Si no están los secretos
+ * opcionales, o algo falla, nunca corta nada (full: false).
  */
-async function turnFull(env) {
-  if (!env.CF_ANALYTICS_TOKEN || !env.ACCOUNT_ID) return false;
+async function turnUsage(env) {
+  if (!env.CF_ANALYTICS_TOKEN || !env.ACCOUNT_ID) return { configured: false, ok: false, gb: null, full: false };
   const month = new Date().toISOString().slice(0, 7);
-  const cacheKey = new Request('https://turn-budget.internal/' + month);
+  const cacheKey = new Request('https://turn-budget.internal/v2/' + month);
   const cache = caches.default;
   const hit = await cache.match(cacheKey);
-  if (hit) return (await hit.text()) === '1';
-  let full = false;
+  if (hit) return hit.json();
+  let res = { configured: true, ok: false, gb: null, full: false, at: new Date().toISOString() };
   try {
     const today = new Date().toISOString().slice(0, 10);
     const query = `{ viewer { accounts(filter: { accountTag: "${env.ACCOUNT_ID}" }) {
@@ -103,10 +113,16 @@ async function turnFull(env) {
       body: JSON.stringify({ query })
     });
     const j = await r.json();
-    const rows = (j.data && j.data.viewer.accounts[0] && j.data.viewer.accounts[0].callsTurnUsageAdaptiveGroups) || [];
-    const gb = rows.reduce((a, x) => a + (x.sum.egressBytes || 0), 0) / 1e9;
-    full = gb >= TURN_CAP_GB;
-  } catch (e) { full = false; }
-  await cache.put(cacheKey, new Response(full ? '1' : '0', { headers: { 'cache-control': 'max-age=1800' } }));
-  return full;
+    const acc = j && j.data && j.data.viewer && j.data.viewer.accounts && j.data.viewer.accounts[0];
+    if (r.ok && acc && !(j.errors && j.errors.length)) {
+      const rows = acc.callsTurnUsageAdaptiveGroups || [];
+      const gb = rows.reduce((a, x) => a + (x.sum.egressBytes || 0), 0) / 1e9;
+      res = { ...res, ok: true, gb, full: gb >= TURN_CAP_GB };
+    }
+  } catch (e) { /* res.ok = false: no corta nada */ }
+  // Si no se pudo leer, sólo 5 min: así, al corregir el token, se nota pronto.
+  await cache.put(cacheKey, new Response(JSON.stringify(res), { headers: { 'cache-control': 'max-age=' + (res.ok ? 1800 : 300) } }));
+  return res;
 }
+
+async function turnFull(env) { return (await turnUsage(env)).full; }
