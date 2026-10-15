@@ -615,8 +615,7 @@ G.I18n.add({
     'Preview: during a run, from level 10 and in its final form, {x} can show up in the level-up cards (very rare).',
   'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.',
   // ---------------- aviso legal del fork (PokéSurvivor Plus+) ----------------
-  'Versión no oficial del juego original (pokesurvivor.com) · gratis: si alguien te pide pagar, no somos nosotros':
-    'Unofficial version of the original game (pokesurvivor.com) · free: if anyone asks you to pay, it isn\'t us',
+  'Versión no oficial de pokesurvivor.com · siempre gratis': 'Unofficial version of pokesurvivor.com · always free',
   'es una versión modificada de': 'is a modified version of',
   ', el juego de JPTER78, con evoluciones en partida, naturalezas, habilidades, megaevoluciones, misiones por familia y maldiciones.':
     ', the game by JPTER78, with in-run evolutions, natures, abilities, Mega Evolutions, family missions and curses.',

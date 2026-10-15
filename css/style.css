@@ -218,6 +218,12 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 
 .wide { width: min(980px, 100%); }
 .split { display: grid; grid-template-columns: 1fr 300px; gap: 18px; }
+/* Ficha del Pokémon: con naturalezas, habilidad, misiones... ya no cabía y
+   desplazaba toda la ventana. Ahora se desplaza sólo ella, a la altura de la
+   cuadrícula (filtros + 56vh). En móvil horizontal ya va aparte (más abajo). */
+@media (min-height: 521px) {
+  #dex-detail { max-height: calc(56vh + 48px); overflow-y: auto; scrollbar-width: thin; }
+}
 .panel {
   background: rgba(0,0,0,.2); border: 2px solid rgba(244,248,255,.2); border-radius: 10px; padding: 14px;
 }
@@ -806,6 +812,13 @@ a.btn { text-decoration: none; display: inline-block; color: var(--ink); }
 @keyframes blink { 50% { opacity: .25; } }
 .login-tag { margin: -6px 0 12px; font-size: 13px; color: var(--muted); text-align: center; }
 .login-official { margin: -6px 0 12px; font-size: 12px; color: var(--muted); text-align: center; opacity: .85; }
+/* Login sin barras: la vertical salía por unos px y, al quitar ancho, traía la
+   horizontal. Más compacto y, si en pantallas muy bajas no cabe, se desplaza
+   con la rueda o el dedo pero sin barra visible. */
+#scr-login .box { overflow-x: hidden; scrollbar-width: none; }
+#scr-login .box::-webkit-scrollbar { display: none; }
+#scr-login .logo { margin-bottom: 4px; }
+#scr-login .login-official { margin-bottom: 8px; }
 .login-links { margin-top: 10px; font-size: 13px; text-align: center; }
 .login-links a { color: #9fd4ff; }
 

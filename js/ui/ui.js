@@ -248,9 +248,10 @@ G.UI = (() => {
         ctx.beginPath(); ctx.ellipse(fx, fy, 9 * k, 3.4 * k, 0, 0, 6.2832); ctx.fill();
       }
       if (s.opts.silhouette) {
+        // Los que aún no tienes: en color pero apagados (antes, silueta negra
+        // con ctx.filter, que Safari no aplicaba y allí ya se veían en color).
         ctx.save();
-        ctx.filter = 'brightness(0)';
-        ctx.globalAlpha = 0.55;
+        ctx.globalAlpha = 0.4;
         s.a.draw(ctx, fx, fy);
         ctx.restore();
       } else {
