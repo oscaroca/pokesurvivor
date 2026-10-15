@@ -616,7 +616,8 @@ G.I18n.add({
   'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.',
   // ---------------- mejoras por familia ----------------
   'Las mejoras son de cada familia: valen para todas sus evoluciones.': 'Upgrades belong to each family: they count for all its evolutions.',
-  'Familia': 'Family', 'Todas': 'All', 'Estoy listo': 'I\'m ready', '✓ ¡Listo! (pulsa para quitar)': '✓ Ready! (tap to undo)',
+  'Familia': 'Family', 'Todas': 'All', 'Seguir sin objeto': 'Keep going without an item', 'Ponerme {x}': 'Equip {x}',
+  'No te pones nada. Puedes coger otro más adelante.': 'You don\'t equip anything. You can pick up another one later.', 'Estoy listo': 'I\'m ready', '✓ ¡Listo! (pulsa para quitar)': '✓ Ready! (tap to undo)',
   '✓ Listo': '✓ Ready', 'No está listo': 'Not ready', 'Esperando a que todos estén listos ({x}/{x}).': 'Waiting for everyone to be ready ({x}/{x}).', 'Los mejores · histórico': 'The best · all-time', 'Solitario': 'Solo',
   'En grupo': 'In a group', 'Aún nadie': 'Nobody yet', 'Mejoras de la familia: cuentan para {x}.': 'Family upgrades: they count for {x}.', 'Mejoras de {x}.': 'Upgrades for {x}.',
   'Las mejoras ahora son por familia. Te devolvemos {x} monedas de las que se solapaban.': 'Upgrades are now per family. We refunded you {x} coins from the ones that overlapped.',
