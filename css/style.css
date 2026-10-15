@@ -393,7 +393,7 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .lobby-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
 .lob-card .ready-tag { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .lob-card .ready-tag.on { color: #5fe08a; font-weight: 700; }
-.menu-top { cursor: pointer; }
+.menu-top { cursor: pointer; width: min(420px, 100%); margin-bottom: 18px; }
 .menu-top .mt-head { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 .menu-top .mt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .menu-top .mt-col b { display: block; font-size: 13px; color: var(--gold); margin-bottom: 2px; }
