@@ -86,7 +86,7 @@ G.Game = (() => {
 
   /** @param coop  { seed, host, members } para una partida en grupo */
   function startRun(coop = null) {
-    holdBy = []; awayBy = null;
+    holdBy = []; awayBy = null; readyT = 0;
     const save = G.DB.save;
     const mon = G.DEX_BY[save.partner];
     const perks = G.Upgrades.perks(G.DB.upgradesOf(mon.dex));
@@ -220,7 +220,7 @@ G.Game = (() => {
     waiting(names) { G.RunUI.setWaiting(names); },
     resume() {
       G.RunUI.closeLevelUp();
-      if (state === 'levelup') { state = holdBy.length ? 'held' : 'playing'; afterLevelUp(); }
+      if (state === 'levelup') { if (holdBy.length) state = 'held'; else resumeSoon(); afterLevelUp(); }
     },
     /** ¿Estás eligiendo algo que para la partida (objeto o vínculo)? */
     choosing() { return state === 'choice'; },
@@ -246,7 +246,7 @@ G.Game = (() => {
         if (!mine && others.length) G.Spawner.say('Pausa: ' + others.join(', ') + ' ' + (others.length > 1 ? 'están eligiendo…' : 'está eligiendo…'), 999, true);
         else if (!others.length) G.Spawner.say(awayBy ? awayText() : '', awayBy ? 999 : 0, true);   // sólo tú: sin aviso viejo
       } else {
-        if (state === 'held' && !awayBy) state = 'playing';
+        if (state === 'held' && !awayBy) resumeSoon();
         G.Spawner.say(awayBy ? awayText() : '', awayBy ? 999 : 0, true);
       }
     },
@@ -257,12 +257,31 @@ G.Game = (() => {
         if (state === 'playing') state = 'held';
         G.Spawner.say(awayText(), 999, true);
       } else if (!holdBy.length) {
-        if (state === 'held') state = 'playing';
+        if (state === 'held') resumeSoon();
         G.Spawner.say('', 0, true);
       }
     }
   };
   let awayBy = null;
+
+  /*
+   * Grupo: al cerrarse una elección que paraba la partida (cartas de nivel,
+   * objeto, vínculo) se espera READY_DELAY antes de seguir, para que a todos les
+   * dé tiempo a cerrar su pantalla y estar listos. En solitario, al instante.
+   */
+  const READY_DELAY = 0.5;
+  let readyT = 0;
+  function resumeSoon() {
+    if (!G.Coop.active) { state = 'playing'; readyT = 0; return; }
+    state = 'held';
+    readyT = READY_DELAY;
+  }
+  /** Cada fotograma (con el tiempo real): suelta la espera si nadie más tiene parado el grupo. */
+  function readyTick(real) {
+    if (readyT <= 0) return;
+    readyT -= real;
+    if (readyT <= 0) { readyT = 0; if (state === 'held' && !holdBy.length && !awayBy) state = 'playing'; }
+  }
   const awayText = () => 'Pausa: esperando a ' + awayBy + ' (anfitrión)…';
 
   /** Has llevado a casa a un Pokémon perdido y se une a ti (events.js). */
@@ -455,7 +474,7 @@ G.Game = (() => {
       G.FX.ring(pl.x, pl.y, 8, 130, '#ff8ad8', 0.8, 6);
       G.FX.burst(pl.x, pl.y - pl.bodyH * 0.5, '#ffb3e6', 40, 240);
       G.Spawner.say('¡Vínculo! ' + group.length + ' movimientos a la vez', 2.6, true);
-      if (state === 'choice') state = holdBy.length ? 'held' : 'playing';
+      if (state === 'choice') { if (holdBy.length) state = 'held'; else resumeSoon(); }
       if (G.Coop.active) G.Coop.holdEnd();
     });
   }
@@ -497,7 +516,7 @@ G.Game = (() => {
         G.Progress.event('item', { id: got });
       }
       if (!mine) { afterLevelUp(); return; }
-      if (state === 'choice') state = holdBy.length ? 'held' : 'playing';
+      if (state === 'choice') { if (holdBy.length) state = 'held'; else resumeSoon(); }
       if (G.Coop.active) G.Coop.holdEnd();
       afterLevelUp();
     };
@@ -647,6 +666,7 @@ G.Game = (() => {
     frameDt = state === 'playing' ? dt : 0;
 
     handleKeys();
+    readyTick(real);
 
     if (state === 'playing') update(dt);
     else if (pl && state !== 'ui') { G.FX.update(dt * 0.25); pl.anim.update(dt * 0.25); }

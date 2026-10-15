@@ -29,6 +29,9 @@ G.CHANGELOG = [
      'Curses (in the menu): you choose curses that make the run harder (more enemies, faster or tougher ones, less HP, no healing, fog, earlier bosses...). Each point gives +10% coins and +12.5% shiny chance, and every 3 points, a ticket if you survive 5 minutes. In a group, the host\'s curses apply to everyone.'],
     ['Las mejoras que compras con monedas son ahora de cada familia: lo que compras con Charmander vale también para Charmeleon y Charizard. Si tenías mejoras repetidas en una misma familia, se queda el nivel más alto y te devolvemos las monedas del resto.',
      'Upgrades bought with coins now belong to each family: what you buy with Charmander also counts for Charmeleon and Charizard. If you had overlapping upgrades in the same family, the highest level is kept and the coins for the rest are refunded.']
+  ], chg: [
+    ['Cooperativo: al cerrarse las cartas de nivel o una elección (objeto, vínculo), la partida espera medio segundo antes de seguir, para que todos estén listos.',
+     'Co-op: when the level-up cards or a choice (item, bond) close, the game waits half a second before resuming, so everyone is ready.']
   ] },
   { d: '2026-10-14', title: ['Recupera tu cuenta con Gmail', 'Recover your account with Gmail'], new: [
     ['Si juegas con nombre y contraseña, puedes vincular tu Gmail: si un día olvidas la contraseña, entras con Google y es tu misma cuenta. Te lo ofrecemos al entrar.',
