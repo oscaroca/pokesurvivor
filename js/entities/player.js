@@ -34,7 +34,10 @@ G.Player = class Player {
     this.maxHp = this.speciesHp + (perks.hp || 0);
     this.hp = this.maxHp;
     this.baseSpd = mon.spd * this.natMul.spd;
+    // Ataque para los movimientos físicos, Ataque Especial para los especiales.
+    // La naturaleza que sube o baja el ataque afecta a los dos.
     this.baseAtk = mon.atk * this.natMul.atk;
+    this.baseSpa = (mon.spa ?? mon.atk) * this.natMul.atk;
 
     this.moves = [];           // todos los movimientos aprendidos
     this.slots = [];           // huecos: cada uno, una lista de movimientos que se lanzan a la vez
@@ -92,6 +95,9 @@ G.Player = class Player {
 
   // ---------------- stats efectivos ----------------
   get atk() { return this.baseAtk * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
+  get spa() { return this.baseSpa * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
+  /** Multiplicador de daño de un movimiento: Ataque si es físico, Ataque Especial si es especial. */
+  atkFor(m) { return m && m.cat === 'special' ? this.spa : this.atk; }
   get spd() {
     const s = this.baseSpd * this.spdMul * (1 + this.buffs.spd.n * this.buffs.spd.amount) * (this.slowT > 0 ? 0.5 : 1);
     const w = G.Weather.speedFor(this.mon.types);
@@ -302,6 +308,7 @@ G.Player = class Player {
     this.hp = Math.min(this.maxHp, this.hp + Math.max(0, gain));
     this.baseSpd = mon.spd * this.natMul.spd;
     this.baseAtk = mon.atk * this.natMul.atk * this.evoMul;
+    this.baseSpa = (mon.spa ?? mon.atk) * this.natMul.atk * this.evoMul;
   }
 
   /** Devuelve cuántos niveles ha subido (pueden ser varios de golpe). */

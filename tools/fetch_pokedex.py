@@ -90,7 +90,9 @@ def one(dex):
     # --- stats del juego a partir de los stats base ---
     hp = round(70 + base['hp'] * 0.45)
     spd = round(78 + base['speed'] * 0.42)
-    atk = round(0.70 + max(base['attack'], base['special-attack']) / 100 * 0.55, 2)
+    # Ataque (movimientos físicos) y Ataque Especial (especiales), por separado.
+    atk = round(0.70 + base['attack'] / 100 * 0.55, 2)
+    spa = round(0.70 + base['special-attack'] / 100 * 0.55, 2)
 
     return {
         'dex': dex,
@@ -100,6 +102,7 @@ def one(dex):
         'hp': hp,
         'spd': spd,
         'atk': atk,
+        'spa': spa,
         'bst': bst,
         'height': p['height'],
         'rarity': rarity(bst, dex, s.get('is_legendary'), s.get('is_mythical')),
@@ -127,7 +130,8 @@ def main():
         ' * Lo produce tools/fetch_pokedex.py. Los datos se bajaron una vez de',
         ' * PokeAPI y viven aqui: el juego no hace ninguna peticion a internet.',
         ' *',
-        ' * hp/spd/atk son stats de juego derivados de los stats base.',
+        ' * hp/spd/atk/spa son stats de juego derivados de los stats base',
+        ' * (atk para los movimientos físicos, spa para los especiales).',
         ' * rarity 1-5 para el gacha · gen = generación (banner) · starter = test',
         ' * leg = legendario o singular (sólo salen en las grietas)',
         ' */',
@@ -136,7 +140,7 @@ def main():
     for r in rows:
         o = {
             'dex': r['dex'], 'name': r['name'], 'types': r['types'],
-            'hp': r['hp'], 'spd': r['spd'], 'atk': r['atk'],
+            'hp': r['hp'], 'spd': r['spd'], 'atk': r['atk'], 'spa': r['spa'],
             'rarity': r['rarity'], 'bst': r['bst'],
             'starter': r['starter'], 'gen': r['gen'],
         }

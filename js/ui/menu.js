@@ -211,13 +211,15 @@ G.MenuUI = (() => {
       ${own ? `
         ${bar('Vida', p.hp * nm.hp, max.hp, Math.round(p.hp * nm.hp), 'hp')}
         ${bar('Ataque', p.atk * nm.atk, max.atk, '×' + (p.atk * nm.atk).toFixed(2), 'atk')}
+        ${bar('At. Esp.', p.spa * nm.atk, max.atk, '×' + (p.spa * nm.atk).toFixed(2), 'atk')}
         ${bar('Velocidad', p.spd * nm.spd, max.spd, Math.round(p.spd * nm.spd), 'spd')}
         <p style="font-size:14px;margin:10px 0 4px">Naturaleza <b class="gold">${G.Natures.BY[nat].name}</b>
           <span style="color:var(--muted)">· ${G.Natures.effect(nat)} · ${natHave.size}/${G.Natures.ALL.length}</span></p>
         <div class="nat-grid">${natGrid}</div>
-        <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.Moves.BY_ID[G.startMoveOf(dex)].name}</b></p>
+        <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.Moves.BY_ID[G.startMoveOf(dex)].name}</b>
+          ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>
         <p class="move-icons" title="Movimientos que puede aprender">
-          ${G.Moves.poolFor(p).map(id => `<span title="${G.Moves.BY_ID[id].name}">${G.Icons.html('move:' + id, 16)}</span>`).join('')}</p>
+          ${G.Moves.poolFor(p).map(id => { const d = G.Moves.BY_ID[id]; return `<span title="${d.name}${d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''}">${G.Icons.html('move:' + id, 16)}</span>`; }).join('')}</p>
         ${usingThis
           ? '<button class="btn grow" disabled style="width:100%">Es tu compañero</button>'
           : `<button id="dex-pick" class="btn gold" data-sfx="confirm" style="width:100%">Elegir de compañero${viewShiny ? ' (shiny)' : ''}</button>`}

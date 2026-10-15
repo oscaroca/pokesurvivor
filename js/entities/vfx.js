@@ -366,6 +366,7 @@ G.VFX = (() => {
     'dark-pulse':    { proj: 'crescent' },
     'night-shade':   { aura: 'shadow', rise: true },
     'swords-dance':  { buff: 'arrow', pal: 'fighting' },
+    'nasty-plot':    { buff: 'arrow', pal: 'dark' },
     'agility':       { buff: 'arrow', pal: 'flying' },
     'harden':        { buff: 'arrow', pal: 'steel' },
     'bonemerang':    { proj: 'crescent' },

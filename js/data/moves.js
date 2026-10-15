@@ -132,7 +132,7 @@
       cd: 0.75, dmg: 20, radius: 110, width: 34, knock: 40 },
 
     { id: 'swords-dance', name: 'Danza Espada', type: 'normal', kind: 'buff',
-      desc: 'No hace daño: acumula ATAQUE mientras esté activo.',
+      desc: 'No hace daño: acumula ATAQUE y AT. ESP. mientras esté activo.',
       cd: 0.85, stat: 'atk', amount: 0.13, dur: 7, stacks: 5 },
 
     { id: 'agility', name: 'Agilidad', type: 'normal', kind: 'buff',
@@ -317,7 +317,7 @@
       cd: 1.0, dmg: 24, radius: 230, width: 34 },
 
     { id: 'dragon-dance', name: 'Danza Dragón', type: 'dragon', kind: 'buff',
-      desc: 'No hace daño: acumula ATAQUE más rápido que Danza Espada.',
+      desc: 'No hace daño: acumula ATAQUE y AT. ESP. más rápido que Danza Espada.',
       cd: 0.7, stat: 'atk', amount: 0.11, dur: 7, stacks: 5 },
 
     // ---------------- HADA ----------------
@@ -346,6 +346,10 @@
     { id: 'dark-pulse', name: 'Pulso Umbrío', type: 'dark', kind: 'nova',
       desc: 'Onda de energía oscura en todas direcciones.',
       cd: 1.15, dmg: 14, speed: 240, count: 10, pierce: 1, life: 1.1, size: 8 },
+
+    { id: 'nasty-plot', name: 'Maquinación', type: 'dark', kind: 'buff',
+      desc: 'No hace daño: acumula ATAQUE y AT. ESP. mientras esté activo.',
+      cd: 0.85, stat: 'atk', amount: 0.13, dur: 7, stacks: 5 },
 
     { id: 'night-shade', name: 'Tinieblas', type: 'dark', kind: 'aura',
       desc: 'Una sombra te rodea y consume lo cercano.',
@@ -398,8 +402,86 @@
 
     { id: 'hex', name: 'Infortunio', type: 'ghost', kind: 'chain',
       desc: 'Maldición que salta entre enemigos. Mucho más daño si están quemados, envenenados o frenados.',
-      cd: 0.9, dmg: 17, count: 4, radius: 150, hex: 1.7 }
+      cd: 0.9, dmg: 17, count: 4, radius: 150, hex: 1.7 },
+
+    // ---------------- FÍSICOS A DISTANCIA (15-10-2026) ----------------
+    // Casi todos los físicos eran cuerpo a cuerpo, y Agua, Eléctrico, Hielo,
+    // Dragón y Hada no tenían ninguno. Con el Ataque separado del Ataque
+    // Especial, cada tipo tiene ahora al menos un físico que no obliga a pegarse.
+    { id: 'spike-cannon', name: 'Clavo Cañón', type: 'normal', kind: 'projectile',
+      desc: 'Ráfaga de púas rectas al enemigo más cercano.',
+      cd: 0.62, dmg: 9, speed: 380, count: 2, spread: 0.18, pierce: 0, life: 1.2, size: 5 },
+
+    { id: 'pyro-ball', name: 'Balón Ígneo', type: 'fire', kind: 'projectile',
+      desc: 'Una piedra en llamas, lenta y pesada, que quema.',
+      cd: 0.85, dmg: 26, speed: 250, count: 1, spread: 0.1, pierce: 0, life: 1.6, size: 9, knock: 70, burn: 1 },
+
+    { id: 'razor-shell', name: 'Concha Filo', type: 'water', kind: 'boomerang',
+      desc: 'Una concha afilada que va y vuelve cortando.',
+      cd: 0.9, dmg: 15, speed: 320, count: 1, radius: 220, size: 8, knock: 30 },
+
+    { id: 'aqua-jet', name: 'Acua Jet', type: 'water', kind: 'dash',
+      desc: 'Te lanzas envuelto en agua hacia el enemigo.',
+      cd: 0.75, dmg: 19, radius: 115, width: 36, knock: 50 },
+
+    { id: 'bullet-seed', name: 'Recurrente', type: 'grass', kind: 'projectile',
+      desc: 'Metralla de semillas: muchas, pequeñas y rápidas.',
+      cd: 0.40, dmg: 6, speed: 430, count: 2, spread: 0.22, pierce: 0, life: 1.0, size: 4 },
+
+    { id: 'fusion-bolt', name: 'Rayo Fusión', type: 'electric', kind: 'projectile',
+      desc: 'Un proyectil eléctrico que atraviesa y paraliza el paso.',
+      cd: 0.8, dmg: 20, speed: 340, count: 1, spread: 0.1, pierce: 2, life: 1.4, size: 8 },
+
+    { id: 'ice-shard', name: 'Canto Helado', type: 'ice', kind: 'projectile',
+      desc: 'Esquirla de hielo muy rápida. Siempre sale primero.',
+      cd: 0.36, dmg: 10, speed: 460, count: 1, spread: 0.08, pierce: 0, life: 1.0, size: 5, slow: 0.25 },
+
+    { id: 'icicle-crash', name: 'Chuzos', type: 'ice', kind: 'meteor',
+      desc: 'Carámbanos enormes caen sobre los enemigos cercanos.',
+      cd: 1.3, dmg: 22, count: 3, radius: 46, knock: 40, slow: 0.3 },
+
+    { id: 'dragon-darts', name: 'Dracoflechas', type: 'dragon', kind: 'projectile',
+      desc: 'Dos flechas dragón que atraviesan al primero.',
+      cd: 0.7, dmg: 13, speed: 400, count: 2, spread: 0.2, pierce: 1, life: 1.3, size: 6 },
+
+    { id: 'spirit-break', name: 'Choque Anímico', type: 'fairy', kind: 'dash',
+      desc: 'Embestida feérica que cruza entre los enemigos.',
+      cd: 0.8, dmg: 21, radius: 115, width: 38, knock: 60 },
+
+    { id: 'pin-missile', name: 'Pin Misil', type: 'bug', kind: 'projectile',
+      desc: 'Aguijones en ráfaga que perforan.',
+      cd: 0.55, dmg: 8, speed: 420, count: 3, spread: 0.3, pierce: 1, life: 1.1, size: 4 },
+
+    { id: 'shadow-bone', name: 'Hueso Sombrío', type: 'ghost', kind: 'boomerang',
+      desc: 'Un hueso fantasmal que va y vuelve.',
+      cd: 0.95, dmg: 16, speed: 300, count: 1, radius: 230, size: 8, knock: 40 },
+
+    { id: 'fling', name: 'Lanzamiento', type: 'dark', kind: 'projectile',
+      desc: 'Arrojas lo que tengas a mano con muy mala idea.',
+      cd: 0.75, dmg: 23, speed: 300, count: 1, spread: 0.12, pierce: 0, life: 1.4, size: 8, knock: 80 },
+
+    { id: 'bounce', name: 'Bote', type: 'flying', kind: 'meteor',
+      desc: 'Saltas muy alto y caes sobre los enemigos.',
+      cd: 1.25, dmg: 20, count: 3, radius: 48, knock: 60 },
+
+    { id: 'mach-punch', name: 'Ultrapuño', type: 'fighting', kind: 'dash',
+      desc: 'Puñetazo tan rápido que cruzas la pantalla.',
+      cd: 0.7, dmg: 20, radius: 115, width: 36, knock: 70 }
   ];
+
+  // Físico o especial (los de los juegos; PokeAPI damage_class). El daño sale
+  // del Ataque o del Ataque Especial del Pokémon. Los de estado de los juegos
+  // que aquí hacen daño van a la categoría que más pega con su efecto.
+  // Los potenciadores (buff) no hacen daño y no tienen categoría.
+  const PHYSICAL = new Set([
+    'tackle', 'quick-attack', 'vine-whip', 'razor-leaf', 'wing-attack', 'body-slam', 'poison-sting',
+    'bulldoze', 'bug-bite', 'rock-throw', 'rock-slide', 'karate-chop', 'lick', 'metal-claw', 'bite',
+    'bonemerang', 'psycho-cut', 'meteor-mash', 'aerial-ace', 'flame-wheel', 'spikes', 'substitute',
+    'spike-cannon', 'pyro-ball', 'razor-shell', 'aqua-jet', 'bullet-seed', 'fusion-bolt', 'ice-shard',
+    'icicle-crash', 'dragon-darts', 'spirit-break', 'pin-missile', 'shadow-bone', 'fling', 'bounce', 'mach-punch'
+  ]);
+  for (const m of RAW) m.cat = m.kind === 'buff' ? null : PHYSICAL.has(m.id) ? 'physical' : 'special';
+  const CAT_NAME = { physical: 'Físico', special: 'Especial' };
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
   // (y -25 % de daño recibido mientras sea tu ataque activo, en player.js).
@@ -473,10 +555,32 @@
     ghost: 'shadow-ball', dragon: 'dragon-rage', fairy: 'fairy-wind', steel: 'metal-claw',
     dark: 'bite', normal: 'tackle'
   };
+  // Si pega más con el Ataque que con el Ataque Especial, empieza con uno físico.
+  const START_PHYS = {
+    fire: 'pyro-ball', water: 'razor-shell', grass: 'bullet-seed', electric: 'fusion-bolt',
+    psychic: 'psycho-cut', poison: 'poison-sting', ground: 'bonemerang', flying: 'bounce',
+    bug: 'pin-missile', rock: 'rock-throw', ice: 'ice-shard', fighting: 'karate-chop',
+    ghost: 'shadow-bone', dragon: 'dragon-darts', fairy: 'spirit-break', steel: 'meteor-mash',
+    dark: 'fling', normal: 'spike-cannon'
+  };
+  // Y al revés: los tipos cuyo inicial era físico tienen uno especial.
+  const START_SPEC = Object.assign({}, START, {
+    grass: 'giga-drain', bug: 'bug-buzz', fighting: 'aura-sphere', steel: 'flash-cannon',
+    dark: 'dark-pulse', normal: 'hyper-voice', rock: 'rock-throw'
+  });
+  /** Categoría que más le conviene: 'physical', 'special' o null si están parejos. */
+  function favors(mon) {
+    if (!mon || mon.spa == null) return null;
+    if (mon.atk > mon.spa * 1.1) return 'physical';
+    if (mon.spa > mon.atk * 1.1) return 'special';
+    return null;
+  }
   function startFor(mon) {
     if (mon.start && BY_ID[mon.start]) return mon.start;
-    for (const t of mon.types) if (START[t]) return START[t];
-    return 'tackle';
+    const f = favors(mon);
+    const table = f === 'physical' ? START_PHYS : f === 'special' ? START_SPEC : START;
+    for (const t of mon.types) if (table[t]) return table[t];
+    return f === 'special' ? 'hyper-voice' : 'tackle';
   }
 
   // ---------------- evolución de movimientos ----------------
@@ -517,7 +621,15 @@
     'hail': ['Alud', 'cd'],                  'meteor-mash': ['Bomba Imán', 'atk'],
     'will-o-wisp': ['Infierno', 'cd'],       'substitute': ['Doble Equipo', 'def'],
     'aerial-ace': ['Acróbata', 'spd'],       'flame-wheel': ['Envite Ígneo', 'spd'],
-    'bubble-beam': ['Acua Cola', 'atk'],     'hex': ['Poltergeist', 'mag']
+    'bubble-beam': ['Acua Cola', 'atk'],     'hex': ['Poltergeist', 'mag'],
+    'spike-cannon': ['Ataque Furia', 'cd'],  'pyro-ball': ['Puño Fuego', 'atk'],
+    'razor-shell': ['Cascada', 'atk'],       'aqua-jet': ['Hidroariete', 'spd'],
+    'bullet-seed': ['Bomba Germen', 'atk'],  'fusion-bolt': ['Placaje Eléctrico', 'atk'],
+    'ice-shard': ['Carámbano', 'cd'],        'icicle-crash': ['Lanza Glacial', 'atk'],
+    'dragon-darts': ['Enfado', 'atk'],       'spirit-break': ['Carantoña', 'atk'],
+    'pin-missile': ['Megacuerno', 'atk'],    'shadow-bone': ['Garra Umbría', 'cd'],
+    'fling': ['Juego Sucio', 'atk'],         'bounce': ['Ataque Aéreo', 'atk'],
+    'mach-punch': ['Puño Incremento', 'spd']
   };
   // Lo que gana al evolucionar, según cómo funcione.
   const EVO_MODS = {
@@ -557,6 +669,6 @@
     return true;
   }
 
-  G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, instance, levelUp, nextUpText, startFor,
+  G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, instance, levelUp, nextUpText, startFor, favors, CAT_NAME,
               EVO, NEED_NAME, evoInfo, evolve };
 })();

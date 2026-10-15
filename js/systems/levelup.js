@@ -38,12 +38,14 @@ G.LevelUp = (() => {
       const buffs = pl.moves.filter(m => m.kind === 'buff').length;
       const pool = G.Moves.poolFor(pl.baseMon || pl.mon).filter(id =>
         !pl.hasMove(id) && !(pl.banned && pl.banned.has(id)) && !(buffs >= 2 && G.Moves.BY_ID[id].kind === 'buff'));
+      // Los de la categoría que le conviene (Ataque o Ataque Especial) salen más.
+      const fav = G.Moves.favors(pl.mon);
       for (const id of G.U.pickN(pool, 6)) {
         const d = G.Moves.BY_ID[id];
         out.push({
-          w: 10, type: 'new', key: 'new:' + id,
+          w: !fav || !d.cat ? 10 : d.cat === fav ? 14 : 6, type: 'new', key: 'new:' + id,
           icon: 'move:' + id, color: G.U.TYPE_COLOR[d.type],
-          tag: G.U.TYPE_NAME[d.type],
+          tag: G.U.TYPE_NAME[d.type] + (d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''),
           title: d.name, desc: d.desc,
           apply: p => p.addMove(id)
         });
