@@ -31,7 +31,11 @@ G.CHANGELOG = [
      'Upgrades bought with coins now belong to each family: what you buy with Charmander also counts for Charmeleon and Charizard. If you had overlapping upgrades in the same family, the highest level is kept and the coins for the rest are refunded.']
   ], chg: [
     ['Cooperativo: al cerrarse las cartas de nivel o una elección (objeto, vínculo), la partida espera medio segundo antes de seguir, para que todos estén listos.',
-     'Co-op: when the level-up cards or a choice (item, bond) close, the game waits half a second before resuming, so everyone is ready.']
+     'Co-op: when the level-up cards or a choice (item, bond) close, the game waits half a second before resuming, so everyone is ready.'],
+    ['Grupo: botón «Estoy listo» en la sala; el anfitrión sólo puede empezar cuando lo están todos. Mientras estás en un grupo, la sala se queda de fondo: puedes entrar en Pokémon, Mejoras, Maldiciones o Gacha desde ella y al volver sigue ahí.',
+     'Group: an «I\'m ready» button in the room; the host can only start when everyone is. While you are in a group, the room stays in the background: you can open Pokémon, Upgrades, Curses or Gacha from it and it is still there when you come back.'],
+    ['Menú: los 3 mejores del ranking histórico, en solitario y en grupo. Pokémon: se abre con todas las regiones y sólo los que tienes, y «Elegir de compañero» está arriba de la ficha.',
+     'Menu: the top 3 of the all-time ranking, solo and in a group. Pokémon: opens with all regions and only the ones you own, and «Choose as partner» is at the top of the page.']
   ] },
   { d: '2026-10-14', title: ['Recupera tu cuenta con Gmail', 'Recover your account with Gmail'], new: [
     ['Si juegas con nombre y contraseña, puedes vincular tu Gmail: si un día olvidas la contraseña, entras con Google y es tu misma cuenta. Te lo ofrecemos al entrar.',

@@ -194,6 +194,7 @@
     <div class="box" style="padding:14px 18px">
       <div id="menu-stats" style="font-size:14px;color:var(--muted)"></div>
     </div>
+    <div class="box menu-top hidden" id="menu-top" style="padding:12px 16px"></div>
   </div>
 </section>
 
@@ -373,12 +374,19 @@
 <section id="scr-lobby" class="scr dim hidden">
   <div class="box wide">
     <div class="row between"><h2>Sala</h2>
-      <div class="row"><button id="lobby-menu" class="btn small ghost">Menú</button><button id="lobby-leave" class="btn small ghost">Salir de la sala</button></div></div>
+      <div class="row"><button id="lobby-leave" class="btn small ghost">Salir de la sala</button></div></div>
     <p class="sub" id="lobby-sub"></p>
+    <div class="lobby-nav">
+      <button class="btn small" data-nav="dex">Pokémon</button>
+      <button class="btn small" data-nav="upgrades">Mejoras</button>
+      <button class="btn small" data-nav="curses">Maldiciones</button>
+      <button class="btn small" data-nav="gacha">Gacha</button>
+    </div>
     <div id="lobby-members" class="lobby-members"></div>
     <h3 id="lobby-inv-title" style="margin:14px 0 6px">Invitar amigos</h3>
     <div id="lobby-invite" class="fr-list"></div>
     <div class="row" style="margin-top:14px">
+      <button id="lobby-ready" class="btn grow">Listo</button>
       <button id="lobby-start" class="btn gold grow">Empezar partida</button>
     </div>
     <p class="note" id="lobby-note"></p>

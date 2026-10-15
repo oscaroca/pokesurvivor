@@ -403,6 +403,11 @@ G.Social = (() => {
   }
 
   /** Actualiza tu Pokémon en la sala (si cambias de compañero). */
+  /** Grupo: "Listo" en tu plaza de la sala (rooms/{id}/m/{uid}/ready). */
+  function setReady(v) {
+    if (room && me) fb.rtdb.ref('rooms/' + room.id + '/m/' + uid + '/ready').set(!!v).catch(() => {});
+  }
+
   function refreshMember() {
     if (room && me) fb.rtdb.ref('rooms/' + room.id + '/m/' + uid).update(
       { dex: G.DB.save.partner, shiny: !!G.DB.save.partnerShiny && G.DB.ownsShiny(G.DB.save.partner) }).catch(() => {});
@@ -521,7 +526,7 @@ G.Social = (() => {
 
   return {
     start, stop, claimNick, request, accept, remove, publishProfile, getProfile, profileData,
-    createRoom, joinRoom, leaveRoom, setOpen, refreshMember, setPlaying, refreshPresence,
+    createRoom, joinRoom, leaveRoom, setOpen, refreshMember, setReady, setPlaying, refreshPresence,
     invite, acceptInvite, declineInvite,
     on(fn) { listeners.add(fn); }, off(fn) { listeners.delete(fn); },
     get me() { return me; },

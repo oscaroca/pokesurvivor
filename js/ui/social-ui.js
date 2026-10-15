@@ -150,7 +150,22 @@
         G.Net.close();
         G.MenuUI.open();
       };
-      $('lobby-menu').onclick = () => G.MenuUI.open();
+      // Accesos desde la sala (se abren encima y "Volver" regresa a la sala).
+      document.querySelectorAll('#scr-lobby [data-nav]').forEach(b => {
+        b.onclick = () => {
+          const k = b.dataset.nav;
+          if (k === 'curses') G.CursesUI.open();
+          else { const go = document.querySelector('#scr-menu [data-go="' + k + '"]'); if (go) go.click(); }
+        };
+      });
+      // Listo: el anfitrión sólo puede empezar cuando lo están todos (él incluido).
+      $('lobby-ready').onclick = () => {
+        const room = G.Social.room;
+        const mine = room && room.members.find(m => m.uid === G.Social.uid);
+        if (!mine) return;
+        G.Audio.sfx(mine.ready ? 'back' : 'confirm');
+        G.Social.setReady(!mine.ready);
+      };
       $('lobby-start').onclick = start;
       $('lobby-start').dataset.sfx = 'confirm';
       // Conecta / desconecta la red al entrar o salir de una sala.
@@ -208,11 +223,21 @@
           if (m) {
             c.style.setProperty('--pc', G.Coop.COLORS[i]);
             c.appendChild(G.UI.spriteCanvas(m.dex, 120, 96, { scale: 2, lively: true, shiny: !!m.shiny }));
-            c.insertAdjacentHTML('beforeend', `<b translate="no">${esc(m.name)}</b><small>${esc((G.DEX_BY[m.dex] || {}).name || '')}</small><span class="conn" data-u="${m.uid}"></span>`);
+            c.insertAdjacentHTML('beforeend', `<b translate="no">${esc(m.name)}</b><small>${esc((G.DEX_BY[m.dex] || {}).name || '')}</small><span class="conn" data-u="${m.uid}"></span><span class="ready-tag" data-r="${m.uid}"></span>`);
           } else c.innerHTML = '<span>Libre</span>';
           box.appendChild(c);
         }
       }
+      box.querySelectorAll('.ready-tag').forEach(el => {
+        const m = ms.find(x => x.uid === el.dataset.r);
+        el.textContent = m && m.ready ? '✓ Listo' : 'No está listo';
+        el.classList.toggle('on', !!(m && m.ready));
+      });
+      const meM = ms.find(m => m.uid === G.Social.uid);
+      const rb = $('lobby-ready');
+      rb.textContent = meM && meM.ready ? '✓ ¡Listo! (pulsa para quitar)' : 'Estoy listo';
+      rb.classList.toggle('gold', !(meM && meM.ready));
+      const nReady = ms.filter(m => m.ready).length, allReady = ms.length >= 2 && nReady === ms.length;
       box.querySelectorAll('.conn').forEach(el => {
         const m = ms.find(x => x.uid === el.dataset.u);
         if (!m) return;
@@ -246,7 +271,7 @@
       btn.classList.toggle('hidden', !room.isHost);
       const connecting = ms.some(m => m.uid !== room.host && G.Net.mode(m.uid) === 'connecting');
       const failed = ms.some(m => m.uid !== room.host && G.Net.mode(m.uid) === 'failed');
-      btn.disabled = !room.isHost || ms.length < 2 || connecting || failed;
+      btn.disabled = !room.isHost || ms.length < 2 || connecting || failed || !allReady;
       btn.textContent = 'Empezar partida (' + ms.length + '/' + G.Social.MAX_PLAYERS + ')';
       const cp = G.Curses.points(G.Curses.chosen(G.DB.save));
       const curseNote = room.isHost ? (cp ? ' Tus maldiciones (' + cp + ' puntos) se aplicarán a todos.' : '')
@@ -254,7 +279,9 @@
       $('lobby-note').textContent = (!room.isHost ? 'Cuando el anfitrión empiece, entraréis todos a la vez.'
         : ms.length < 2 ? 'Necesitas al menos un amigo en la sala.'
         : failed ? 'No se puede conectar con algún amigo: su red (o la tuya) no deja jugar en grupo. Probad con otra wifi o datos móviles; se reintenta solo.'
-        : connecting ? 'Conectando con tus amigos…' : 'La partida empieza para todos a la vez.') + curseNote;
+        : connecting ? 'Conectando con tus amigos…'
+        : !allReady ? 'Esperando a que todos estén listos (' + nReady + '/' + ms.length + ').'
+        : 'La partida empieza para todos a la vez.') + curseNote;
     }
 
     function start() {

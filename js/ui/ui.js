@@ -12,7 +12,9 @@ G.UI = (() => {
                    'scr-nick', 'scr-friends', 'scr-lobby', 'scr-rank', 'scr-item', 'scr-goals', 'scr-bond', 'scr-mod', 'scr-curses'];
 
   function show(id, keepMenu = false) {
-    for (const s of SCREENS) if (s !== id && !(keepMenu && s === 'scr-menu')) $(s).classList.add('hidden');
+    // En grupo, la sala se queda de fondo bajo Pokémon, Mejoras... (y al volver sigue ahí).
+    const keepLobby = keepMenu && G.Social && G.Social.room;
+    for (const s of SCREENS) if (s !== id && !(keepMenu && s === 'scr-menu') && !(keepLobby && s === 'scr-lobby')) $(s).classList.add('hidden');
     $(id).classList.remove('hidden');
   }
   function hide(id) { $(id).classList.add('hidden'); }

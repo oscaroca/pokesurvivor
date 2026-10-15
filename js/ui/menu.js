@@ -2,7 +2,8 @@
 G.MenuUI = (() => {
   const $ = G.UI.$;
   const GEN_NAMES = ['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Teselia', 'Kalos', 'Alola', 'Galar', 'Paldea'];
-  let dexFilter = 'all', dexGen = 1, dexSel = null;
+  // Por defecto: todas las regiones (dexGen 0) y sólo los que tienes, para ver de primeras con quién puedes jugar.
+  let dexFilter = 'own', dexGen = 0, dexSel = null;
 
   function init() {
     const ICON = { play: 'ball', curses: 'bomb', dex: 'book', upgrades: 'up', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
@@ -70,6 +71,10 @@ G.MenuUI = (() => {
     const shinies = Object.keys(s.shiny || {}).length;
     $('menu-dex-count').textContent = `${owned} / ${G.DEX.length}` + (shinies ? ` · ${shinies} shiny` : '');
 
+    topLine();
+    // En grupo, el menú muestra la sala encima (no se pierde al entrar en Pokémon y volver).
+    if (G.Social.room && G.LobbyUI) setTimeout(() => { if (G.Social.room && G.UI.isOpen('scr-menu')) G.LobbyUI.open(); }, 0);
+
     const st = s.stats;
     $('menu-stats').innerHTML =
       `Runs <b style="color:#fff">${st.runs}</b> · Mejor tiempo <b style="color:#fff">${G.U.mmss(st.bestTime)}</b><br>` +
@@ -93,6 +98,27 @@ G.MenuUI = (() => {
   }
 
   /** Texto bajo "Amigos" y "Jugar": quién está en línea, solicitudes, sala. */
+  /**
+   * Top 3 del histórico, en solitario y en grupo, para picar a jugar. Sólo con
+   * cuenta en la nube; el ranking guarda lo leído 30 min (net/ranking.js), así
+   * que abrir el menú muchas veces no gasta lecturas.
+   */
+  const fmtT = t => (t >= 3600 ? Math.floor(t / 3600) + ':' + G.U.mmss(t % 3600).padStart(5, '0') : G.U.mmss(t));
+  const escH = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  async function topLine() {
+    const box = $('menu-top');
+    if (!box) return;
+    if (!G.DB.online) { box.classList.add('hidden'); return; }
+    const [solo, group] = await Promise.all([G.Ranking.top('s', 'a').catch(() => []), G.Ranking.top('g', 'a').catch(() => [])]);
+    if (!G.UI.isOpen('scr-menu')) return;
+    const col = (title, rows) => `<div class="mt-col"><b>${title}</b>${rows.length
+      ? rows.slice(0, 3).map((r, i) => `<div class="mt-row"><span class="mt-pos">${['🥇', '🥈', '🥉'][i]}</span><span class="mt-name" translate="no">${escH((r.names || []).join(' · '))}</span><span class="mt-t">${fmtT(r.t)}</span></div>`).join('')
+      : '<div class="mt-row" style="color:var(--muted)">Aún nadie</div>'}</div>`;
+    box.innerHTML = `<div class="mt-head">Los mejores · histórico</div><div class="mt-cols">${col('Solitario', solo)}${col('En grupo', group)}</div>`;
+    box.classList.remove('hidden');
+    box.onclick = () => G.RankingUI.open();
+  }
+
   /** Menú lateral: las maldiciones elegidas, o que en grupo no cuentan. */
   function curseLine() {
     const sub = $('menu-curse-sub');
@@ -123,17 +149,17 @@ G.MenuUI = (() => {
   function openDex() {
     G.UI.show('scr-dex', true);
     const s = G.DB.save;
-    if (dexSel == null) { dexSel = s.partner; dexGen = G.DEX_BY[s.partner].gen; }
+    if (dexSel == null) dexSel = s.partner;
     const owned = Object.keys(s.owned).filter(d => G.DEX_BY[d]).length;
     $('dex-total').textContent = `${owned} / ${G.DEX.length}`;
 
     // Pestañas de generación, con cuántos tienes de cada una.
     const tabs = $('dex-gens');
     tabs.innerHTML = '';
-    GEN_NAMES.forEach((name, i) => {
-      const g = i + 1;
-      const total = G.DEX.filter(p => p.gen === g).length;
-      const have = G.DEX.filter(p => p.gen === g && s.owned[p.dex]).length;
+    ['Todas'].concat(GEN_NAMES).forEach((name, g) => {
+      const inGen = p => !g || p.gen === g;
+      const total = G.DEX.filter(inGen).length;
+      const have = G.DEX.filter(p => inGen(p) && s.owned[p.dex]).length;
       const b = document.createElement('button');
       b.className = 'gen-tab' + (g === dexGen ? ' on' : '');
       b.innerHTML = `<b>${name}</b><small>${have}/${total}</small>`;
@@ -162,7 +188,7 @@ G.MenuUI = (() => {
     const grid = $('dex-grid');
     grid.innerHTML = '';
     for (const p of G.DEX) {
-      if (p.gen !== dexGen) continue;
+      if (dexGen && p.gen !== dexGen) continue;
       const own = !!s.owned[p.dex], sh = !!(s.shiny && s.shiny[p.dex]);
       if (dexFilter === 'own' && !own) continue;
       if (dexFilter === 'miss' && own) continue;
@@ -248,8 +274,13 @@ G.MenuUI = (() => {
       : `<button disabled title="Sácala con un repetido en el gacha">?</button>`).join('');
     const usingThis = isPartner && (!hasSh || !!s.partnerShiny === viewShiny);
 
+    // Elegir de compañero arriba del todo: así se cambia de Pokémon sin bajar por la ficha.
+    const pickBtn = !own ? '' : usingThis
+      ? '<button class="btn grow dex-pick-top" disabled style="width:100%">Es tu compañero</button>'
+      : `<button id="dex-pick" class="btn gold dex-pick-top" data-sfx="confirm" style="width:100%">Elegir de compañero${viewShiny ? ' (shiny)' : ''}</button>`;
     const box = $('dex-detail');
     box.innerHTML = `
+      ${pickBtn}
       <canvas id="dex-big" class="stage" width="220" height="190"></canvas>
       ${hasSh ? `<div class="seg">
           <button class="${viewShiny ? '' : 'on'}" data-v="0">Normal</button>
@@ -281,9 +312,6 @@ G.MenuUI = (() => {
           ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>
         <p class="move-icons" title="Movimientos que puede aprender">
           ${G.Moves.poolFor(p).map(id => { const d = G.Moves.BY_ID[id]; return `<span title="${d.name}${d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''}">${G.Icons.html('move:' + id, 16)}</span>`; }).join('')}</p>
-        ${usingThis
-          ? '<button class="btn grow" disabled style="width:100%">Es tu compañero</button>'
-          : `<button id="dex-pick" class="btn gold" data-sfx="confirm" style="width:100%">Elegir de compañero${viewShiny ? ' (shiny)' : ''}</button>`}
       ` : `<p class="center" style="color:var(--muted)">Aún no lo tienes.<br>Consíguelo en el banner de <b class="gold">${GEN_NAMES[p.gen - 1]}</b>
             o derrotándolo cuando salga shiny.</p>`}
     `;

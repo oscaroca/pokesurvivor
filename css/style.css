@@ -388,6 +388,19 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .pcard .tag { font-size: 12px; margin-top: 2px; }
 .pcard .new { color: var(--gold); font-weight: 700; }
 .pcard .tag.nat { color: var(--muted); }
+/* "Elegir de compañero" arriba de la ficha (en móvil iba pegado abajo). */
+#dex-detail .dex-pick-top { position: static !important; order: 0 !important; margin: 0 0 8px !important; }
+.lobby-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.lob-card .ready-tag { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.lob-card .ready-tag.on { color: #5fe08a; font-weight: 700; }
+.menu-top { cursor: pointer; }
+.menu-top .mt-head { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.menu-top .mt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.menu-top .mt-col b { display: block; font-size: 13px; color: var(--gold); margin-bottom: 2px; }
+.menu-top .mt-row { display: flex; gap: 4px; align-items: baseline; font-size: 12px; line-height: 1.5; }
+.menu-top .mt-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-top .mt-t { color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-height: 520px) { .menu-top { display: none; } }
 .curse-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; }
 @media (max-width: 520px) { .curse-list { grid-template-columns: 1fr; } }
 .curse { appearance: none; cursor: pointer; text-align: left; font: inherit; color: #dfe8ff; padding: 8px 10px; border-radius: 10px;

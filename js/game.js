@@ -1016,6 +1016,7 @@ G.Flow = {
   startCoop(cfg) {
     if (G.Game.state !== 'ui' || !G.Social.room) return;
     G.LobbyUI.close();
+    G.Social.setReady(false);       // para la siguiente partida, cada uno vuelve a darle a Listo
     G.Game.startRun(cfg);
   }
 };
