@@ -52,6 +52,9 @@ FALLBACK = {
     'Faint': ['Hurt', 'Idle'],
 }
 REQUIRED = {'Idle', 'Walk', 'Attack'}
+# Para entrar en el juego basta con Idle: lo que falte (Walk, Attack...) se
+# rellena con FALLBACK. Así entran los que SpriteCollab tiene a medias.
+MINIMUM = {'Idle'}
 
 
 def fetch(url, retries=4):
@@ -223,7 +226,7 @@ def main():
     jobs = []
     for dex in range(lo, hi + 1):
         e = tracker.get(f'{dex:04d}')
-        if not e or not REQUIRED <= set(e.get('sprite_files', {})):
+        if not e or not MINIMUM <= set(e.get('sprite_files', {})):
             continue
         s = e.get('subgroups', {}).get('0000', {}).get('subgroups', {}).get('0001', {})
         jobs.append((dex, {'Idle', 'Walk'} <= set(s.get('sprite_files', {}))))

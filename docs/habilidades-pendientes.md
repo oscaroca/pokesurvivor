@@ -2,9 +2,9 @@
 
 Generado con `node tools/abilities_report.js`. No editar a mano.
 
-- Habilidades con efecto: **101** de 211
-- Pokémon con habilidad que hace algo: **706** de 966 (73%)
-- Pendientes: **110** habilidades, 260 Pokémon
+- Habilidades con efecto: **101** de 215
+- Pokémon con habilidad que hace algo: **714** de 980 (73%)
+- Pendientes: **114** habilidades, 266 Pokémon
 
 Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia existente o una nueva) y volver a generar este archivo.
 
@@ -17,16 +17,16 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Polvo Escudo | `shield-dust` | 9 | Caterpie, Weedle, Venomoth, Wurmple, Dustox, Scatterbug, Vivillon, Snom… (+1) |
 | Bromista | `prankster` | 8 | Cottonee, Whimsicott, Tornadus, Thundurus, Klefki, Impidimp, Morgrem, Grimmsnarl |
 | Defensa Hoja | `leaf-guard` | 7 | Leafeon, Swadloon, Fomantis, Lurantis, Bounsweet, Steenee, Tsareena |
+| Carga Cuark | `quark-drive` | 7 | Ferrodada, Ferrosaco, Ferropalmas, Ferropolilla, Ferropúas, Ferropaladín, Ferroverdor |
 | Insonorizar | `soundproof` | 7 | Voltorb, Electrode, Mr. Mime, Whismur, Loudred, Exploud, Mime Jr. |
 | Rompemoldes | `mold-breaker` | 6 | Cranidos, Rampardos, Tinkatink, Tinkatuff, Tinkaton, Veluza |
-| Carga Cuark | `quark-drive` | 6 | Ferrosaco, Ferropalmas, Ferropolilla, Ferropúas, Ferropaladín, Ferroverdor |
 | Espíritu Vital | `vital-spirit` | 6 | Mankey, Primeape, Delibird, Vigoroth, Lillipup, Annihilape |
 | Sacapecho | `big-pecks` | 5 | Pidove, Unfezant, Vullaby, Mandibuzz, Fletchling |
+| Madrugar | `early-bird` | 5 | Kangaskhan, Houndour, Houndoom, Smoliv, Dolliv |
 | Cacheo | `frisk` | 5 | Gothita, Gothorita, Gothitelle, Noibat, Noivern |
 | Funda | `overcoat` | 5 | Solosis, Duosion, Reuniclus, Varoom, Revavroom |
 | Anticipación | `anticipation` | 4 | Wormadam, Croagunk, Toxicroak, Flittle |
 | Humedad | `damp` | 4 | Psyduck, Golduck, Wooper, Quagsire |
-| Madrugar | `early-bird` | 4 | Kangaskhan, Houndour, Houndoom, Smoliv |
 | Velo Flor | `flower-veil` | 4 | Flabébé, Floette, Florges, Comfey |
 | Más | `plus` | 4 | Plusle, Klink, Klang, Klinklang |
 | Dicha | `serene-grace` | 4 | Dunsparce, Jirachi, Meloetta, Dudunsparce |
@@ -95,7 +95,9 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Menos | `minus` | 1 | Minun |
 | Nebulogénesis | `misty-surge` | 1 | Tapu Fini |
 | Multitipo | `multitype` | 1 | Arceus |
+| Poder Fúngico | `mycelium-might` | 1 | Toedscool |
 | Latido Oricalco | `orichalcum-pulse` | 1 | Koraidon |
+| Títere Tóxico | `poison-puppeteer` | 1 | Pecharunt |
 | Fuente Energía | `power-spot` | 1 | Stonjourner |
 | Psicogénesis | `psychic-surge` | 1 | Tapu Lele |
 | Punk Rock | `punk-rock` | 1 | Toxtricity |
@@ -111,7 +113,9 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Teracambio | `tera-shift` | 1 | Terapagos |
 | Terravoltaje | `teravolt` | 1 | Zekrom |
 | Turbollama | `turboblaze` | 1 | Reshiram |
+| Liviano | `unburden` | 1 | Grafaiai |
 | Puño Invisible | `unseen-fist` | 1 | Urshifu |
+| Caldero Debacle | `vessel-of-ruin` | 1 | Ting-Lu |
 | Tinovictoria | `victory-star` | 1 | Victini |
 | Alma Errante | `wandering-spirit` | 1 | Runerigus |
 | Humo Blanco | `white-smoke` | 1 | Torkoal |
