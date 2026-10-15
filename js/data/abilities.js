@@ -28,6 +28,7 @@
  *   onKill       cada derrota sube un stat un rato (acumulable)
  *   onHurt       recibir daño sube un stat un rato (acumulable)
  *   speedBoost   ganas velocidad poco a poco
+ *   weatherSet   invocas un clima (las primigenias, toda la partida)
  *   berry        las bayas curan más
  *   stat         mejora fija: atk, spd, cd, magnet, coin, xp, crit, regen
  */
@@ -77,6 +78,9 @@ G.Abilities = (() => {
     onHurt: a => [`Al recibir daño sube tu ${STAT[a.stat][0]} un rato (acumulable).`, `Taking damage raises your ${STAT[a.stat][1]} for a while (stacks).`],
     speedBoost: () => ['Ganas velocidad poco a poco durante la partida (hasta +30%).', 'You gain speed little by little during the run (up to +30%).'],
     berry: a => [`Las bayas te curan un ${pct(a.mult)}% más.`, `Berries heal you ${pct(a.mult)}% more.`],
+    weatherSet: a => a.every
+      ? [`Cada ${a.every} s invocas ${W[a.w][0]} durante ${a.dur} s.`, `Every ${a.every} s you summon ${W[a.w][1]} for ${a.dur} s.`]
+      : [`Hay ${W[a.w][0]} mientras estés en la partida.`, `There is ${W[a.w][1]} for as long as you are in the run.`],
     stat: a => a.desc
   };
 
@@ -149,7 +153,20 @@ G.Abilities = (() => {
     'pure-power': st({ atk: 1.4 }, '+40% de daño.', '+40% damage.'),
     'sheer-force': st({ atk: 1.15 }, '+15% de daño.', '+15% damage.'),
     'intrepid-sword': st({ atk: 1.15 }, '+15% de daño.', '+15% damage.'),
-    'rivalry': st({ atk: 1.1 }, '+10% de daño.', '+10% damage.')
+    'rivalry': st({ atk: 1.1 }, '+10% de daño.', '+10% damage.'),
+    // --- habilidades de megas ---
+    'huge-power': st({ atk: 1.5 }, '+50% de daño.', '+50% damage.'),
+    'parental-bond': st({ atk: 1.25 }, '+25% de daño.', '+25% damage.'),
+    'regenerator': st({ regen: 1.2 }, 'Recuperas vida sin parar.', 'You constantly recover HP.'),
+    'multiscale': { fam: 'guard', red: 0.15 }, 'filter': { fam: 'guard', red: 0.12 },
+    'solar-power': { fam: 'weatherPower', w: 'sun', mult: 1.3 },
+    'protean': { fam: 'stab', mult: 1.2 },
+    'sharpness': { fam: 'kindBoost', kinds: 'melee', mult: 1.25 },
+    'skill-link': { fam: 'kindBoost', kinds: 'ranged', mult: 1.2 },
+    // --- clima ---
+    'desolate-land': { fam: 'weatherSet', w: 'sun' }, 'primordial-sea': { fam: 'weatherSet', w: 'rain' },
+    'drought': { fam: 'weatherSet', w: 'sun', every: 45, dur: 15 }, 'drizzle': { fam: 'weatherSet', w: 'rain', every: 45, dur: 15 },
+    'sand-stream': { fam: 'weatherSet', w: 'sand', every: 45, dur: 15 }, 'snow-warning': { fam: 'weatherSet', w: 'snow', every: 45, dur: 15 }
   };
 
   for (const id in TABLE) TABLE[id].id = id;
@@ -165,8 +182,8 @@ G.Abilities = (() => {
   }
 
   /** Habilidad de un Pokémon: { id, name, desc, fam, ... } o con fam null si aún no hace nada. */
-  function of(dex) {
-    const id = G.ABILITY_DEX && G.ABILITY_DEX[dex];
+  function of(dex) { return byId(G.ABILITY_DEX && G.ABILITY_DEX[dex]); }
+  function byId(id) {
     if (!id) return null;
     const name = (G.ABILITY_NAME[id] || [id])[0];
     const t = TABLE[id];
@@ -258,6 +275,16 @@ G.Abilities = (() => {
   function enemyCdMul(pl, d2) { const a = fam(pl, 'pressure'); return a && d2 < 260 * 260 ? a.mult : 1; }
   function berryMul(pl) { const a = fam(pl, 'berry'); return a ? a.mult : 1; }
 
-  return { TABLE, DESC, of, applyStatic, dmgMul, absorbs, takenMul, guard, touchMul, sturdy, onTouch, onHurt, onKill,
-           spdMul, regen, floats, lavaProof, noSlow, enemyCdMul, berryMul };
+  /** Cada fotograma (player.update): climas invocados. */
+  function tick(pl, dt) {
+    const a = fam(pl, 'weatherSet');
+    if (!a || !G.Weather || pl.remote) return;
+    // (Un clima recién puesto aún no cuenta como activo: se espera antes de volver a mirar.)
+    pl.wsT = (pl.wsT ?? 1e9) + dt;
+    if (!a.every) { if (pl.wsT > 5 && !weatherIs(a.w)) { pl.wsT = 0; G.Weather.force(a.w, 600); } return; }
+    if (pl.wsT >= a.every) { pl.wsT = 0; if (!G.Weather.current) G.Weather.force(a.w, a.dur); }
+  }
+
+  return { TABLE, DESC, of, byId, applyStatic, dmgMul, absorbs, takenMul, guard, touchMul, sturdy, onTouch, onHurt, onKill,
+           spdMul, regen, floats, lavaProof, noSlow, enemyCdMul, berryMul, tick };
 })();

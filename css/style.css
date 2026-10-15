@@ -191,6 +191,7 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
   box-shadow: 0 0 0 3px #0b1838, 0 10px 30px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.06);
 }
 .stage.shiny { box-shadow: 0 0 0 3px #0b1838, 0 0 22px rgba(154,230,255,.55), inset 0 0 0 2px rgba(255,255,255,.08); }
+.stage.mega { box-shadow: 0 0 0 3px #0b1838, 0 0 24px rgba(233,140,255,.6), inset 0 0 0 2px rgba(255,255,255,.08); }
 
 /* ---------- rejilla de Pokémon ---------- */
 .grid {

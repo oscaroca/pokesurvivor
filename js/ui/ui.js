@@ -252,7 +252,22 @@ G.UI = (() => {
         s.a.draw(ctx, fx, fy);
         ctx.restore();
       } else {
-        s.a.draw(ctx, fx, fy);
+        // Megaevolución (vista previa en la ficha): aura detrás y, si la forma
+        // no tiene sprite propio, el normal teñido (como en la partida).
+        let tint = null;
+        if (s.opts.mega) {
+          const now = performance.now(), pulse = 0.5 + Math.sin(now / 160) * 0.5;
+          const cy = fy - ay * k * 0.5, rad = ay * k * (0.75 + pulse * 0.1);
+          const g = ctx.createRadialGradient(fx, cy, rad * 0.1, fx, cy, rad);
+          const hue = (now / 12) % 360;
+          g.addColorStop(0, `hsla(${hue},90%,70%,${0.35 + pulse * 0.15})`);
+          g.addColorStop(0.6, `hsla(${(hue + 60) % 360},90%,60%,${0.15 + pulse * 0.08})`);
+          g.addColorStop(1, 'hsla(0,0%,0%,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(fx, cy, rad, 0, 6.2832); ctx.fill();
+          if (s.opts.megaTint) tint = { color: `hsl(${Math.floor(now / 250) % 12 * 30},85%,62%)`, a: 0.4 + Math.sin(now / 160) * 0.12 };
+        }
+        s.a.draw(ctx, fx, fy, tint ? { tint } : {});
       }
 
       // Centelleos alrededor de los shiny: cada uno nace en un sitio al azar.

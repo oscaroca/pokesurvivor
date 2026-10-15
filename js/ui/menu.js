@@ -170,8 +170,14 @@ G.MenuUI = (() => {
     if (!grid.children.length) grid.innerHTML = '<p class="sub" style="grid-column:1/-1">Ninguno con este filtro.</p>';
   }
 
-  // Variante que se está viendo en la ficha (normal o shiny).
+  // Variante que se está viendo en la ficha (normal o shiny) y forma (null o la clave de una mega).
   let viewShiny = false;
+  let viewForm = null;
+
+  /** Etiqueta corta de una mega para su botón: 'Mega', 'Mega X', 'Primigenio'. */
+  const formLabel = f => f.item === 'red-orb' || f.item === 'blue-orb' ? 'Primigenio'
+    : 'Mega' + (f.key.includes('-mega-') ? ' ' + f.key.split('-mega-')[1].toUpperCase() : '');
+  const MEGA_HOW = { 'stone': 'la Megapiedra', 'red-orb': 'el Orbe Rojo', 'blue-orb': 'el Orbe Azul', 'dragon-ascent': 'Ascenso Draco' };
 
   function showDetail(dex) {
     const s = G.DB.save;
@@ -181,7 +187,25 @@ G.MenuUI = (() => {
     const isPartner = dex === s.partner;
     if (!hasSh) viewShiny = false;
     else if (isPartner && dex !== showDetail.last) viewShiny = !!s.partnerShiny;
+    if (dex !== showDetail.last) viewForm = null;
     showDetail.last = dex;
+
+    // Megas: vista previa (se consiguen en partida, ver systems/levelup.js).
+    const forms = own ? (G.MEGA && G.MEGA[dex]) || [] : [];
+    const form = forms.find(f => f.key === viewForm) || null;
+    if (!form) viewForm = null;
+    // Lo que se enseña: la especie o la mega (stats, tipos, habilidad).
+    const v = form ? Object.assign({}, p, { name: form.name, types: form.types, hp: form.hp, atk: form.atk, spa: form.spa, spd: form.spd }) : p;
+    // Evoluciones: a qué y a qué nivel (data/evolutions.js); los que no tienes, ocultos.
+    const evos = (G.EVO && G.EVO[dex] || []).filter(e => G.DEX_BY[e.to]);
+    const evoName = d => s.owned[d] ? G.DEX_BY[d].name : '???';
+    const known = evos.filter(e => s.owned[e.to]).map(e => `<b class="gold">${G.DEX_BY[e.to].name}</b>`);
+    const evoLine = !evos.length ? ''
+      : evos.length > 3 && new Set(evos.map(e => e.lvl)).size === 1
+        ? `Evoluciona al nivel <b class="gold">${evos[0].lvl}</b> en una de sus ${evos.length} evoluciones` + (known.length ? ` (tienes ${known.join(', ')})` : '')
+      : new Set(evos.map(e => e.lvl)).size === 1
+        ? `Evoluciona a ${evos.map(e => `<b class="gold">${evoName(e.to)}</b>`).join(', ')} al nivel <b class="gold">${evos[0].lvl}</b>`
+        : 'Evoluciona a ' + evos.map(e => `<b class="gold">${evoName(e.to)}</b> (nv. ${e.lvl})`).join(', ');
 
     const max = { hp: 183, atk: 1.55, spd: 137 };
     // Stats con la naturaleza elegida: verde lo que sube, rojo lo que baja.
@@ -191,7 +215,7 @@ G.MenuUI = (() => {
     const bar = (label, v, m, txt, k) =>
       `<div class="stat"><span${natC(k)}>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span${natC(k)}>${txt}</span></div>`;
     const natHave = new Set(G.Natures.owned(s, dex));
-    const ab = G.Abilities.of(dex);
+    const ab = (form && form.ab && G.Abilities.byId(form.ab)) || G.Abilities.of(dex);
     const natGrid = G.Natures.ALL.map(n => natHave.has(n.id)
       ? `<button class="${n.id === nat ? 'on' : ''}" data-nat="${n.id}" title="${G.Natures.effect(n.id)}">${n.name}</button>`
       : `<button disabled title="Sácala con un repetido en el gacha">?</button>`).join('');
@@ -203,17 +227,23 @@ G.MenuUI = (() => {
       ${hasSh ? `<div class="seg">
           <button class="${viewShiny ? '' : 'on'}" data-v="0">Normal</button>
           <button class="${viewShiny ? 'on' : ''}" data-v="1">${G.Icons.html('shiny', 12)} Shiny</button></div>` : ''}
+      ${forms.length ? `<div class="seg mega-seg">
+          <button class="${form ? '' : 'on'}" data-form="">Base</button>
+          ${forms.map(f => `<button class="${f === form ? 'on' : ''}" data-form="${f.key}">${formLabel(f)}</button>`).join('')}</div>` : ''}
       <div class="center">
         <div style="color:var(--muted);font-size:13px">Nº ${String(p.dex).padStart(3, '0')} · ${GEN_NAMES[p.gen - 1]}</div>
-        <h3>${own ? p.name : '???'}</h3>
+        <h3>${own ? v.name : '???'}</h3>
         <div style="color:${G.Gacha.RARITY_COLOR[p.rarity]}">${G.UI.stars(p.rarity, 24)} ${G.Gacha.RARITY_NAME[p.rarity]}</div>
-        <div style="margin:6px 0">${own ? G.UI.typeChips(p.types) : ''}</div>
+        <div style="margin:6px 0">${own ? G.UI.typeChips(v.types) : ''}</div>
+        ${evoLine ? `<div style="font-size:13px;margin:2px 0 6px">${evoLine}</div>` : ''}
+        ${form ? `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">Vista previa: en partida, a partir del nivel 10 y en su forma final, puede salirte ${MEGA_HOW[form.item]} en las cartas de nivel (muy rara).</div>`
+          : forms.length && !evos.length ? `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">Puede megaevolucionar en partida: pulsa el botón de arriba para verla.</div>` : ''}
       </div>
       ${own ? `
-        ${bar('Vida', p.hp * nm.hp, max.hp, Math.round(p.hp * nm.hp), 'hp')}
-        ${bar('Ataque', p.atk * nm.atk, max.atk, '×' + (p.atk * nm.atk).toFixed(2), 'atk')}
-        ${bar('At. Esp.', p.spa * nm.atk, max.atk, '×' + (p.spa * nm.atk).toFixed(2), 'atk')}
-        ${bar('Velocidad', p.spd * nm.spd, max.spd, Math.round(p.spd * nm.spd), 'spd')}
+        ${bar('Vida', v.hp * nm.hp, max.hp, Math.round(v.hp * nm.hp), 'hp')}
+        ${bar('Ataque', v.atk * nm.atk, max.atk, '×' + (v.atk * nm.atk).toFixed(2), 'atk')}
+        ${bar('At. Esp.', v.spa * nm.atk, max.atk, '×' + (v.spa * nm.atk).toFixed(2), 'atk')}
+        ${bar('Velocidad', v.spd * nm.spd, max.spd, Math.round(v.spd * nm.spd), 'spd')}
         <p style="font-size:14px;margin:10px 0 4px">Naturaleza <b class="gold">${G.Natures.BY[nat].name}</b>
           <span style="color:var(--muted)">· ${G.Natures.effect(nat)} · ${natHave.size}/${G.Natures.ALL.length}</span></p>
         <div class="nat-grid">${natGrid}</div>
@@ -231,9 +261,14 @@ G.MenuUI = (() => {
     `;
     $('dex-big').style.setProperty('--stage-c', !own ? '#5b83d6' : viewShiny ? '#9ae6ff' : G.U.TYPE_COLOR[p.types[0]]);
     $('dex-big').classList.toggle('shiny', own && viewShiny);
-    G.UI.sprite($('dex-big'), dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny });
-    box.querySelectorAll('.seg button').forEach(b => {
+    $('dex-big').classList.toggle('mega', !!form);
+    G.UI.sprite($('dex-big'), form && form.spr ? form.key : dex,
+      { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny, mega: !!form, megaTint: !!form && !form.spr });
+    box.querySelectorAll('.seg button[data-v]').forEach(b => {
       b.onclick = () => { viewShiny = b.dataset.v === '1'; showDetail(dex); };
+    });
+    box.querySelectorAll('.mega-seg button').forEach(b => {
+      b.onclick = () => { viewForm = b.dataset.form || null; G.Audio.sfx('select'); showDetail(dex); };
     });
     box.querySelectorAll('.nat-grid button[data-nat]').forEach(b => {
       b.onclick = () => {

@@ -2,9 +2,9 @@
 
 Generado con `node tools/abilities_report.js`. No editar a mano.
 
-- Habilidades con efecto: **97** de 211
-- Pokémon con habilidad que hace algo: **699** de 966 (72%)
-- Pendientes: **114** habilidades, 267 Pokémon
+- Habilidades con efecto: **101** de 211
+- Pokémon con habilidad que hace algo: **706** de 966 (73%)
+- Pendientes: **110** habilidades, 260 Pokémon
 
 Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia existente o una nueva) y volver a generar este archivo.
 
@@ -33,7 +33,6 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Velo Dulce | `sweet-veil` | 4 | Swirlix, Slurpuff, Milcery, Alcremie |
 | Ignorante | `unaware` | 4 | Woobat, Swoobat, Cosmog, Dondozo |
 | Antibalas | `bulletproof` | 3 | Jangmo-o, Hakamo-o, Kommo-o |
-| Chorro Arena | `sand-stream` | 3 | Tyranitar, Hippopotas, Hippowdon |
 | Ventosas | `suction-cups` | 3 | Octillery, Lileep, Cradily |
 | Velo Agua | `water-veil` | 3 | Wailmer, Wailord, Finizen |
 | Detonación | `aftermath` | 2 | Drifloon, Drifblim |
@@ -52,7 +51,6 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Expulsarena | `sand-spit` | 2 | Silicobra, Sandaconda |
 | Sombra Trampa | `shadow-tag` | 2 | Wobbuffet, Wynaut |
 | Simple | `simple` | 2 | Bidoof, Bibarel |
-| Nevada | `snow-warning` | 2 | Snover, Abomasnow |
 | Viscosidad | `sticky-hold` | 2 | Shellos, Gastrodon |
 | Néctar Dulce | `supersweet-syrup` | 2 | Dipplin, Hydrapple |
 | Telepatía | `telepathy` | 2 | Elgyem, Beheeyem |
@@ -78,8 +76,6 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Cuerpo Vívido | `dazzling` | 1 | Bruxish |
 | Disfraz | `disguise` | 1 | Mimikyu |
 | Descarga | `download` | 1 | Genesect |
-| Llovizna | `drizzle` | 1 | Kyogre |
-| Sequía | `drought` | 1 | Groudon |
 | Electrogénesis | `electric-surge` | 1 | Tapu Koko |
 | Dinamo | `electromorphosis` | 1 | Bellibolt |
 | Retirada | `emergency-exit` | 1 | Golisopod |
@@ -124,3 +120,41 @@ Para adaptar una: añadirla a `TABLE` en `js/data/abilities.js` (con una familia
 | Superguarda | `wonder-guard` | 1 | Shedinja |
 | Piel Milagro | `wonder-skin` | 1 | Sigilyph |
 | Cambio Heroico | `zero-to-hero` | 1 | Palafin |
+
+## Habilidades de megas y primigenias sin efecto
+
+| Habilidad | id | Formas |
+|---|---|---|
+| Piel Celeste | `aerilate` | Mega-Pinsir, Mega-Salamence |
+| aura-guard | `aura-guard` | Mega-Lucario Z |
+| Antibalas | `bulletproof` | Mega-Chesnaught |
+| Respondón | `contrary` | Mega-Staraptor, Mega-Malamar |
+| Ráfaga Delta | `delta-stream` | Mega-Rayquaza |
+| Piel Dragontina | `dragonize` | Mega-Feraligatr |
+| eelevate | `eelevate` | Mega-Eelektross |
+| Electrogénesis | `electric-surge` | Mega-Raichu X |
+| Aura Feérica | `fairy-aura` | Mega-Floette |
+| Allanamiento | `infiltrator` | Mega-Chandelure |
+| Revés | `innards-out` | Mega-Victreebel |
+| Insomnio | `insomnia` | Mega-Mewtwo Y |
+| Espejo Mágico | `magic-bounce` | Mega-Clefable, Mega-Sableye, Mega-Absol, Mega-Diancie |
+| Megasolar | `mega-sol` | Mega-Meganium |
+| Rompemoldes | `mold-breaker` | Mega-Gyarados, Mega-Ampharos, Mega-Emboar |
+| Indefenso | `no-guard` | Mega-Pidgeot, Mega-Raichu Y, Mega-Hawlucha |
+| Turbotaladro | `piercing-drill` | Mega-Excadrill |
+| Piel Feérica | `pixilate` | Mega-Gardevoir, Mega-Altaria |
+| Bromista | `prankster` | Mega-Banette |
+| Piel Helada | `refrigerate` | Mega-Glalie |
+| Poder Arena | `sand-force` | Mega-Steelix, Mega-Garchomp |
+| Intrépido | `scrappy` | Mega-Lopunny |
+| Sombra Trampa | `shadow-tag` | Mega-Gengar |
+| Salpicante | `spicy-spray` | Mega-Scovillain |
+| Acérrimo | `stalwart` | Mega-Skarmory |
+| Calco | `trace` | Mega-Alakazam, Mega-Meowstic |
+| Puño Invisible | `unseen-fist` | Mega-Golurk |
+
+## Megas sin sprite en SpriteCollab (52)
+
+Usan el sprite del Pokémon normal con un tinte y un aura de mega. Si SpriteCollab las añade, `python tools/fetch_megas.py` las baja solo.
+
+Mega-Venusaur, Mega-Charizard Y, Mega-Blastoise, Mega-Beedrill, Mega-Pidgeot, Mega-Raichu X, Mega-Raichu Y, Mega-Clefable, Mega-Victreebel, Mega-Starmie, Mega-Pinsir, Mega-Gyarados, Mega-Dragonite, Mega-Mewtwo X, Mega-Meganium, Mega-Feraligatr, Mega-Ampharos, Mega-Scizor, Mega-Heracross, Mega-Sceptile, Mega-Blaziken, Mega-Swampert, Mega-Aggron, Mega-Chimecho, Mega-Absol Z, Mega-Salamence, Mega-Metagross, Mega-Staraptor, Mega-Garchomp, Mega-Garchomp Z, Mega-Lucario Z, Mega-Abomasnow, Mega-Froslass, Mega-Heatran, Mega-Emboar, Mega-Audino, Mega-Scolipede, Mega-Chandelure, Mega-Golurk, Mega-Chesnaught, Mega-Delphox, Mega-Greninja, Mega-Meowstic, Mega-Malamar, Mega-Barbaracle, Mega-Hawlucha, Mega-Crabominable, Mega-Golisopod, Mega-Magearna, Mega-Scovillain, Mega-Glimmora, Mega-Baxcalibur

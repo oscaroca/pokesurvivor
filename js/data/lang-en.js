@@ -606,5 +606,12 @@ G.I18n.add({
   'Un hueso fantasmal que va y vuelve.': 'A ghostly bone that flies out and back.',
   'Arrojas lo que tengas a mano con muy mala idea.': 'You hurl whatever you have at hand, with bad intentions.',
   'Saltas muy alto y caes sobre los enemigos.': 'You leap high and crash down on enemies.',
-  'Puñetazo tan rápido que cruzas la pantalla.': 'A punch so fast you cross the screen.'
+  'Puñetazo tan rápido que cruzas la pantalla.': 'A punch so fast you cross the screen.',
+  // ---------------- ficha: evolución y megas ----------------
+  'Evoluciona a': 'Evolves into', 'al nivel': 'at level', 'Evoluciona al nivel': 'Evolves at level',
+  'en una de sus {x} evoluciones': 'into one of its {x} evolutions', 'en una de sus {x} evoluciones (tienes': 'into one of its {x} evolutions (you have', '(nv. {x})': '(lv. {x})', 'Primigenio': 'Primal',
+  'la Megapiedra': 'the Mega Stone', 'el Orbe Rojo': 'the Red Orb', 'el Orbe Azul': 'the Blue Orb',
+  'Vista previa: en partida, a partir del nivel 10 y en su forma final, puede salirte {x} en las cartas de nivel (muy rara).':
+    'Preview: during a run, from level 10 and in its final form, {x} can show up in the level-up cards (very rare).',
+  'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.'
 });

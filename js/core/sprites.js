@@ -40,6 +40,24 @@ G.Sprites = (() => {
     return c;
   }
 
+  /** Versión teñida de un color (megas sin sprite propio). Se cachea como white(). */
+  const tints = new WeakMap();
+  function tinted(img, color) {
+    let byColor = tints.get(img);
+    if (!byColor) tints.set(img, byColor = new Map());
+    let c = byColor.get(color);
+    if (c) return c;
+    c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = color;
+    x.fillRect(0, 0, c.width, c.height);
+    byColor.set(color, c);
+    return c;
+  }
+
   /** ¿Tiene versión shiny? (assets/pokemon/{dex}/s/) */
   function hasShiny(dex) { const m = meta(dex); return !!(m && m.sh); }
 
@@ -224,7 +242,7 @@ G.Sprites = (() => {
       }
     }
 
-    /** Dibuja con los pies en (x, y). opts: { flash, alpha } */
+    /** Dibuja con los pies en (x, y). opts: { flash, alpha, tint: { color, a } } */
     draw(ctx, x, y, opts = {}) {
       let m = animMeta(this.dex, this.cur, this.shiny);
       let s = sheet(this.dex, this.cur, this.shiny);
@@ -250,6 +268,10 @@ G.Sprites = (() => {
       if (alpha < 1) ctx.globalAlpha = prev * alpha;
       // Destello: blanco entero (enemigos) o medio blanco encima (tu Pokémon).
       if (!opts.flash || opts.softFlash) ctx.drawImage(s.img, sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
+      if (opts.tint && !opts.flash) {
+        ctx.globalAlpha = prev * alpha * opts.tint.a;
+        ctx.drawImage(tinted(s.img, opts.tint.color), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
+      }
       if (opts.flash) {
         if (opts.softFlash) ctx.globalAlpha = prev * alpha * 0.55;
         ctx.drawImage(white(s.img), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);

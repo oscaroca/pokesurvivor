@@ -27,6 +27,24 @@ G.LevelUp = (() => {
       apply: pl => pl.heal(pl.maxHp * 0.45) }
   ];
 
+  // Megaevolución (data/megas.js): probabilidad de que salga la carta en cada
+  // subida de nivel, si estás en forma final, desde este nivel.
+  const MEGA_CHANCE = 0.02, MEGA_MIN_LEVEL = 10;
+  const MEGA_ITEM = {
+    'stone':         { name: 'Megapiedra',    icon: 'star', color: '#e98cff' },
+    'red-orb':       { name: 'Orbe Rojo',     icon: 'fire', color: '#ff5a3d' },
+    'blue-orb':      { name: 'Orbe Azul',     icon: 'water', color: '#4d9bff' },
+    'dragon-ascent': { name: 'Ascenso Draco', icon: 'dragon', color: '#5fe08a' }
+  };
+  if (G.I18n && G.MEGA) {
+    const dict = { 'Megapiedra': 'Mega Stone', 'Orbe Rojo': 'Red Orb', 'Orbe Azul': 'Blue Orb', 'Ascenso Draco': 'Dragon Ascent',
+      'Megaevolución': 'Mega Evolution',
+      'te conviertes en {x} hasta el final de la partida.': 'you become {x} until the end of the run.',
+      'Regresión primigenia: te conviertes en {x} hasta el final de la partida.': 'Primal Reversion: you become {x} until the end of the run.' };
+    for (const f of Object.values(G.MEGA).flat()) dict[f.name] = f.en;
+    G.I18n.add(dict);
+  }
+
   /** Construye el conjunto de cartas candidatas, con pesos. */
   function candidates(pl) {
     const out = [];
@@ -103,6 +121,28 @@ G.LevelUp = (() => {
       });
     }
 
+    // --- megaevolución: muy rara, sólo en forma final ---
+    const megas = pl.level >= MEGA_MIN_LEVEL ? pl.megaOptions() : [];
+    if (megas.length && Math.random() < MEGA_CHANCE) {
+      const f = G.U.pick(megas);
+      const it = MEGA_ITEM[f.item];
+      out.push({
+        w: 0, type: 'mega', key: 'mega:' + f.key,
+        icon: it.icon, color: it.color, tag: 'Megaevolución',
+        title: it.name,
+        desc: (f.item === 'red-orb' || f.item === 'blue-orb' ? 'Regresión primigenia: ' : '') +
+              'te conviertes en ' + f.name + ' hasta el final de la partida.',
+        apply: p => {
+          p.megaEvolve(f);
+          G.Sprites.preload([p.dex], 8000, p.shiny);
+          G.FX.ring(p.x, p.y, 10, 170, it.color, 1, 7);
+          G.FX.burst(p.x, p.y - p.bodyH * 0.5, '#ffffff', 60, 300);
+          G.Audio.sfx('legend');
+          G.Spawner.say('¡' + f.name + '!' + (p.ability && p.ability.fam ? ' · ' + p.ability.name + ': ' + p.ability.desc : ''), 4.5, true);
+        }
+      });
+    }
+
     return out;
   }
 
@@ -114,6 +154,9 @@ G.LevelUp = (() => {
     // Si hay una evolución lista, su carta dorada sale siempre.
     const evo = pool.findIndex(c => c.type === 'evo');
     if (evo >= 0) { const c = pool.splice(evo, 1)[0]; used.add(c.key); picked.push(c); }
+    // Y la de megaevolución, si ha tocado (ya es rara de por sí).
+    const mega = pool.findIndex(c => c.type === 'mega');
+    if (mega >= 0) { const c = pool.splice(mega, 1)[0]; used.add(c.key); picked.push(c); }
 
     while (picked.length < n && pool.length) {
       const total = pool.reduce((a, c) => a + c.w, 0);
@@ -127,5 +170,5 @@ G.LevelUp = (() => {
     return picked;
   }
 
-  return { offer, STATS };
+  return { offer, STATS, MEGA_CHANCE };
 })();

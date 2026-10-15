@@ -305,6 +305,48 @@ G.Player = class Player {
   /** Bonus por haber empezado en una forma anterior: +20% por evolución. */
   get evoMul() { return 1 + 0.2 * this.evos; }
 
+  // ---------------- megaevolución ----------------
+  /** Formas a las que puede megaevolucionar ya (sólo en forma final y una vez por run). */
+  megaOptions() {
+    if (this.mega || (G.EVO && (G.EVO[this.dex] || []).length)) return [];
+    return (G.MEGA && G.MEGA[this.dex]) || [];
+  }
+
+  /**
+   * Megaevoluciona (o regresión primigenia) hasta el final de la run: stats,
+   * tipos y habilidad de la forma, con la naturaleza y el bonus de evolución
+   * que ya llevaba. Si SpriteCollab no tiene su sprite, usa el normal con un
+   * tinte y un aura de mega (data/megas.js, spr: 0).
+   */
+  megaEvolve(form) {
+    const base = this.mon;
+    this.mega = form;
+    const mon = Object.assign({}, base, { name: form.name, types: form.types, hp: form.hp, spd: form.spd,
+                                          atk: form.atk, spa: form.spa, mega: form.key });
+    this.mon = mon;
+    if (form.spr) {
+      this.dex = form.key;
+      this.shiny = this.shiny && G.Sprites.hasShiny(form.key);
+      this.anim = new G.Sprites.Animator(form.key, 1, this.shiny);
+      this.r = G.Sprites.bodyRadius(form.key);
+      this.bodyH = G.Sprites.bodyHeight(form.key);
+    }
+    this.megaTint = !form.spr;
+    const hp = Math.round(mon.hp * this.natMul.hp * this.evoMul);
+    const gain = hp - this.speciesHp;
+    this.speciesHp = hp;
+    this.maxHp += gain;
+    this.hp = Math.min(this.maxHp, this.hp + Math.max(0, gain));
+    this.baseSpd = mon.spd * this.natMul.spd;
+    this.baseAtk = mon.atk * this.natMul.atk * this.evoMul;
+    this.baseSpa = mon.spa * this.natMul.atk * this.evoMul;
+    if (form.ab) {
+      G.Abilities.applyStatic(this, -1);
+      this.ability = G.Abilities.byId(form.ab);
+      G.Abilities.applyStatic(this, 1);
+    }
+  }
+
   /** Evoluciones disponibles a este nivel (data/evolutions.js). */
   evoOptions() {
     return (G.EVO && G.EVO[this.dex] || []).filter(e => e.lvl <= this.level && G.DEX_BY[e.to]);
@@ -384,6 +426,7 @@ G.Player = class Player {
     this.anim.update(dt);
     if (this.dead) return;
     this.abT += dt;
+    G.Abilities.tick(this, dt);
     if (this.invuln > 0) this.invuln -= dt;
     if (this.flash > 0) this.flash -= dt;
     if (this.attackFace > 0) this.attackFace -= dt;
@@ -522,8 +565,25 @@ G.Player = class Player {
       ctx.restore();
     }
 
+    // Megaevolución: aura de colores latiendo detrás.
+    const now = performance.now();
+    if (this.mega && !this.dead) {
+      const pulse = 0.5 + Math.sin(now / 160) * 0.5;
+      const cy = this.y - this.bodyH * 0.5, rad = Math.max(this.bodyH, this.r * 2) * (0.85 + pulse * 0.15);
+      const g = ctx.createRadialGradient(this.x, cy, rad * 0.15, this.x, cy, rad);
+      const hue = (now / 12) % 360;
+      g.addColorStop(0, `hsla(${hue},90%,70%,${0.30 + pulse * 0.15})`);
+      g.addColorStop(0.6, `hsla(${(hue + 60) % 360},90%,60%,${0.12 + pulse * 0.08})`);
+      g.addColorStop(1, 'hsla(0,0%,0%,0)');
+      ctx.save();
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(this.x, cy, rad, 0, 6.2832); ctx.fill();
+      ctx.restore();
+    }
     const alpha = this.invuln > 0 && !this.dead ? (Math.floor(this.invuln * 18) % 2 ? 0.45 : 1) : 1;
-    this.anim.draw(ctx, this.x, this.y, { flash: this.flash > 0, softFlash: true, alpha, color: '#ffcb3d' });
+    // Tinte en 12 tonos fijos: cada color es una hoja teñida en caché (sprites.js).
+    const tint = this.megaTint ? { color: `hsl(${Math.floor(now / 250) % 12 * 30},85%,62%)`, a: 0.4 + Math.sin(now / 160) * 0.12 } : null;
+    this.anim.draw(ctx, this.x, this.y, { flash: this.flash > 0, softFlash: true, alpha, color: '#ffcb3d', tint });
 
     // Arcos de buff alrededor de los pies.
     const COL = { atk: '#ff6b4d', spd: '#7fe0ff', def: '#b0b8c8', regen: '#5fe08a' };

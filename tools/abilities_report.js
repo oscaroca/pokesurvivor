@@ -8,8 +8,8 @@
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 global.window = {};
-global.G = { I18n: { add() {} } };
-for (const f of ['js/core/util.js', 'js/data/pokedex.js', 'js/data/abilities-dex.js', 'js/data/abilities.js']) require(path.join(ROOT, f));
+global.G = { I18n: { add() {} }, SPRITE_META: {} };
+for (const f of ['js/core/util.js', 'js/data/pokedex.js', 'js/data/abilities-dex.js', 'js/data/megas.js', 'js/data/abilities.js']) require(path.join(ROOT, f));
 
 const byAb = {};
 for (const [dex, id] of Object.entries(G.ABILITY_DEX)) (byAb[id] = byAb[id] || []).push(+dex);
@@ -36,6 +36,24 @@ for (const id of todo) {
   const list = names.length > 8 ? names.slice(0, 8).join(', ') + `… (+${names.length - 8})` : names.join(', ');
   L.push(`| ${(G.ABILITY_NAME[id] || [id])[0]} | \`${id}\` | ${names.length} | ${list} |`);
 }
+L.push('');
+// Megas y primigenias: habilidades propias sin efecto (si la forma no tiene, usa la normal).
+const megaTodo = {};
+for (const list of Object.values(G.MEGA || {})) for (const f of list) {
+  if (f.ab && !G.Abilities.TABLE[f.ab]) (megaTodo[f.ab] = megaTodo[f.ab] || []).push(f.name);
+}
+L.push('## Habilidades de megas y primigenias sin efecto');
+L.push('');
+L.push('| Habilidad | id | Formas |');
+L.push('|---|---|---|');
+for (const id of Object.keys(megaTodo).sort()) L.push(`| ${(G.ABILITY_NAME[id] || [id])[0]} | \`${id}\` | ${megaTodo[id].join(', ')} |`);
+L.push('');
+const megaNoSprite = Object.values(G.MEGA || {}).flat().filter(f => !f.spr).map(f => f.name);
+L.push(`## Megas sin sprite en SpriteCollab (${megaNoSprite.length})`);
+L.push('');
+L.push('Usan el sprite del Pokémon normal con un tinte y un aura de mega. Si SpriteCollab las añade, `python tools/fetch_megas.py` las baja solo.');
+L.push('');
+L.push(megaNoSprite.join(', '));
 L.push('');
 const out = path.join(ROOT, 'docs', 'habilidades-pendientes.md');
 fs.writeFileSync(out, L.join('\r\n'));
