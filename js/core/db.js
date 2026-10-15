@@ -176,6 +176,42 @@ G.DB = (() => {
         else u[id] = Math.min(G.Upgrades.BY[id].max, n(u[id]));
       }
     }
+    s.pupgRefund = n(s.pupgRefund);
+    foldFamilies(s);
+  }
+
+  /**
+   * Mejoras por FAMILIA (15-10-2026): save.pupg va por la raíz de la cadena
+   * evolutiva (G.Family.rootOf), así lo comprado con Charmander vale también
+   * para Charmeleon y Charizard. Las que estaban por Pokémon se juntan: de cada
+   * mejora queda el nivel más alto y el oro de los niveles que sobran se
+   * devuelve UNA vez (save.pupgFam). Si después llegan claves sueltas (una copia
+   * vieja de otro dispositivo al fusionar), se juntan igual pero sin devolver.
+   */
+  function foldFamilies(s) {
+    if (!G.Family || !G.Upgrades || !s.pupg) return;
+    const groups = {};
+    for (const d of Object.keys(s.pupg)) (groups[G.Family.rootOf(d)] = groups[G.Family.rootOf(d)] || []).push(d);
+    const spent = (id, lvl) => { let c = 0; for (let l = 0; l < lvl; l++) c += G.Upgrades.cost(id, l); return c; };
+    let refund = 0, changed = false;
+    for (const root of Object.keys(groups)) {
+      const keys = groups[root];
+      if (keys.length === 1 && keys[0] === root) continue;
+      changed = true;
+      const out = {};
+      for (const id of new Set(keys.flatMap(k => Object.keys(s.pupg[k] || {})))) {
+        const lv = keys.map(k => (s.pupg[k] || {})[id] || 0).sort((a, b) => b - a);
+        out[id] = lv[0];
+        for (const extra of lv.slice(1)) refund += spent(id, extra);
+      }
+      for (const k of keys) delete s.pupg[k];
+      s.pupg[root] = out;
+    }
+    if (!s.pupgFam) {
+      s.pupgFam = true;
+      if (refund > 0) { s.coins += refund; s.pupgRefund = (s.pupgRefund || 0) + refund; }
+    }
+    return changed;
   }
 
   /**
@@ -205,6 +241,7 @@ G.DB = (() => {
       for (const k in older.pupg[d]) mine[k] = Math.max(mine[k] || 0, older.pupg[d][k]);
     }
     r.pupgDone = r.pupgDone || older.pupgDone;
+    r.pupgFam = r.pupgFam || older.pupgFam;
     // Lo conseguido nunca se pierde: unión de legendarios, arenas, objetos, logros...
     // Misiones de familia: lo mejor de cada una; las recogidas, unión.
     r.fam = r.fam || {};
@@ -784,10 +821,13 @@ G.DB = (() => {
   function ownsShiny(dex) { return !!(save && save.shiny && save.shiny[dex]); }
 
   /** Mejoras compradas para un Pokémon: { id -> nivel }. */
+  /** Mejoras de la familia de `dex` (las comparten todas sus evoluciones). */
   function upgradesOf(dex) {
     if (!save) return {};
     save.pupg = save.pupg || {};
-    return save.pupg[dex] || (save.pupg[dex] = {});
+    foldFamilies(save);
+    const k = G.Family ? G.Family.rootOf(dex) : dex;
+    return save.pupg[k] || (save.pupg[k] = {});
   }
 
   /** Da la versión shiny (y la normal, si no la tenía). Devuelve true si es nueva. */

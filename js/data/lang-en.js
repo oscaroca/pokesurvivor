@@ -614,6 +614,10 @@ G.I18n.add({
   'Vista previa: en partida, a partir del nivel 10 y en su forma final, puede salirte {x} en las cartas de nivel (muy rara).':
     'Preview: during a run, from level 10 and in its final form, {x} can show up in the level-up cards (very rare).',
   'Puede megaevolucionar en partida: pulsa el botón de arriba para verla.': 'It can Mega Evolve during a run: press the button above to see it.',
+  // ---------------- mejoras por familia ----------------
+  'Las mejoras son de cada familia: valen para todas sus evoluciones.': 'Upgrades belong to each family: they count for all its evolutions.',
+  'Familia': 'Family', 'Mejoras de la familia: cuentan para {x}.': 'Family upgrades: they count for {x}.', 'Mejoras de {x}.': 'Upgrades for {x}.',
+  'Las mejoras ahora son por familia. Te devolvemos {x} monedas de las que se solapaban.': 'Upgrades are now per family. We refunded you {x} coins from the ones that overlapped.',
   // ---------------- aviso legal del fork (PokéSurvivor Plus+) ----------------
   'Versión no oficial de pokesurvivor.com · siempre gratis': 'Unofficial version of pokesurvivor.com · always free',
   'es una versión modificada de': 'is a modified version of',

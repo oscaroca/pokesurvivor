@@ -35,6 +35,12 @@ G.MenuUI = (() => {
 
   function open() {
     const s = G.DB.save;
+    // Mejoras juntadas por familia: aviso (una vez) del oro devuelto (core/db.js foldFamilies).
+    if (s.pupgRefund > 0) {
+      G.UI.toast('Las mejoras ahora son por familia. Te devolvemos ' + s.pupgRefund + ' monedas de las que se solapaban.', 6000);
+      s.pupgRefund = 0;
+      G.DB.commit();
+    }
     const mon = G.DEX_BY[s.partner];
     const shiny = !!s.partnerShiny && G.DB.ownsShiny(mon.dex);
     G.UI.chrome(true);
@@ -327,12 +333,21 @@ G.MenuUI = (() => {
     G.UI.show('scr-upgrades', true);
     const s = G.DB.save;
     if (!upgDex || !s.owned[upgDex]) upgDex = s.partner;
-    // Selector con tus Pokémon: el compañero primero, luego los que ya tienen mejoras.
+    // Selector por FAMILIA (las mejoras son de toda la cadena evolutiva): una
+    // opción por familia con los que tienes; la del compañero primero.
     const sel = $('upg-mon');
-    const lv = d => Object.values(s.pupg[d] || {}).reduce((a, b) => a + b, 0);
-    const mons = Object.keys(s.owned).map(Number).filter(d => G.DEX_BY[d])
-      .sort((a, b) => (b === s.partner) - (a === s.partner) || lv(b) - lv(a) || a - b);
-    sel.innerHTML = mons.map(d => `<option value="${d}">${G.DEX_BY[d].name}${d === s.partner ? ' (compañero)' : ''}${lv(d) ? ' · ' + lv(d) + ' niveles' : ''}</option>`).join('');
+    const root = d => G.Family.rootOf(d);
+    const lv = d => Object.values(G.DB.upgradesOf(d)).reduce((a, b) => a + b, 0);
+    const fams = {};
+    for (const d of Object.keys(s.owned).map(Number).filter(d => G.DEX_BY[d])) (fams[root(d)] = fams[root(d)] || []).push(d);
+    // Representante de cada familia: el compañero si es de ella; si no, el más evolucionado que tengas.
+    const rep = l => l.includes(s.partner) ? s.partner : l[l.length - 1];
+    const reps = Object.values(fams).map(l => l.sort((a, b) => G.Family.members(root(a)).indexOf(a) - G.Family.members(root(b)).indexOf(b)))
+      .map(l => ({ d: rep(l), names: l.map(d => G.DEX_BY[d].name).join(' / ') }))
+      .sort((a, b) => (root(b.d) === root(s.partner)) - (root(a.d) === root(s.partner)) || lv(b.d) - lv(a.d) || a.d - b.d);
+    if (!reps.some(r => root(r.d) === root(upgDex))) upgDex = s.partner;
+    else upgDex = reps.find(r => root(r.d) === root(upgDex)).d;
+    sel.innerHTML = reps.map(r => `<option value="${r.d}">${r.names}${root(r.d) === root(s.partner) ? ' (compañero)' : ''}${lv(r.d) ? ' · ' + lv(r.d) + ' niveles' : ''}</option>`).join('');
     sel.value = upgDex;
     sel.onchange = () => { upgDex = +sel.value; G.Audio.sfx('select'); renderUpgrades(); };
     renderUpgrades();
@@ -342,6 +357,8 @@ G.MenuUI = (() => {
     const s = G.DB.save;
     const levels = G.DB.upgradesOf(upgDex);
     const mon = G.DEX_BY[upgDex];
+    const fam = G.Family.members(G.Family.rootOf(upgDex)).map(d => s.owned[d] ? G.DEX_BY[d].name : '???');
+    $('upg-fam').textContent = fam.length > 1 ? 'Mejoras de la familia: cuentan para ' + fam.join(', ') + '.' : 'Mejoras de ' + mon.name + '.';
     const shiny = upgDex === s.partner && !!s.partnerShiny && G.DB.ownsShiny(upgDex);
     G.UI.sprite($('upg-stage'), upgDex, { lively: true, scale: 2, hero: true, shiny });
     $('upg-stage').style.setProperty('--stage-c', shiny ? '#9ae6ff' : G.U.TYPE_COLOR[mon.types[0]]);

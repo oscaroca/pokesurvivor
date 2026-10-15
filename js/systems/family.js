@@ -32,6 +32,17 @@ G.Family = (() => {
     while (parent[d] != null && guard++ < 5) d = parent[d];
     return d;
   }
+  /** Todos los de la familia, de la raíz a las formas finales (los que hay en el juego). */
+  function members(root) {
+    const out = [], q = [+root];
+    while (q.length) {
+      const d = q.shift();
+      if (out.includes(d)) continue;
+      if (G.DEX_BY[d]) out.push(d);
+      for (const e of (G.EVO && G.EVO[d]) || []) q.push(e.to);
+    }
+    return out;
+  }
   /** ¿La familia evoluciona? */
   function evolves(root) { return !!(G.EVO && G.EVO[root] && G.EVO[root].length); }
   /** Misiones de la familia de `dex`. */
@@ -125,5 +136,5 @@ G.Family = (() => {
     'Se recogen en la ficha de cada Pokémon (menú Pokémon).': 'Claim them on each Pokémon’s page (Pokémon menu).'
   });
 
-  return { DEFS, rootOf, defsFor, status, claim, pending, runStart, tick, runEnd };
+  return { DEFS, rootOf, members, defsFor, status, claim, pending, runStart, tick, runEnd };
 })();
