@@ -31,9 +31,9 @@ G.Net = (() => {
   const ALLOW_RELAY = false, RETRY_MS = 15000;
 
   // ---------------- TURN (Cloudflare) ----------------
-  // El TURN de Cloudflare era del juego original; este fork no tiene (gratis, sin
-  // tarjeta). Sin él, el cooperativo va por conexión directa o por Firebase.
-  const TURN_URL = null;
+  // TURN de Cloudflare propio de este fork (cloudflare/turn-worker-plus.js,
+  // pasos en docs/TURN-PLUS.md). Si no responde, se sigue sólo con conexión directa.
+  const TURN_URL = 'https://pokesurvivor.mailoscaroca.workers.dev/';
   let turn = null, turnAt = 0, turnReq = null;
   /** Pide (o reutiliza) credenciales TURN. Nunca falla: sin ellas, se sigue como antes. */
   function fetchTurn() {
