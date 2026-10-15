@@ -97,7 +97,7 @@ G.Spawner = (() => {
 
   function spawnBoss(pl, t, b) {
     const [x, y] = ringPoint(pl, Math.random() * 6.2832);
-    const e = new G.Enemy(b, x, y, scaled(G.Enemies.bossScale(t), G.Coop.scaleHp(players.length) * (players.length > 1 ? 1.4 : 1)), true);
+    const e = new G.Enemy(b, x, y, scaled(G.Enemies.bossScale(t), G.Coop.scaleBossHp(players.length) * (players.length > 1 ? 1.4 : 1)), true);
     G.Curses.modEnemy(e);
     if (rollShiny(b.dex)) e.makeShiny();
     G.EnemyMgr.add(e);

@@ -52,8 +52,12 @@ G.Coop = (() => {
 
   // ---------------- escalado de dificultad ----------------
 
-  const scaleRate = n => 1 + 0.75 * Math.max(0, n - 1);
-  const scaleHp = n => 1 + 0.3 * Math.max(0, n - 1);
+  // En grupo (15-10-2026): los enemigos normales tienen la misma vida que en
+  // solitario y salen más (+125 % por jugador extra; antes +75 % y +30 % de vida).
+  // Los jefes sí escalan su vida (si no, con 3-4 pegando caían en segundos).
+  const scaleRate = n => 1 + 1.25 * Math.max(0, n - 1);
+  const scaleHp = n => 1;
+  const scaleBossHp = n => 1 + 0.3 * Math.max(0, n - 1);
 
   // ---------------- arranque / fin ----------------
 
@@ -122,7 +126,8 @@ G.Coop = (() => {
   function xpFactor() {
     let s = local.xpMul, n = 1;
     for (const m of mates.values()) if (m.connected) { s += m.xpMul || 1; n++; }
-    return (s / n) / local.xpMul / (1 + 0.6 * (n - 1));
+    // Cada gema vale menos con más jugadores (y más enemigos): el ritmo de subir de nivel queda parecido al de solitario.
+    return (s / n) / local.xpMul / (1 + 1.0 * (n - 1));
   }
 
   // ---------------- estado de un jugador ----------------
@@ -521,7 +526,7 @@ G.Coop = (() => {
   }
 
   return {
-    ANIMS, COLORS, begin, end, leave, tick, players, puppets, xpFactor, scaleRate, scaleHp,
+    ANIMS, COLORS, begin, end, leave, tick, players, puppets, xpFactor, scaleRate, scaleHp, scaleBossHp,
     cast, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
     formChanged,
     propBroken, collected, shinyCaught, levelStart, localPicked, over, holdStart, holdEnd,
