@@ -113,8 +113,9 @@ G.Game = (() => {
     runReal = performance.now(); tampered = false;
 
     pl = new G.Player(mon, perks, !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
-    // Maldiciones (systems/curses.js): sólo en solitario.
-    G.Curses.begin(save, !!coop);
+    // Maldiciones (systems/curses.js): en grupo, las del anfitrión (van en `coop`).
+    G.Curses.begin(save, coop);
+    if (coop && G.Curses.points()) G.Spawner.say('Maldiciones del grupo: ' + G.Curses.points() + ' puntos', 3.5, true);
     if (G.Curses.on('fragile')) { pl.maxHp = Math.round(pl.maxHp * 0.7); pl.hp = pl.maxHp; }
     banked = { t1: 0, t10: 0 };
     caught = [];

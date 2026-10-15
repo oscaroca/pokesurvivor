@@ -248,10 +248,13 @@
       const failed = ms.some(m => m.uid !== room.host && G.Net.mode(m.uid) === 'failed');
       btn.disabled = !room.isHost || ms.length < 2 || connecting || failed;
       btn.textContent = 'Empezar partida (' + ms.length + '/' + G.Social.MAX_PLAYERS + ')';
-      $('lobby-note').textContent = !room.isHost ? 'Cuando el anfitrión empiece, entraréis todos a la vez.'
+      const cp = G.Curses.points(G.Curses.chosen(G.DB.save));
+      const curseNote = room.isHost ? (cp ? ' Tus maldiciones (' + cp + ' puntos) se aplicarán a todos.' : '')
+        : ' Se usarán las maldiciones del anfitrión.';
+      $('lobby-note').textContent = (!room.isHost ? 'Cuando el anfitrión empiece, entraréis todos a la vez.'
         : ms.length < 2 ? 'Necesitas al menos un amigo en la sala.'
         : failed ? 'No se puede conectar con algún amigo: su red (o la tuya) no deja jugar en grupo. Probad con otra wifi o datos móviles; se reintenta solo.'
-        : connecting ? 'Conectando con tus amigos…' : 'La partida empieza para todos a la vez.';
+        : connecting ? 'Conectando con tus amigos…' : 'La partida empieza para todos a la vez.') + curseNote;
     }
 
     function start() {
@@ -259,7 +262,9 @@
       if (!room || !room.isHost || room.members.length < 2) return;
       const cfg = {
         k: 'start', seed: Math.floor(Math.random() * 1e6), host: room.host,
-        members: room.members.map(m => ({ uid: m.uid, name: m.name, dex: m.dex, shiny: !!m.shiny }))
+        members: room.members.map(m => ({ uid: m.uid, name: m.name, dex: m.dex, shiny: !!m.shiny })),
+        // En grupo mandan las maldiciones del anfitrión (systems/curses.js).
+        curses: G.Curses.chosen(G.DB.save)
       };
       G.Social.setOpen(false);
       G.Net.broadcast(cfg);

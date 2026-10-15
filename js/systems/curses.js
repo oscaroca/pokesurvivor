@@ -6,7 +6,8 @@
  *             salvaje · +1 ticket cada 3 puntos (sólo si aguantas 5 minutos)
  *
  * Guardado: save.curses = [ids] (se recuerdan para la siguiente partida).
- * En cooperativo no se aplican (habría que sincronizarlas entre todos).
+ * En cooperativo mandan las del anfitrión: van en el mensaje de inicio
+ * ({ k:'start', ..., curses }) y todos aplican esa misma lista.
  */
 G.Curses = (() => {
   const ALL = [
@@ -31,8 +32,11 @@ G.Curses = (() => {
     const l = chosen(save);
     save.curses = l.includes(id) ? l.filter(x => x !== id) : l.concat(id);
   }
-  /** Al empezar la partida. */
-  function begin(save, coop) { active = new Set(coop ? [] : chosen(save)); fogT = 99; }
+  /** Al empezar la partida. En grupo, `coop` es el inicio que manda el anfitrión. */
+  function begin(save, coop) {
+    active = new Set(coop ? (Array.isArray(coop.curses) ? coop.curses : []).filter(id => BY[id]) : chosen(save));
+    fogT = 99;
+  }
   function on(id) { return active.has(id); }
   function points(list) { return (list || [...active]).reduce((n, id) => n + (BY[id] ? BY[id].pts : 0), 0); }
 
@@ -65,9 +69,12 @@ G.Curses = (() => {
       'Maldiciones': 'Curses', 'Puntos de maldición': 'Curse points', '¡A la mazmorra!': 'To the dungeon!',
       'Hacen la partida más difícil, pero cada punto mejora el premio. Sólo en solitario.': 'They make the run harder, but each point improves the reward. Solo only.',
       'MALDICIÓN · {x} PUNTOS': 'CURSE · {x} POINTS', 'Sin maldiciones': 'No curses',
-      'Más difícil, más premio': 'Harder, bigger reward', 'En grupo no se aplican': 'Not applied in a group',
-      '{x} puntos · desactivadas en grupo': '{x} points · off in a group', '{x} puntos · +{x}% monedas': '{x} points · +{x}% coins',
-      'Estás en grupo: las maldiciones no se aplican hasta que juegues en solitario.': 'You are in a group: curses do not apply until you play solo.',
+      'Más difícil, más premio': 'Harder, bigger reward', 'En grupo, las del anfitrión': 'In a group, the host\'s',
+      '{x} puntos · en grupo, las del anfitrión': '{x} points · in a group, the host\'s', '{x} puntos · +{x}% monedas': '{x} points · +{x}% coins',
+      'Estás en grupo: se usan las maldiciones del anfitrión. Si eres tú, estas se aplicarán a todos.': 'You are in a group: the host\'s curses are used. If that is you, these apply to everyone.',
+      ' Tus maldiciones ({x} puntos) se aplicarán a todos.': ' Your curses ({x} points) will apply to everyone.',
+      ' Se usarán las maldiciones del anfitrión.': ' The host\'s curses will be used.',
+      'Maldiciones del grupo: {x} puntos': 'Group curses: {x} points',
       '+{x}% monedas': '+{x}% coins', 'shiny ×{x}': 'shiny ×{x}', '+{x} tickets si aguantas 5 min': '+{x} tickets if you survive 5 min',
       '{x} pt': '{x} pt', 'Hordas': 'Hordes', 'Prisa': 'Haste', 'Niebla perpetua': 'Perpetual fog', 'Sin curas': 'No healing',
       'Piel dura': 'Tough hide', 'Golpes duros': 'Heavy blows', 'Frágil': 'Fragile', 'Jefes antes': 'Early bosses',

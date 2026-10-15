@@ -92,7 +92,7 @@ G.MenuUI = (() => {
     const sub = $('menu-curse-sub');
     if (!sub) return;
     const p = G.Curses.points(G.Curses.chosen(G.DB.save));
-    sub.textContent = G.Social.room ? (p ? p + ' puntos · desactivadas en grupo' : 'En grupo no se aplican')
+    sub.textContent = G.Social.room ? (p ? p + ' puntos · en grupo, las del anfitrión' : 'En grupo, las del anfitrión')
       : p ? p + ' puntos · +' + Math.round((G.Curses.coinMul(p) - 1) * 100) + '% monedas' : 'Más difícil, más premio';
     sub.parentElement.classList.toggle('cursed', !!p && !G.Social.room);
   }
