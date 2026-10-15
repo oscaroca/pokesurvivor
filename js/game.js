@@ -113,6 +113,9 @@ G.Game = (() => {
     runReal = performance.now(); tampered = false;
 
     pl = new G.Player(mon, perks, !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
+    // Maldiciones (systems/curses.js): sólo en solitario.
+    G.Curses.begin(save, !!coop);
+    if (G.Curses.on('fragile')) { pl.maxHp = Math.round(pl.maxHp * 0.7); pl.hp = pl.maxHp; }
     banked = { t1: 0, t10: 0 };
     caught = [];
     // Atajos: movimientos con hueco fijo (save.pbind[dex] = [id del 1, id del 2, ...]),
@@ -295,7 +298,10 @@ G.Game = (() => {
     G.Audio.music(null);
     G.Audio.sfx(dead ? 'gameover' : 'back');
     const save = G.DB.save;
-    const mul = pl.coinMul;
+    const curse = G.Curses.points();
+    const mul = pl.coinMul * G.Curses.coinMul();
+    // Maldiciones: +1 ticket cada 3 puntos si has aguantado 5 minutos.
+    if (curse && time >= G.Curses.TICKET_MIN_TIME) pl.t1 += G.Curses.tickets();
     const parts = {
       tiempo: Math.floor(time / 5),
       derrotados: Math.floor(pl.kills * 0.25),
@@ -336,7 +342,8 @@ G.Game = (() => {
       dead, time, level: pl.level, kills: pl.kills, bosses: pl.bosses, coins, record, t1: pl.t1, t10: pl.t10, judge,
       moves: pl.moves, caught,
       breakdown: Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
-                 (mul > 1 ? ` · ×${mul.toFixed(2)} Fortuna` : '')
+                 (pl.coinMul > 1 ? ` · ×${pl.coinMul.toFixed(2)} Fortuna` : '') +
+                 (curse ? ` · ×${G.Curses.coinMul().toFixed(2)} Maldiciones` : '')
     }, () => { pl = null; G.Flow.afterRun(); });
   }
 
@@ -717,6 +724,7 @@ G.Game = (() => {
     if (!coop || G.Coop.isHost) maybeLevelUp();
     maybeEvolve();
     if ((famT += dt) > 1) { famT = 0; G.Family.tick(pl, time); }
+    G.Curses.tick(dt);
     if (pl.bonds > 0) offerBond(true);
     if (G.Coop.isHost) checkAllDown(dt);
   }

@@ -83,6 +83,8 @@ G.HUD = (() => {
     ctx.font = F(600, 10);
     ctx.fillStyle = '#8fa3c4';
     ctx.fillText(G.World.biomeName().toUpperCase() + '  ·  ' + pl.kills + ' DERROTADOS  ·  ' + pl.coins + ' MONEDAS', w / 2, 58);
+    const curse = G.Curses.points();
+    if (curse) { ctx.fillStyle = '#c98bff'; ctx.fillText('MALDICIÓN · ' + curse + ' PUNTOS', w / 2, 72); }
 
     // ---------- clima (arriba a la derecha) ----------
     const wx = G.Weather.current;

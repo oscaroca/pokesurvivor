@@ -54,7 +54,7 @@ G.Interact = (() => {
 
   function spring(dt, pl, p, d2) {
     if (p.charge < 1) p.charge = Math.min(1, p.charge + dt / 45);
-    if (pl.dead || d2 > 26 * 26 || p.charge <= 0.02 || pl.hp >= pl.maxHp) return;
+    if (pl.dead || d2 > 26 * 26 || p.charge <= 0.02 || pl.hp >= pl.maxHp || G.Curses.on('noheal')) return;
     const before = pl.hp;
     pl.hp = Math.min(pl.maxHp, pl.hp + pl.maxHp * 0.14 * dt);
     healAcc += pl.hp - before;

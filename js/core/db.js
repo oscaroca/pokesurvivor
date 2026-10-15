@@ -129,6 +129,8 @@ G.DB = (() => {
     if (G.DEX_BY) for (const coll of ['owned', 'shiny']) {
       for (const d of Object.keys(s[coll] || {})) if (!G.DEX_BY[d]) delete s[coll][d];
     }
+    // Maldiciones elegidas: sólo ids que existan.
+    if (s.curses != null) s.curses = Array.isArray(s.curses) && G.Curses ? s.curses.filter(id => G.Curses.BY[id]) : [];
     // Misiones de familia: números y lista de recogidas con buena forma.
     if (s.fam && typeof s.fam === 'object') {
       for (const d of Object.keys(s.fam)) {

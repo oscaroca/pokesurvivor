@@ -78,7 +78,7 @@ G.Pickups = (() => {
         push(orb('xpBig', x + Math.cos(a) * d, y + Math.sin(a) * d, Math.ceil(value / 14)));
       }
       if (plain) return;
-      push(orb('heal', x + 24, y, 0));
+      if (!G.Curses.on('noheal')) push(orb('heal', x + 24, y, 0));
       push(orb('magnet', x - 24, y, 0));
       // Ticket ×10: siempre el legendario de la grieta; un jefe normal, 1 de cada 3 veces.
       // (Hasta el 12-10-2026 el legendario de la grieta daba siempre 2: salían demasiados.)
@@ -90,7 +90,7 @@ G.Pickups = (() => {
 
     // Drops ocasionales.
     const r = Math.random();
-    if (r < 0.012) push(orb('heal', x + G.U.rand(-8, 8), y, 0));
+    if (r < 0.012) { if (!G.Curses.on('noheal')) push(orb('heal', x + G.U.rand(-8, 8), y, 0)); }
     else if (r < 0.020) push(orb('magnet', x, y, 0));
     else if (r < 0.026) push(orb('bomb', x, y, 0));
   }

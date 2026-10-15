@@ -181,6 +181,7 @@
     <div class="box">
       <div class="menu-list">
         <button class="menu-item play" data-go="play">Jugar<small>Entra en la mazmorra</small></button>
+        <button class="menu-item" data-go="curses">Maldiciones<small id="menu-curse-sub">Más difícil, más premio</small></button>
         <button class="menu-item" data-go="dex">Pokémon<small id="menu-dex-count">Tu colección</small></button>
         <button class="menu-item" data-go="upgrades">Mejoras<small>Haz más fuerte cada run</small></button>
         <button class="menu-item" data-go="gacha">Gacha<small>9 regiones · Pokémon y shinies</small></button>
@@ -413,6 +414,16 @@
 </section>
 
 <!-- ====== Misiones, logros y perfil ====== -->
+<section id="scr-curses" class="scr dim hidden">
+  <div class="box" style="width:min(560px,100%)">
+    <div class="row between"><h2>Maldiciones</h2><button class="btn small ghost" data-back>Volver</button></div>
+    <p class="sub">Hacen la partida más difícil, pero cada punto mejora el premio. Sólo en solitario.</p>
+    <div id="curse-list" class="curse-list"></div>
+    <div id="curse-group" class="curse-group hidden">Estás en grupo: las maldiciones no se aplican hasta que juegues en solitario.</div>
+    <div id="curse-sum" class="curse-sum"></div>
+  </div>
+</section>
+
 <section id="scr-goals" class="scr dim hidden">
   <div class="box wide">
     <div class="row between"><h2>Misiones</h2><button class="btn small ghost" data-back>Volver</button></div>
@@ -615,6 +626,7 @@
 <script defer src="js/systems/pathing.js"></script>
 <script defer src="js/systems/progress.js"></script>
 <script defer src="js/systems/family.js"></script>
+<script defer src="js/systems/curses.js"></script>
 <script defer src="js/systems/hazards.js"></script>
 <!-- red: amigos, salas, cooperativo y ranking -->
 <script defer src="js/net/social.js"></script>
@@ -631,6 +643,7 @@
 <script defer src="js/ui/menu.js"></script>
 <script defer src="js/ui/slots.js"></script>
 <script defer src="js/ui/gacha-ui.js"></script>
+<script defer src="js/ui/curses-ui.js"></script>
 <script defer src="js/ui/run-ui.js"></script>
 <script defer src="js/ui/social-ui.js"></script>
 <script defer src="js/ui/ranking-ui.js"></script>

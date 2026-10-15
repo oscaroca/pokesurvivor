@@ -5,13 +5,14 @@ G.MenuUI = (() => {
   let dexFilter = 'all', dexGen = 1, dexSel = null;
 
   function init() {
-    const ICON = { play: 'ball', dex: 'book', upgrades: 'up', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
+    const ICON = { play: 'ball', curses: 'bomb', dex: 'book', upgrades: 'up', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
     document.querySelectorAll('#scr-menu [data-go]').forEach(b => {
       b.insertAdjacentHTML('afterbegin', `<span class="mi-ico">${G.Icons.html(ICON[b.dataset.go], 26)}</span>`);
       b.dataset.sfx = b.dataset.go === 'play' ? 'confirm' : 'click';
       b.onclick = () => {
         const go = b.dataset.go;
         if (go === 'play') { if (G.Social.room) G.LobbyUI.open(); else G.Flow.play(); }
+        else if (go === 'curses') G.CursesUI.open();
         else if (go === 'dex') openDex();
         else if (go === 'upgrades') openUpgrades();
         else if (go === 'gacha') G.GachaUI.open();
@@ -86,7 +87,18 @@ G.MenuUI = (() => {
   }
 
   /** Texto bajo "Amigos" y "Jugar": quién está en línea, solicitudes, sala. */
+  /** Menú lateral: las maldiciones elegidas, o que en grupo no cuentan. */
+  function curseLine() {
+    const sub = $('menu-curse-sub');
+    if (!sub) return;
+    const p = G.Curses.points(G.Curses.chosen(G.DB.save));
+    sub.textContent = G.Social.room ? (p ? p + ' puntos · desactivadas en grupo' : 'En grupo no se aplican')
+      : p ? p + ' puntos · +' + Math.round((G.Curses.coinMul(p) - 1) * 100) + '% monedas' : 'Más difícil, más premio';
+    sub.parentElement.classList.toggle('cursed', !!p && !G.Social.room);
+  }
+
   function socialLine() {
+    curseLine();
     const room = G.Social.room;
     const play = document.querySelector('#scr-menu [data-go=play] small');
     if (play) play.textContent = room ? 'Volver a tu sala (' + room.members.length + '/' + G.Social.MAX_PLAYERS + ')' : 'Entra en la mazmorra';
