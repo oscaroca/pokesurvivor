@@ -32,8 +32,9 @@ G.LevelUp = (() => {
   const MEGA_CHANCE = 0.02, MEGA_MIN_LEVEL = 10;
   // Favoritos: peso en el sorteo de movimientos nuevos y en la carta (ver candidates).
   // Medido (16-10-2026): con 4 favoritos por aprender sale al menos uno en el
-  // 66-78 % de las subidas según el Pokémon (~80 % con la Cuarta carta).
-  const FAV = { share: 1.1, cap: 12, w: 1.15 };
+  // 50-63 % de las subidas según el Pokémon (sin ventaja, 33-63 %). Antes
+  // (share 1.1, w 1.15) era 66-78 % y salían demasiado.
+  const FAV = { share: 0.6, cap: 12, w: 1 };
   const MEGA_ITEM = {
     'stone':         { name: 'Megapiedra',    icon: 'star', color: '#e98cff' },
     'red-orb':       { name: 'Orbe Rojo',     icon: 'fire', color: '#ff5a3d' },
@@ -64,8 +65,8 @@ G.LevelUp = (() => {
       const fav = G.Moves.favors(pl.mon);
       // Favoritos (ficha del Pokémon, hasta 4): entran en el sorteo de 6 con más
       // facilidad, en proporción a cuántos movimientos NO favoritos hay (así no
-      // depende de si el Pokémon aprende 13 movimientos o 25) y pesan algo más
-      // en la carta: sale al menos uno en ~7 de cada 10 subidas.
+      // depende de si el Pokémon aprende 13 movimientos o 25): sale al menos
+      // uno en algo más de la mitad de las subidas.
       const stars = new Set((pl.favs || []).filter(id => pool.includes(id)));
       const others = pool.length - stars.size;
       const fw = stars.size ? Math.min(FAV.cap, Math.max(1, FAV.share * others / stars.size)) : 1;

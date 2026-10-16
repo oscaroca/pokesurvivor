@@ -103,7 +103,7 @@ G.TalentsUI = (() => {
     'Bloqueado: derrótalo en una grieta o completa la misión de familia de 15 minutos.': 'Locked: defeat it in a rift or complete the 15-minute family mission.',
     'Bloqueado: completa la misión de familia «Aguanta 15 minutos» y recoge el premio.': 'Locked: complete the family mission «Survive 15 minutes» and claim the reward.',
     'Movimientos': 'Moves', '· Favoritos {x}': '· Favourites {x}', 'Favorito': 'Favourite',
-    'Toca hasta 4 favoritos: con los 4 marcados, sale al menos uno en unas 7 de cada 10 subidas de nivel.': 'Tap up to 4 favourites: with all 4 starred, at least one shows up in about 7 out of 10 level-ups.',
+    'Toca hasta 4 favoritos: salen más a menudo en las cartas de nivel (con los 4 marcados, al menos uno en algo más de la mitad de las subidas).': 'Tap up to 4 favourites: they show up more often in the level-up cards (with all 4 starred, at least one in a bit over half of level-ups).',
     'Ya tienes 4 favoritos: quita uno primero': 'You already have 4 favourites: remove one first',
     'Saltar (+10% vida) ·': 'Skip (+10% HP) ·'
   });

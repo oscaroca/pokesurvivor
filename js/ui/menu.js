@@ -425,7 +425,7 @@ G.MenuUI = (() => {
       ${lockStart}
       ${sigLine}
       <p style="font-size:14px;margin:10px 0 2px"><b class="gold">Movimientos</b> <span style="color:var(--muted)">· Favoritos ${favs.length}/${T.FAV_MAX}</span></p>
-      <div class="mv-note" style="margin-bottom:4px">Toca hasta ${T.FAV_MAX} favoritos: con los ${T.FAV_MAX} marcados, sale al menos uno en unas 7 de cada 10 subidas de nivel.</div>
+      <div class="mv-note" style="margin-bottom:4px">Toca hasta ${T.FAV_MAX} favoritos: salen más a menudo en las cartas de nivel (con los ${T.FAV_MAX} marcados, al menos uno en algo más de la mitad de las subidas).</div>
       <div class="mv-grid">${chips}</div>`;
   }
 
