@@ -25,6 +25,10 @@ G.Projectiles = (() => {
       orb: false, rehit: 0.34, hitLog: null, phits: null
     }, o);
     if (p.friendly && !p.orb && !p.phits) p.phits = new Set();
+    // Movimiento que lo lanzó (para el resumen de daño al acabar).
+    if (p.friendly && p.mid == null && G.Combat) p.mid = G.Combat.curMid;
+    // Rebote (Tabla Draco): sólo tus disparos, no los fantasma de los compañeros.
+    if (p.friendly && !p.orb && !p.ghost && p.bounce == null && G.Plates) p.bounce = G.Plates.bounce();
     list.push(p);
     return p;
   }

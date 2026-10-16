@@ -9,7 +9,7 @@ G.UI = (() => {
   const $ = id => document.getElementById(id);
   const SCREENS = ['scr-login', 'scr-test', 'scr-result', 'scr-starters', 'scr-menu',
                    'scr-dex', 'scr-upgrades', 'scr-gacha', 'scr-levelup', 'scr-pause', 'scr-over',
-                   'scr-nick', 'scr-friends', 'scr-lobby', 'scr-rank', 'scr-item', 'scr-goals', 'scr-bond', 'scr-mod', 'scr-curses', 'scr-talents'];
+                   'scr-nick', 'scr-friends', 'scr-lobby', 'scr-rank', 'scr-item', 'scr-goals', 'scr-bond', 'scr-mod', 'scr-curses', 'scr-talents', 'scr-shop', 'scr-plates', 'scr-daycare'];
 
   function show(id, keepMenu = false) {
     // En grupo, la sala se queda de fondo bajo Pokémon, Mejoras... (y al volver sigue ahí).

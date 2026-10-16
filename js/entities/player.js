@@ -104,7 +104,7 @@ G.Player = class Player {
   get spa() { return this.baseSpa * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
   /** Multiplicador de daño de un movimiento: Ataque si es físico, Ataque Especial si es especial. */
   atkFor(m) {
-    let k = (m && m.cat === 'special' ? this.spa : this.atk) * G.Abilities.dmgMul(this, m) * G.Talents.dmgMul(this, m);
+    let k = (m && m.cat === 'special' ? this.spa : this.atk) * G.Abilities.dmgMul(this, m) * G.Talents.dmgMul(this, m) * G.Plates.dmgMul(this);
     // Última Baza (ataque único de Eevee): más daño por cada otro movimiento al máximo.
     if (m && m.perMax) k *= 1 + m.perMax * this.moves.filter(o => o !== m && o.lvl >= o.def.maxLvl).length;
     return k;
@@ -124,6 +124,7 @@ G.Player = class Player {
     if (this.slots.length >= this.maxMoves || this.hasMove(id)) return false;
     const m = G.Moves.instance(id, 1);
     G.Talents.applyMove(m, this.tal);       // árbol de la región (systems/talents.js)
+    G.Plates.applyMove(m, this);            // Tablas de Arceus que ya tengas
     this.moves.push(m);
     const group = [m];
     this.slots.push(group);
@@ -316,6 +317,7 @@ G.Player = class Player {
     this.hp = Math.min(this.maxHp, this.hp + amount);
     const got = Math.round(this.hp - before);
     if (got >= 1) G.FX.dmgText(this.x, this.y - this.bodyH - 6, '+' + got, '#5fe08a');
+    if (!this.remote) G.Plates.onHeal(this, this.hp - before);   // Curación radiante (Tabla Duende)
   }
 
   addMaxHp(amount) { this.maxHp += amount; this.hp += amount; }
@@ -507,6 +509,12 @@ G.Player = class Player {
     this.target = tg;
     if (tg) this.aim = Math.atan2(tg.y - this.y, tg.x - this.x);
     else if (this.walking) this.aim = this.moveAngle;
+    // Ajustes → Controles → Apuntar con el ratón (sólo en PC): los ataques van al cursor.
+    if (G.Settings.get('aimMouse') && !G.Touch.active) {
+      const mm = G.Input.mouse(), cam = G.Camera;
+      const wx = cam.left() + mm.x / cam.scale, wy = cam.top() + mm.y / cam.scale;
+      this.aim = Math.atan2(wy - this.y, wx - this.x);
+    }
 
     // --- animación: mira al objetivo al atacar, si no a donde camina ---
     const face = this.attackFace > 0 || !this.walking ? this.aim : this.moveAngle;

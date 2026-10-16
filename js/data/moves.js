@@ -526,6 +526,8 @@
     for (const t of mon.types) for (const id of (POOL[t] || [])) ids.add(id);
     const sig = G.Signatures && save ? G.Signatures.forDex(mon.dex, save) : null;
     if (sig) ids.add(sig);
+    // Movimientos huevo de la familia (Guardería, systems/daycare.js).
+    if (G.Daycare && save) for (const id of G.Daycare.eggMovesOf(save, mon.dex)) if (BY_ID[id]) ids.add(id);
     return [...ids];
   }
 

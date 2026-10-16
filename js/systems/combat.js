@@ -15,6 +15,14 @@
 G.Combat = (() => {
   let ghost = false;
   let fields = [];
+  let curMid = null;          // movimiento que se está ejecutando (resumen de daño)
+
+  /** Daño por movimiento en esta run (pl.dmgBy[id]), para el resumen del final. */
+  function track(pl, id, d) {
+    if (ghost || !id || !(d > 0)) return;
+    const t = pl.dmgBy || (pl.dmgBy = {});
+    t[id] = (t[id] || 0) + d;
+  }
 
   // ---------------- ejecutar el movimiento activo ----------------
 
@@ -52,7 +60,9 @@ G.Combat = (() => {
     m.castAt = performance.now();
 
     const z = G.Talents.zBegin(pl);       // Movimiento Z (nodo de Alola): este ataque, ×3
+    G.Plates.onCast(pl);                  // Golpe certero (Tabla Puño)
     run(pl, m);
+    G.Plates.afterCast(pl);
     if (z) G.Talents.zEnd(pl);
     if (pl.tal && pl.tal.eco && m.kind !== 'buff' && !pl.echo && Math.random() < 0.12) pl.echo = { m, t: 0.18 };
   }
@@ -77,6 +87,7 @@ G.Combat = (() => {
   }
 
   function run(pl, m) {
+    curMid = m.id;
     switch (m.kind) {
       case 'projectile': fireProjectiles(pl, m); break;
       case 'melee':      melee(pl, m); break;
@@ -93,6 +104,7 @@ G.Combat = (() => {
       case 'trail':      trailPatch(pl, m); break;
       case 'cone':       cone(pl, m); break;
     }
+    if (!ghost) G.Plates.onRun(pl, m, trailPatch);   // Suelo ardiente (Tabla Llama)
   }
 
   const TARGETED = ['melee', 'beam', 'projectile', 'boomerang', 'chain', 'meteor', 'dash', 'cone'];
@@ -424,7 +436,7 @@ G.Combat = (() => {
             G.Projectiles.spawn(Object.assign({
               x: f.x, y: f.y, vx: Math.cos(a) * (m.speed || 300), vy: Math.sin(a) * (m.speed || 300),
               dmg: f.dmg, r: m.size || 6, life: 1.4, pierce: m.pierce | 0, color: f.col,
-              hits: new Set(), vis: f.vis, ghost: f.ghost, owner: f.owner
+              hits: new Set(), vis: f.vis, ghost: f.ghost, owner: f.owner, mid: m.id
             }, payload(m)));
             f.kick = 0.12;
           }
@@ -498,6 +510,7 @@ G.Combat = (() => {
   function clearFields(owner) { fields = owner ? fields.filter(f => f.owner !== owner) : []; }
 
   function orbit(pl, m, dt, now, isGhost = false) {
+    curMid = m.id;
     const col = G.U.TYPE_COLOR[m.type];
     const want = Math.max(1, m.count | 0);
     // Cada movimiento de órbita tiene sus orbes (puede haber dos en un vínculo).
@@ -565,6 +578,8 @@ G.Combat = (() => {
     e.hurt(dmg, col, dx, dy, knock, crit ? 'crit' : G.Types.label(G.Types.mult(m.type, e.types)));
     if (!ghost) pl.onDealt(dmg);
     pl.dmgDealt += dmg;
+    track(pl, m && m.id, dmg);
+    if (!ghost) G.Plates.onHit(pl, e, dmg);
     if (m.burn) e.applyBurn(m.burn);
     if (m.poison) e.applyPoison(m.poison);
     if (m.slow) e.applySlow(m.slow);
@@ -674,13 +689,29 @@ G.Combat = (() => {
         if (Math.random() < 0.5) G.FX.sp('impact', p.vis ? p.vis.pal : 'normal', e.x, e.y - e.bodyH * 0.5, { life: 0.12, scale: 1 });
         pl.dmgDealt += p.dmg * k;
         pl.onDealt(p.dmg * k);
+        track(pl, p.mid, p.dmg * k);
+        G.Plates.onHit(pl, e, p.dmg * k);
         if (p.burn) e.applyBurn(p.burn);
         if (p.poison) e.applyPoison(p.poison);
         if (p.slow) e.applySlow(p.slow);
 
         if (!p.orb) {
           if (p.pierce > 0) { p.pierce--; }
-          else {
+          else if (p.bounce > 0) {
+            // Rebote (Tabla Draco): sale hacia el enemigo más cercano que no haya tocado.
+            p.bounce--;
+            let best = null, bd = 240 * 240;
+            for (const o of G.EnemyMgr.queryCircle(p.x, p.y, 240)) {
+              if (o.dead || p.hits.has(o.id)) continue;
+              const d = G.U.dist2(o.x, o.y, p.x, p.y);
+              if (d < bd) { bd = d; best = o; }
+            }
+            if (!best) { projectiles.splice(i, 1); break; }
+            const sp = Math.hypot(p.vx, p.vy) || 300, a = Math.atan2(best.y - p.y, best.x - p.x);
+            p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp;
+            p.life = Math.max(p.life, p.t + 0.9);
+            break;
+          } else {
             G.FX.burst(p.x, p.y - G.LIFT, p.color, 5, 80);
             projectiles.splice(i, 1);
             break;
@@ -704,6 +735,6 @@ G.Combat = (() => {
     }
   }
 
-  return { tick, dashNow, resolve, ghostCast, ghostOrbit, updateFields, drawGroundFields, drawAirFields, clearFields,
+  return { get curMid() { return curMid; }, tick, dashNow, resolve, ghostCast, ghostOrbit, updateFields, drawGroundFields, drawAirFields, clearFields,
            get fieldCount() { return fields.length; } };
 })();

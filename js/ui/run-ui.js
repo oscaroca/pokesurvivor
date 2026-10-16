@@ -129,8 +129,7 @@ G.RunUI = (() => {
         <div style="font-size:12px;color:var(--muted)">${r.breakdown}</div></div>
       ${r.t1 || r.t10 ? `<div style="grid-column:1/-1"><span>Tickets del gacha</span><b>
         ${r.t1 ? G.Icons.html('ticket', 22) + ' +' + r.t1 + ' ' : ''}${r.t10 ? G.Icons.html('ticket10', 22) + ' +' + r.t10 + ' ×10' : ''}</b></div>` : ''}
-      <div style="grid-column:1/-1"><span>Movimientos</span><b style="font-size:15px">
-        ${r.moves.map(m => `${G.Icons.html('move:' + m.id, 16)} ${m.name} Nv.${m.lvl}`).join(' · ') || '—'}</b></div>
+      <div style="grid-column:1/-1"><span>Daño por movimiento</span>${dmgTable(r)}</div>
       ${r.caught && r.caught.length ? `<div style="grid-column:1/-1" class="caught"><span>${G.Icons.html('shiny', 12)} Shinies conseguidos</span>
         <div class="caught-row" id="over-caught"></div></div>` : ''}
       ${r.record ? '<div style="grid-column:1/-1;text-align:center" class="gold">¡Nuevo récord de tiempo!</div>' : ''}
@@ -152,6 +151,53 @@ G.RunUI = (() => {
       }
     }
     G.UI.show('scr-over');
+  }
+
+  /**
+   * Resumen de daño (como el de Vampire Survivors): cada movimiento con su nivel,
+   * daño total, % del total y daño por segundo de partida. De más a menos.
+   */
+  function dmgTable(r) {
+    const by = r.dmgBy || {};
+    const total = Object.values(by).reduce((a, b) => a + b, 0);
+    const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'k' : String(Math.round(n));
+    const rows = r.moves.slice().sort((a, b) => (by[b.id] || 0) - (by[a.id] || 0)).map(m => {
+      const d = by[m.id] || 0, pct = total ? d / total * 100 : 0;
+      return `<tr><td>${G.Icons.html('move:' + m.id, 16)} ${m.name} <small>Nv.${m.lvl}</small></td>
+        <td class="num">${fmt(d)}</td><td class="num">${pct.toFixed(0)}%</td><td class="num">${fmt(d / Math.max(1, r.time))}/s</td>
+        <td class="dmg-bar"><i style="width:${pct.toFixed(1)}%"></i></td></tr>`;
+    }).join('');
+    return rows ? `<table class="dmg-table"><thead><tr><th>Movimiento</th><th>Daño</th><th>%</th><th>DPS</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<b>—</b>';
+  }
+
+  /**
+   * Cofre del jefe: ruleta con N huecos que giran iconos de movimientos y se
+   * van parando uno tras otro en lo que ha tocado. No para el juego.
+   */
+  let chestT = null;
+  function showChest(got, n) {
+    const box = $('chest-pop');
+    clearTimeout(chestT);
+    const pl = G.Game.player;
+    const pool = pl ? pl.moves.map(m => m.id) : [];
+    const slots = got.length ? got : [];
+    box.innerHTML = `<b>${n === 5 ? '¡Cofre legendario!' : n === 3 ? '¡Gran cofre!' : '¡Cofre!'}</b>
+      <div class="chest-row">${slots.map(() => '<div class="chest-slot"><span></span><small></small></div>').join('') ||
+        '<div class="mv-note">Todo al máximo: te curas y ganas 25 monedas</div>'}</div>`;
+    box.classList.remove('hidden');
+    G.Audio.sfx('legend');
+    const els = [...box.querySelectorAll('.chest-slot')];
+    els.forEach((el, i) => {
+      const spin = setInterval(() => { el.querySelector('span').innerHTML = G.Icons.html('move:' + G.U.pick(pool), 30); }, 70);
+      setTimeout(() => {
+        clearInterval(spin);
+        el.classList.add('done');
+        el.querySelector('span').innerHTML = G.Icons.html('move:' + slots[i].id, 30);
+        el.querySelector('small').textContent = slots[i].name + ' Nv.' + slots[i].lvl;
+        G.Audio.sfx('coin');
+      }, 600 + i * 280);
+    });
+    chestT = setTimeout(() => box.classList.add('hidden'), 1600 + els.length * 280 + 1400);
   }
 
   /** Has encontrado un objeto llevando ya otro: ¿con cuál te quedas? */
@@ -252,5 +298,5 @@ G.RunUI = (() => {
     $('btn-quit').onclick = onQuit;
   }
 
-  return { showLevelUp, reroll, skip, showItemChoice, showBond, pickBond, bondBack, pick, setWaiting, closeLevelUp, showOver, wirePause, showPause };
+  return { showChest, showLevelUp, reroll, skip, showItemChoice, showBond, pickBond, bondBack, pick, setWaiting, closeLevelUp, showOver, wirePause, showPause };
 })();

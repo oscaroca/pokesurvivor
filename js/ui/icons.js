@@ -70,6 +70,18 @@ G.Icons = (() => {
     cards: { pal: { a: '#ffd23f', b: '#4fb4ff', w: '#e6f4ff' }, rows: [
       '............', '.kkkkkk.....', '.kaaaaakkkk.', '.kaaaakbbbbk', '.kaaaakbwwbk', '.kaaaakbwwbk',
       '.kaaaakbbbbk', '.kaaaakbwwbk', '.kkkkkkbwwbk', '......kbbbbk', '......kkkkkk', '............'] },
+    candy: { pal: { b: '#4f7bff', w: '#f4f8ff', c: '#9fd0ff' }, rows: [
+      '............', '.kk......kk.', 'kbbk.kk.kbbk', 'kbbbkwwkbbbk', '.kbkwccwkbk.', '..kwccccwk..',
+      '..kwccccwk..', '.kbkwccwkbk.', 'kbbbkwwkbbbk', 'kbbk.kk.kbbk', '.kk......kk.', '............'] },
+    clock2: { pal: { w: '#cfe8ff', b: '#4fb4ff' }, rows: [
+      '....kkkk....', '..kkbbbbkk..', '.kbwwwkwwbk.', '.kwwwwkwwwk.', 'kbwwwwkwwwbk', 'kbwwwwkkkwbk',
+      'kbwwwwwwwwbk', 'kbwwwwwwwwbk', '.kwwwwwwwwk.', '.kbwwwwwwbk.', '..kkbbbbkk..', '....kkkk....'] },
+    potion: { pal: { p: '#c47bff', q: '#8a3fd0', w: '#f0d8ff', g: '#c9cfdc' }, rows: [
+      '....kkkk....', '....kggk....', '.....kk.....', '....kppk....', '...kppppk...', '..kpwppppk..',
+      '..kpwppppk..', '..kppppppk..', '..kppppppk..', '..kqqqqqqk..', '...kqqqqk...', '....kkkk....'] },
+    treasure: { pal: { o: '#a0602a', y: '#ffd23f', w: '#fff3b0' }, rows: [
+      '............', '..kkkkkkkk..', '.kyooooooyk.', 'kyooooooooyk', 'kkkkkkkkkkkk', 'kyoooyyoooyk',
+      'kyoooywoooyk', 'kyoooyyoooyk', 'kyooooooooyk', 'kyooooooooyk', 'kkkkkkkkkkkk', '............'] },
     berry: { pal: { r: '#ff7a9e', s: '#c23a6b', w: '#ffd3e0', g: '#5fe08a', d: '#2f9a52' }, rows: [
       '............', '.....kkk....', '....kgggk...', '..kkkgdkkk..', '.krrrkkrrrk.', 'krwwrrrrrrsk',
       'krwrrrrrrrsk', 'krrrrrrrrrsk', 'krrrrrrrrssk', '.krrrrrrssk.', '..kkssssskk.', '....kkkkk...'] },

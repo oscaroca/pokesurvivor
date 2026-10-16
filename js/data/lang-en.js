@@ -415,6 +415,8 @@ G.I18n.add({
   'cambiar las cartas / saltar (con su talento)': 'reroll the cards / skip (with its talent)',
   'WASD moverse  ·  1-4 / Q / E o clic en un ataque para cambiarlo  ·  Espacio embestida  ·  Esc pausa': 'WASD move  ·  1-4 / Q / E or click a move to switch  ·  Space dash  ·  Esc pause',
   'TOCA': 'TAP', 'ESP': 'SPC',
+  'Apuntar con el ratón': 'Aim with the mouse',
+  'Tus ataques (y la embestida, si estás quieto) van hacia el cursor en vez de al enemigo más cercano.': 'Your attacks (and your dash, when standing still) go towards the cursor instead of the nearest enemy.',
   'Pantalla completa': 'Fullscreen', 'Sin barras del navegador.': 'Without browser bars.', 'Activar': 'Turn on', 'Sí': 'Yes', 'No': 'No',
   'Idioma': 'Language', 'El juego se recarga al cambiarlo.': 'The game reloads when you change it.',
   'En móvil o tablet': 'On mobile or tablet', 'En PC': 'On PC', 'Tamaño del joystick': 'Joystick size', 'Cuánto hay que arrastrar el dedo.': 'How far you need to drag your finger.',

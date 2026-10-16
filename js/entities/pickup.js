@@ -21,8 +21,16 @@ G.Pickups = (() => {
     coin:  { color: '#ffd23f', glow: '#b8860b', r: 5.5 },
     ticket:   { color: '#ffd23f', glow: '#c08a10', r: 7 },
     ticket10: { color: '#c47bff', glow: '#8a3fd0', r: 8 },
-    item:     { color: '#ffd23f', glow: '#c08a10', r: 9 }       // value = id del objeto
+    item:     { color: '#ffd23f', glow: '#c08a10', r: 9 },      // value = id del objeto
+    // 16-10-2026: objetos raros de los enemigos y el cofre de los jefes.
+    candy:    { color: '#9fd0ff', glow: '#4f7bff', r: 7 },       // Caramelo Raro: +1 nivel
+    clock:    { color: '#cfe8ff', glow: '#4fb4ff', r: 7 },       // Reloj: enemigos quietos 5 s
+    potion:   { color: '#c47bff', glow: '#8a3fd0', r: 7 },       // Hiperpoción: vida al máximo
+    amulet:   { color: '#ffd23f', glow: '#c08a10', r: 7 },       // Moneda Amuleto: monedas ×2 30 s
+    treasure: { color: '#ffd23f', glow: '#c08a10', r: 9 }        // cofre del jefe: mejora movimientos
   };
+  // Probabilidad de cada objeto raro por enemigo normal derrotado.
+  const RARE = [['candy', 0.0012], ['clock', 0.0014], ['potion', 0.0012], ['amulet', 0.0014]];
   /** Probabilidad de que un Pokémon normal suelte un ticket del gacha. */
   const BOSS_T10 = 1 / 3;               // ticket ×10 de un jefe normal
   const LEGEND_T10 = 1 / 2;             // ticket ×10 del legendario de la grieta
@@ -80,6 +88,8 @@ G.Pickups = (() => {
       if (plain) return;
       if (!G.Curses.on('noheal')) push(orb('heal', x + 24, y, 0));
       push(orb('magnet', x - 24, y, 0));
+      // Cofre del jefe (como los de Vampire Survivors): sube 1, 3 o 5 movimientos.
+      push(orb('treasure', x, y + 26, 0));
       // Ticket ×10: siempre el legendario de la grieta; un jefe normal, 1 de cada 3 veces.
       // (Hasta el 12-10-2026 el legendario de la grieta daba siempre 2: salían demasiados.)
       if (Math.random() < (legend ? LEGEND_T10 : BOSS_T10)) push(orb('ticket10', x, y - 20, 1));
@@ -94,6 +104,12 @@ G.Pickups = (() => {
     if (r < 0.012) { if (!G.Curses.on('noheal')) push(orb('heal', x + G.U.rand(-8, 8), y, 0)); }
     else if (r < 0.020) push(orb('magnet', x, y, 0));
     else if (r < 0.026) push(orb('bomb', x, y, 0));
+    // Objetos raros (uno como mucho por enemigo).
+    let q = Math.random();
+    for (const [k, p] of RARE) {
+      if (q < p) { if (k !== 'potion' || !G.Curses.on('noheal')) push(orb(k, x + G.U.rand(-8, 8), y, 0)); break; }
+      q -= p;
+    }
   }
 
   /** Suelta un objeto suelto: 'heal' | 'magnet' | 'bomb' | 'coin'. */
@@ -183,9 +199,10 @@ G.Pickups = (() => {
         ctx.beginPath(); ctx.ellipse(p.x, y, r * sx * 0.5, r * 0.5, 0, 0, 6.2832); ctx.fill();
       } else {
         // Baya, imán y bomba: su icono pixel art.
-        const ICON = { heal: 'berry', magnet: 'magnet', bomb: 'bomb', ticket: 'ticket', ticket10: 'ticket10' };
-        const sz = p.kind === 'ticket10' || p.kind === 'item' ? 24 : 18;
-        if (p.kind === 'item') {
+        const ICON = { heal: 'berry', magnet: 'magnet', bomb: 'bomb', ticket: 'ticket', ticket10: 'ticket10',
+                       candy: 'candy', clock: 'clock2', potion: 'potion', amulet: 'amuletcoin', treasure: 'treasure' };
+        const sz = p.kind === 'ticket10' || p.kind === 'item' || p.kind === 'treasure' ? 24 : 18;
+        if (p.kind === 'item' || p.kind === 'treasure') {
           // Objeto: brillo dorado latiendo, para que se vea desde lejos.
           ctx.globalAlpha = 0.35 + Math.sin(p.t * 1.5) * 0.15;
           ctx.fillStyle = '#ffe14d';

@@ -11,6 +11,7 @@
  *   hpBar       'top' | 'player' | 'moves'        barra de vida: arriba a la izquierda, encima del
  *                                                 Pokémon o encima de los ataques
  *   hpColor     '#rrggbb'                         color de la barra de vida
+ *   aimMouse    true/false                        en PC, los ataques van hacia el cursor
  *   pad         { bar, pause, stick } | null      dónde van los botones en móvil (centro, en
  *                                                 proporción a la pantalla); lo pone layout-ui.js
  *
@@ -20,7 +21,7 @@
 G.Settings = (() => {
   const KEY = 'ps.settings';
   const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, stick: 1, stickMode: 'float', pad: null,
-                hpBar: 'top', hpColor: '#ff5f6d' };
+                hpBar: 'top', hpColor: '#ff5f6d', aimMouse: false };
   let s = Object.assign({}, DEF);
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
   const fns = new Set();

@@ -97,6 +97,9 @@ G.Game = (() => {
     G.FX.clear();
     G.Projectiles.clear();
     G.Combat.clearFields();
+    G.Elites.clear();
+    G.Kecleon.reset();
+    G.Plates.reset();
     G.EnemyMgr.clear();
     G.Pickups.clear();
     G.Spawner.reset();
@@ -109,7 +112,7 @@ G.Game = (() => {
     G.World.reset(coop ? coop.seed : Math.floor(Math.random() * 1e6));
     G.World.setBiome(0, true);
     biome = 0;
-    time = 0; pendingLevels = 0;
+    time = 0; pendingLevels = 0; amuletUntil = 0;
     runReal = performance.now(); tampered = false;
 
     pl = new G.Player(mon, perks, !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
@@ -167,6 +170,9 @@ G.Game = (() => {
   function everyone() { return G.Coop.active ? G.Coop.players() : [pl]; }
 
   /** Experiencia que hace falta para el siguiente nivel (cofres con candado). */
+  /** Un nivel entero ya (Caramelo Raro). */
+  function giveLevel() { if (pl) pendingLevels += pl.gainXp(Math.max(1, pl.xpNext - pl.xp) / pl.xpMul + 0.01); }
+
   function levelXp() {
     if (!pl) return 20;
     const k = (G.Coop.active ? G.Coop.xpFactor() : 1) * (pl.xpMul || 1);
@@ -368,7 +374,7 @@ G.Game = (() => {
 
     G.RunUI.showOver({
       dead, time, level: pl.level, kills: pl.kills, bosses: pl.bosses, coins, record, t1: pl.t1, t10: pl.t10, judge,
-      moves: pl.moves, caught,
+      moves: pl.moves, caught, dmgBy: pl.dmgBy || {},
       breakdown: Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
                  (pl.coinMul > 1 ? ` · ×${pl.coinMul.toFixed(2)} Fortuna` : '') +
                  (curse ? ` · ×${G.Curses.coinMul().toFixed(2)} Maldiciones` : '') +
@@ -489,9 +495,48 @@ G.Game = (() => {
     });
   }
 
+  /**
+   * Para el juego mientras eliges algo (tienda de Kecleon, Tablas de Arceus...);
+   * en grupo, para todos, como las fusiones. Devuelve si lo has parado tú.
+   */
+  function pauseChoice() {
+    if (!pl || pl.dead || (state !== 'playing' && state !== 'held')) return false;
+    state = 'choice';
+    if (G.Coop.active) G.Coop.holdStart();
+    return true;
+  }
+  function endChoice() {
+    if (state === 'choice') { if (holdBy.length) state = 'held'; else resumeSoon(); }
+    if (G.Coop.active) G.Coop.holdEnd();
+    afterLevelUp();
+  }
+
   // ---------------- recogida ----------------
 
-  const PICK_SFX = { xp: 'xp', xpBig: 'xp', coin: 'coin', heal: 'heal', bomb: 'break', magnet: 'confirm', ticket: 'shiny', ticket10: 'legend', item: 'legend' };
+  const PICK_SFX = { xp: 'xp', xpBig: 'xp', coin: 'coin', heal: 'heal', bomb: 'break', magnet: 'confirm', ticket: 'shiny', ticket10: 'legend', item: 'legend',
+                     candy: 'levelup', clock: 'confirm', potion: 'heal', amulet: 'coin', treasure: 'legend' };
+  let amuletUntil = 0;           // Moneda Amuleto: hasta qué segundo de la run valen doble las monedas
+
+  /**
+   * Cofre del jefe (como en Vampire Survivors): sube 1, 3 (30%) o 5 (10%)
+   * movimientos tuyos, con una ruleta que se ve en pantalla sin parar el juego.
+   * Si ya los tienes todos al máximo, te cura y da monedas.
+   */
+  function openChest() {
+    if (!pl) return;
+    const r = Math.random(), n = r < 0.1 ? 5 : r < 0.4 ? 3 : 1;
+    const got = [];
+    for (let i = 0; i < n; i++) {
+      const can = pl.moves.filter(m => m.lvl < m.def.maxLvl);
+      if (!can.length) break;
+      const m = G.U.pick(can);
+      G.Moves.levelUp(m);
+      got.push({ id: m.id, name: m.name, lvl: m.lvl });
+    }
+    if (!got.length) { pl.heal(pl.maxHp * 0.5); pl.coins += 25; }
+    G.RunUI.showChest(got, n);
+    G.FX.ring(pl.x, pl.y, 8, 120, '#ffd23f', 0.7, 6);
+  }
 
   /*
    * Cooperativo: la elección de objeto y las cartas de nivel no pueden taparse.
@@ -558,8 +603,37 @@ G.Game = (() => {
       return;
     }
     if (p.kind === 'coin') {
-      pl.coins += p.value;
-      G.FX.dmgText(who.x, who.y - who.bodyH - 6, '+' + p.value, '#ffd23f');
+      const v = p.value * (time < amuletUntil ? 2 : 1);
+      pl.coins += v;
+      G.FX.dmgText(who.x, who.y - who.bodyH - 6, '+' + v, '#ffd23f');
+      return;
+    }
+    // ---- objetos raros (16-10-2026) ----
+    if (p.kind === 'candy') {
+      // Caramelo Raro: un nivel entero (en grupo, para todo el equipo).
+      giveLevel();
+      G.FX.dmgText(who.x, who.y - who.bodyH - 8, '¡Caramelo Raro!', '#9fd0ff', true);
+      return;
+    }
+    if (p.kind === 'clock') {
+      // Reloj (como el Orologion): los enemigos se quedan quietos 5 s (los jefes, muy lentos).
+      for (const e of G.EnemyMgr.all()) e.applySlow(e.boss ? 0.6 : 1, 5);
+      G.FX.ring(who.x, who.y, 20, G.Camera.outerRadius(), '#9fd8ff', 0.6, 5);
+      G.Spawner.say('¡El tiempo se detiene!', 2.2, true);
+      return;
+    }
+    if (p.kind === 'potion') {
+      if (mine) pl.heal(pl.maxHp);
+      G.FX.ring(who.x, who.y, 8, 70, '#c47bff', 0.5, 4);
+      return;
+    }
+    if (p.kind === 'amulet') {
+      amuletUntil = time + 30;
+      G.Spawner.say('Moneda Amuleto: monedas ×2 durante 30 s', 2.6, true);
+      return;
+    }
+    if (p.kind === 'treasure') {
+      if (mine) openChest();
       return;
     }
     if (p.kind === 'item') {
@@ -615,6 +689,15 @@ G.Game = (() => {
       for (let i = 0; i < 4; i++) {
         if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) G.RunUI.pickBond(i);
       }
+      return;
+    }
+    if (G.UI.isOpen('scr-shop')) {
+      for (let i = 0; i < 4; i++) if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) G.Kecleon.buy(i);
+      if (G.Input.tap('escape')) G.Kecleon.close();
+      return;
+    }
+    if (G.UI.isOpen('scr-plates')) {
+      for (let i = 0; i < 3; i++) if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) G.Plates.pick(i);
       return;
     }
     if (G.UI.isOpen('scr-item')) {
@@ -773,7 +856,7 @@ G.Game = (() => {
       G.FX.ring(pl.x, pl.y, 10, G.Camera.outerRadius(), '#ffffff', 0.7, 6);
     }
 
-    pl.frozen = coop && (G.UI.isOpen('scr-pause') || G.UI.isOpen('scr-item'));
+    pl.frozen = coop && ['scr-pause', 'scr-item', 'scr-shop', 'scr-plates'].some(G.UI.isOpen);
     pl.update(dt);
     if (coop) {
       for (const p of G.Coop.puppets()) { p.netUpdate(dt); G.Combat.ghostOrbit(p, dt, time); }
@@ -793,9 +876,12 @@ G.Game = (() => {
     G.Projectiles.update(dt, pl, G.EnemyMgr.all());
     G.Combat.resolve(dt, pl, time);
     G.Combat.updateFields(dt);
+    G.Elites.update(dt, pl);
     G.Pickups.update(dt, all, onCollect);
     G.Hazards.update(dt);
     G.Interact.update(dt, pl);
+    G.Kecleon.update(dt, pl, time);
+    G.Plates.tick(pl, dt, time);
     G.Rift.update(dt, pl, time);
     G.Judgment.update(dt, pl, time);
     G.Events.update(dt, all, time);
@@ -837,6 +923,7 @@ G.Game = (() => {
     G.World.drawLiquid(ctx, cam, t);
     G.Hazards.draw(ctx);
     G.Combat.drawGroundFields(ctx);
+    G.Elites.drawGround(ctx);
     G.Pickups.draw(ctx);
 
     // Todo lo que tiene "pies" se ordena por Y: objetos, enemigos, jugador.
@@ -850,6 +937,8 @@ G.Game = (() => {
     const arceus = pl && state !== 'ui' ? G.Judgment.drawable() : null;
     if (arceus) items.push({ y: arceus.y, ent: arceus });
     if (pl && state !== 'ui') for (const d of G.Events.drawables()) items.push({ y: d.y, ent: d });
+    const kec = pl && state !== 'ui' ? G.Kecleon.drawable() : null;
+    if (kec) items.push({ y: kec.y, ent: kec });
     items.sort((a, b) => a.y - b.y);
     for (const it of items) {
       if (it.prop) G.World.drawProp(ctx, it.prop, t);
@@ -998,7 +1087,9 @@ G.Game = (() => {
   })();
 
   return {
-    init, startRun, everyone, levelXp, flash, offerBond,
+    init, startRun, everyone, levelXp, giveLevel, flash, offerBond, openChest, pauseChoice, endChoice, offerItem,
+    get time() { return time; },
+    get amuletLeft() { return Math.max(0, amuletUntil - time); },
     /** Para pruebas: salta el reloj de la run. */
     debugTime(t) { tampered = true; time = t; },
     /** Para grabar vídeos: cámara lenta (0,5 = mitad de velocidad). */
@@ -1019,6 +1110,7 @@ G.Flow = {
     G.UI.initChrome();
     G.LoginUI.init(); G.TestUI.init(); G.MenuUI.init(); G.GachaUI.init();
     G.SocialUI.init(); G.RankingUI.init(); G.ModUI.init(); G.GoalsUI.init(); G.ProfileUI.init(); G.SettingsUI.init(); G.SupportUI.init(); G.NewsUI.init(); G.Updater.init();
+    G.Kecleon.init(); G.Plates.init(); G.DaycareUI.init();
     // Tu nombre arriba a la derecha abre tu perfil.
     document.getElementById('user-pill').onclick = () => G.GoalsUI.open('profile');
     G.Audio.music('village');     // suena tras el primer clic (lo exige el navegador)

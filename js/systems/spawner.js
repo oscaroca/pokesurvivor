@@ -73,7 +73,7 @@ G.Spawner = (() => {
   function rollShiny(dex) {
     if (!G.Sprites.hasShiny(dex)) return false;
     if (forceShiny > 0) { forceShiny--; return true; }
-    return Math.random() < SHINY_RATE * G.Curses.shinyMul();
+    return Math.random() < SHINY_RATE * G.Curses.shinyMul() * G.Research.shinyMul(dex);
   }
 
   function spawnOne(pl, t, angle) {
@@ -85,6 +85,7 @@ G.Spawner = (() => {
     e.dmg *= DMG_K; e.xp = Math.round(e.xp * XP_K);
     if (G.EnemyMgr.count >= CAP * ELITE_FROM) { e.maxHp = e.hp = Math.round(e.maxHp * 1.6); e.dmg *= 1.25; e.xp = Math.round(e.xp * 1.6); }
     G.Curses.modEnemy(e);
+    G.Elites.roll(e, t);                  // a veces, élite (systems/elites.js)
     if (shiny) e.makeShiny();
     if (G.Events.golden) e.makeGolden();
     G.EnemyMgr.add(e);

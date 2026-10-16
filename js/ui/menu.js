@@ -25,11 +25,40 @@ G.MenuUI = (() => {
       };
     });
     document.querySelectorAll('[data-back]').forEach(b => { b.onclick = open; });
+    hubs();
     G.Social.on(() => { if (G.UI.isOpen('scr-menu')) socialLine(); });
     $('btn-logout').onclick = () => {
       if (G.DB.guest && !confirm('Eres invitado: se perderá todo el progreso. ¿Salir?')) return;
       G.Audio.music(null);
       G.DB.logout().then(() => G.Flow.toLogin());
+    };
+  }
+
+  // ---------------- grupos de pantallas (pestañas arriba) ----------------
+  // Para no llenar el menú: Pokémon = Pokédex + Guardería · Entrenar = Mejoras +
+  // Talentos · Amigos = Amigos + Ranking. Cada pantalla del grupo lleva arriba
+  // las pestañas para saltar a las demás.
+  const HUBS = [
+    [['dex', 'Pokédex', () => openDex()], ['daycare', 'Guardería', () => G.DaycareUI.open()]],
+    [['upgrades', 'Mejoras', () => openUpgrades()], ['talents', 'Talentos', () => G.TalentsUI.open()]],
+    [['friends', 'Amigos', () => G.FriendsUI.open()], ['rank', 'Ranking', () => G.RankingUI.open()]]
+  ];
+  function hubs() {
+    const show = G.UI.show;
+    G.UI.show = (id, ...rest) => {
+      const r = show(id, ...rest);
+      const key = id.replace(/^scr-/, '');
+      const hub = HUBS.find(h => h.some(t => t[0] === key));
+      const box = hub && document.querySelector('#' + id + ' .box');
+      if (box) {
+        let bar = box.querySelector(':scope > .hub-tabs');
+        if (!bar) { bar = document.createElement('div'); bar.className = 'hub-tabs'; box.prepend(bar); }
+        bar.innerHTML = hub.map(([k, l]) => `<button class="${k === key ? 'on' : ''}" data-hub="${k}">${l}</button>`).join('');
+        bar.querySelectorAll('[data-hub]').forEach(b => {
+          b.onclick = () => { if (b.dataset.hub !== key) { G.Audio.sfx('select'); hub.find(t => t[0] === b.dataset.hub)[2](); } };
+        });
+      }
+      return r;
     };
   }
 
@@ -70,7 +99,10 @@ G.MenuUI = (() => {
 
     const owned = Object.keys(s.owned).filter(d => G.DEX_BY[d]).length;
     const shinies = Object.keys(s.shiny || {}).length;
-    $('menu-dex-count').textContent = `${owned} / ${G.DEX.length}` + (shinies ? ` · ${shinies} shiny` : '');
+    const eggs = G.DaycareUI.ready(), resP = G.Research.pendingTotal(s);
+    $('menu-dex-count').textContent = eggs ? 'Huevos listos: ' + eggs : resP ? 'Investigación por recoger: ' + resP
+      : `${owned} / ${G.DEX.length}` + (shinies ? ` · ${shinies} shiny` : '');
+    $('menu-dex-count').classList.toggle('gold', !!(eggs || resP));
 
     topLine();
     buffsLine();
@@ -90,8 +122,8 @@ G.MenuUI = (() => {
     $('menu-goals-sub').textContent = pend ? pend + (pend === 1 ? ' premio por recoger' : ' premios por recoger') : 'Misiones, logros y perfil';
     $('menu-goals-sub').classList.toggle('gold', pend > 0);
     const tf = G.TalentsUI.freeTotal();
-    $('menu-tal-sub').textContent = tf ? 'Insignias sin gastar: ' + tf : 'Insignias por región, sin oro';
-    $('menu-tal-sub').classList.toggle('gold', tf > 0);
+    $('menu-train-sub').textContent = tf ? 'Insignias sin gastar: ' + tf : 'Mejoras y talentos';
+    $('menu-train-sub').classList.toggle('gold', tf > 0);
     // Con cuenta en la nube: amigos en línea, invitaciones y (una vez) el apodo.
     if (G.DB.online && !G.Social.started) {
       G.Social.start().then(r => {
@@ -166,7 +198,7 @@ G.MenuUI = (() => {
     const parts = [];
     if (on) parts.push(on + ' en línea');
     if (req) parts.push(req + (req === 1 ? ' solicitud' : ' solicitudes'));
-    $('menu-friends-sub').textContent = parts.length ? parts.join(' · ') : 'Juega en grupo, hasta 4';
+    $('menu-friends-sub').textContent = parts.length ? parts.join(' · ') : 'Grupo y ranking';
     $('menu-friends-sub').classList.toggle('gold', req > 0);
   }
 
@@ -251,6 +283,10 @@ G.MenuUI = (() => {
     : 'Mega' + (f.key.includes('-mega-') ? ' ' + f.key.split('-mega-')[1].toUpperCase() : '');
   const MEGA_HOW = { 'stone': 'la Megapiedra', 'red-orb': 'el Orbe Rojo', 'blue-orb': 'el Orbe Azul', 'dragon-ascent': 'Ascenso Draco' };
 
+  // Pestañas de la ficha (se recuerda la última).
+  const DTABS = [['info', 'Datos'], ['moves', 'Movimientos'], ['goals', 'Misiones']];
+  let dexTab = 'info';
+
   function showDetail(dex) {
     const s = G.DB.save;
     const p = G.DEX_BY[dex];
@@ -297,6 +333,8 @@ G.MenuUI = (() => {
             <span class="fam-num">${famVal(st.def, st.value)} · ${G.Progress.rewardText(st.def.reward)}</span></div>
           ${st.claimed ? `<span class="fam-ok">✓</span>` : st.done ? `<button class="btn gold fam-claim" data-fam="${st.def.id}">Recoger</button>` : ''}
         </div>`).join('')}</div>` : '';
+    // Hay algo por recoger en Misiones (familia o investigación): punto en la pestaña.
+    const goalsPend = own && (G.Family.status(s, dex).some(x => x.done && !x.claimed) || G.Research.pendingLevels(s, dex) > 0);
     const natGrid = G.Natures.ALL.map(n => natHave.has(n.id)
       ? `<button class="${n.id === nat ? 'on' : ''}" data-nat="${n.id}" title="${G.Natures.effect(n.id)}">${n.name}</button>`
       : `<button disabled title="Sácala con un repetido en el gacha">?</button>`).join('');
@@ -327,6 +365,8 @@ G.MenuUI = (() => {
           : forms.length && !evos.length ? `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">Puede megaevolucionar en partida: pulsa el botón de arriba para verla.</div>` : ''}
       </div>
       ${own ? `
+        <div class="seg dtabs">${DTABS.map(([k, l]) => `<button class="${k === dexTab ? 'on' : ''}" data-dt="${k}">${l}${k === 'goals' && goalsPend ? ' •' : ''}</button>`).join('')}</div>
+        <div class="dtab${dexTab === 'info' ? '' : ' hidden'}" data-tab="info">
         ${bar('Vida', v.hp * nm.hp, max.hp, Math.round(v.hp * nm.hp), 'hp')}
         ${bar('Ataque', v.atk * nm.atk, max.atk, '×' + (v.atk * nm.atk).toFixed(2), 'atk')}
         ${bar('At. Esp.', v.spa * nm.atk, max.atk, '×' + (v.spa * nm.atk).toFixed(2), 'atk')}
@@ -336,11 +376,21 @@ G.MenuUI = (() => {
         <div class="nat-grid">${natGrid}</div>
         ${ab ? `<p style="font-size:14px;margin:6px 0 4px">Habilidad <b class="gold">${ab.name}</b><br>
           <span style="color:${ab.fam ? 'var(--text, #dfe8ff)' : 'var(--muted)'};font-size:13px">${ab.desc}</span></p>` : ''}
-        ${famBox}
-        ${movesBox(dex, p, s)}
+        </div>
+        <div class="dtab${dexTab === 'moves' ? '' : ' hidden'}" data-tab="moves">${movesBox(dex, p, s)}</div>
+        <div class="dtab${dexTab === 'goals' ? '' : ' hidden'}" data-tab="goals">${famBox}${researchBox(dex, s)}</div>
       ` : `<p class="center" style="color:var(--muted)">Aún no lo tienes.<br>Consíguelo en el banner de <b class="gold">${GEN_NAMES[p.gen - 1]}</b>
-            o derrotándolo cuando salga shiny.</p>`}
+            o derrotándolo cuando salga shiny.</p>
+      ${researchBox(dex, s)}`}
     `;
+    box.querySelectorAll('.dtabs button').forEach(b => {
+      b.onclick = () => {
+        dexTab = b.dataset.dt;
+        box.querySelectorAll('.dtabs button').forEach(x => x.classList.toggle('on', x === b));
+        box.querySelectorAll('.dtab').forEach(x => x.classList.toggle('hidden', x.dataset.tab !== dexTab));
+        G.Audio.sfx('select');
+      };
+    });
     $('dex-big').style.setProperty('--stage-c', !own ? '#5b83d6' : viewShiny ? '#9ae6ff' : G.U.TYPE_COLOR[p.types[0]]);
     $('dex-big').classList.toggle('shiny', own && viewShiny);
     $('dex-big').classList.toggle('mega', !!form);
@@ -377,6 +427,12 @@ G.MenuUI = (() => {
         showDetail(dex);
       };
     });
+    const rc = $('res-claim');
+    if (rc) rc.onclick = () => {
+      if (!G.Research.claim(s, dex)) return;
+      G.DB.commit(); G.Audio.sfx('buy'); G.UI.toast('¡Premio de investigación recogido!');
+      showDetail(dex);
+    };
     const st = $('dex-start');
     if (st) st.onchange = () => { G.Talents.setStart(s, dex, st.value); G.DB.commit(); G.Audio.sfx('select'); showDetail(dex); };
     const pick = $('dex-pick');
@@ -387,6 +443,20 @@ G.MenuUI = (() => {
       G.UI.toast(p.name + (s.partnerShiny ? ' shiny' : '') + ' es ahora tu compañero');
       renderGrid(); showDetail(dex);
     };
+  }
+
+  /** Investigación de la especie (systems/research.js): derrotados, nivel, shiny y premio. */
+  function researchBox(dex, s) {
+    const R = G.Research, k = R.kills(s, dex), lv = R.level(s, dex), next = R.GOALS[lv];
+    const pend = R.pendingLevels(s, dex);
+    const pct = next ? Math.min(100, k / next * 100) : 100;
+    return `<div class="fam-box res-box"><p style="font-size:14px;margin:10px 0 2px"><b class="gold">Investigación</b>
+        <span style="color:var(--muted)">· nivel ${lv}/${R.GOALS.length} · shiny ×${R.SHINY[lv]}</span></p>
+      <div class="mv-note">Derrota a los de esta especie en las partidas: cuantos más, más fácil te sale shiny.</div>
+      <div class="fam-row"><div class="fam-txt">${next ? `${k} / ${next} derrotados` : `${k} derrotados · ¡investigación completa!`}
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        ${next ? `<span class="fam-num">Siguiente nivel: shiny ×${R.SHINY[lv + 1]} · ${G.Progress.rewardText(R.REWARD[lv + 1])}</span>` : ''}</div>
+        ${pend ? `<button id="res-claim" class="btn gold fam-claim">Recoger</button>` : ''}</div></div>`;
   }
 
   /**
@@ -414,11 +484,12 @@ G.MenuUI = (() => {
         <span class="mv-note">${sigOn ? 'Desbloqueado: sale en las cartas.' : G.DEX_BY[sig.of].leg
           ? 'Bloqueado: derrótalo en una grieta o completa la misión de familia de 15 minutos.'
           : 'Bloqueado: completa la misión de familia «Aguanta 15 minutos» y recoge el premio.'}</span></div></div>`;
+    const eggs = G.Daycare.eggMovesOf(s, dex);
     const ids = G.Moves.poolFor(p, s).sort((a, b) => (favs.includes(b) - favs.includes(a)) || M[a].name.localeCompare(M[b].name, 'es'));
     const chips = ids.map(id => {
       const d = M[id], on = favs.includes(id);
       return `<button class="mv-chip${on ? ' on' : ''}${d.sig ? ' sig' : ''}" data-mv="${id}" title="${d.desc}">${G.Icons.html('move:' + id, 16)} ${d.name}` +
-        `<small>${G.U.TYPE_NAME[d.type]}${d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''}</small>${on ? '<i>★</i>' : ''}</button>`;
+        `<small>${G.U.TYPE_NAME[d.type]}${d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''}${eggs.includes(id) ? ' · Mov. huevo' : ''}${d.manual ? ' · Espacio' : ''}</small>${on ? '<i>★</i>' : ''}</button>`;
     }).join('');
     return `<p style="font-size:14px;margin:10px 0 4px">${startLine}
         ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>

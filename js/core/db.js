@@ -179,6 +179,8 @@ G.DB = (() => {
     s.pupgRefund = n(s.pupgRefund);
     // Talentos, favoritos y movimiento inicial (systems/talents.js).
     if (G.Talents) G.Talents.sanitize(s);
+    if (G.Research) G.Research.sanitize(s);
+    if (G.Daycare) G.Daycare.sanitize(s);
     foldFamilies(s);
   }
 
@@ -274,6 +276,8 @@ G.DB = (() => {
       });
     }
     for (const k in older.stats || {}) r.stats[k] = Math.max(r.stats[k] || 0, older.stats[k] || 0);
+    if (G.Research) G.Research.merge(r, older);
+    if (G.Daycare) G.Daycare.merge(r, older);
     if (r.starter == null) r.starter = older.starter;
     if (r.personality == null) r.personality = older.personality;
     if (r.partner == null || !r.owned[r.partner]) { r.partner = older.partner; r.partnerShiny = older.partnerShiny; }

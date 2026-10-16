@@ -161,6 +161,20 @@ G.HUD = (() => {
       bx += tw + 5;
     }
 
+    // Moneda Amuleto activa.
+    const am = G.Game.amuletLeft;
+    if (am > 0) {
+      const txt = 'MONEDAS ×2 ' + Math.ceil(am) + 's';
+      ctx.font = F(800, 9);
+      ctx.textAlign = 'left';
+      const tw = ctx.measureText(txt).width + 12;
+      roundRect(ctx, bx, py + 34, tw, 15, 7);
+      ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill();
+      ctx.fillStyle = '#ffd23f';
+      ctx.fillText(txt, bx + 6, py + 45);
+      bx += tw + 5;
+    }
+
     if (G.Coop.active) drawCoop(ctx, w, h, pl, px, py + (bx > px ? 56 : 40));
 
     // Grieta: flecha grande que late en el borde si no se ve, y si se ve, una
@@ -220,6 +234,7 @@ G.HUD = (() => {
 
     // Eventos: cuenta atrás, flecha al Pokémon perdido / a la marca y a los duendes.
     G.Events.drawHud(ctx, w, h, pl, F);
+    G.Kecleon.drawHud(ctx, w, h);
 
     // Aviso propio al abrirse una grieta (no lo tapan los otros avisos).
     if (rift && rift.t < 4.5) {

@@ -528,6 +528,45 @@ img.pix { image-rendering: pixelated; image-rendering: crisp-edges; vertical-ali
 .sig-line.locked { opacity: .7; filter: grayscale(.5); }
 .start-pick select { font-size: 13px; padding: 2px 6px; max-width: 220px; }
 .fav-star { color: var(--gold); margin-right: 2px; }
+.card.off { opacity: .5; }
+/* Pestañas de grupo (Pokémon, Entrenar, Amigos) y de la ficha */
+.hub-tabs { display: flex; gap: 4px; margin: -4px 0 10px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.hub-tabs button { appearance: none; cursor: pointer; font: inherit; font-size: 14px; padding: 6px 12px; border: none;
+  background: none; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.hub-tabs button.on { color: var(--gold); border-bottom-color: var(--gold); }
+.dtabs { margin: 8px 0 6px; }
+/* Guardería */
+.dc-pair { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+.dc-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dc-slot canvas { background: rgba(0,0,0,.25); border-radius: 10px; }
+.dc-slot select { max-width: 170px; }
+.dc-heart { opacity: .8; }
+.dc-eggs { display: flex; gap: 10px; justify-content: center; margin: 6px 0; }
+.dc-egg { width: 26px; height: 32px; border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%; background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.2); }
+.dc-egg.on { background: linear-gradient(#fffaf0, #e8dcc6); border-color: #ffd23f; box-shadow: 0 0 10px rgba(255,210,63,.5); }
+.dc-result { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+.dc-born { display: flex; flex-direction: column; align-items: center; width: 150px; padding: 6px; border-radius: 10px; background: rgba(0,0,0,.25); text-align: center; animation: pop .3s ease-out both; }
+.dc-born.shiny { box-shadow: 0 0 18px #9ae6ff; }
+.dc-born small { font-size: 11px; color: var(--muted); }
+/* Cofre del jefe (ruleta, sin parar el juego) */
+.chest-pop { position: fixed; left: 50%; top: 18%; transform: translateX(-50%); z-index: 40; pointer-events: none;
+  background: rgba(40,28,8,.92); border: 2px solid var(--gold); border-radius: 12px; padding: 8px 14px; text-align: center;
+  box-shadow: 0 0 30px rgba(255,210,63,.4); max-width: calc(100vw - 32px); }
+.chest-pop b { color: var(--gold); font-size: 16px; }
+.chest-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.chest-slot { width: 74px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; border-radius: 8px;
+  background: rgba(0,0,0,.35); border: 1px solid rgba(255,210,63,.3); }
+.chest-slot.done { border-color: var(--gold); animation: pop .25s ease-out; }
+.chest-slot small { font-size: 10px; color: #fff3b0; line-height: 1.15; min-height: 2.3em; }
+/* Fin de partida: daño por movimiento */
+.dmg-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+.dmg-table th { font-size: 11px; color: var(--muted); font-weight: 400; text-align: right; padding: 0 4px; }
+.dmg-table th:first-child { text-align: left; }
+.dmg-table td { padding: 2px 4px; white-space: nowrap; }
+.dmg-table td.num { text-align: right; }
+.dmg-table td small { color: var(--muted); }
+.dmg-table .dmg-bar { width: 30%; }
+.dmg-table .dmg-bar i { display: block; height: 6px; border-radius: 3px; background: var(--gold); min-width: 2px; }
 /* Ajustes: color de la barra de vida */
 .hp-cols { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .hp-col { appearance: none; cursor: pointer; width: 24px; height: 24px; border-radius: 6px; border: 2px solid rgba(0,0,0,.4); }

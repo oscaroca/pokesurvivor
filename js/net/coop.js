@@ -291,6 +291,8 @@ G.Coop = (() => {
         case 'hs': holdOn(from); break;
         case 'he': holdOff(from); break;
         case 're': G.Rift.enterRequest(); break;
+        // Compra en la tienda de Kecleon de un invitado: las monedas son del equipo.
+        case 'buy': if (G.Game.player) G.Game.player.coins = Math.max(0, G.Game.player.coins - (+ev[1] || 0)); break;
         case 'bye': mateGone(from); break;
       }
     }
@@ -354,7 +356,7 @@ G.Coop = (() => {
   function applyHostEvent(ev) {
     switch (ev[0]) {
       case 'ne':
-        G.EnemyMgr.addRemote({ id: ev[1], dex: ev[2], x: ev[3], y: ev[4], boss: !!ev[5], shiny: !!ev[6], hp: ev[7], dmg: ev[8], beh: ev[9] });
+        G.EnemyMgr.addRemote({ id: ev[1], dex: ev[2], x: ev[3], y: ev[4], boss: !!ev[5], shiny: !!ev[6], hp: ev[7], dmg: ev[8], beh: ev[9], elite: ev[10] || null });
         break;
       case 'ed': G.EnemyMgr.removeRemote(ev[1], true); break;
       case 'eg': G.EnemyMgr.removeRemote(ev[1], false); break;
@@ -375,6 +377,8 @@ G.Coop = (() => {
         break;
       case 'pb': G.World.breakAt(ev[1], ev[2]); break;
       case 'say': G.Spawner.say(ev[1], ev[2]); break;
+      case 'chest': if (!local.dead) G.Game.openChest(); break;
+      case 'eb': G.Elites.blast(ev[1], ev[2], ev[3]); break;
       case 'heal': if (!local.dead) { local.heal(local.maxHp * ev[1]); G.FX.ring(local.x, local.y, 6, 60, '#5fe08a', 0.4, 3); } break;
       case 'lu': if (!ev[2] || ev[2] > seenSeq) { seenSeq = ev[2] || seenSeq; api.levelStart(ev[1]); } break;
       case 'lw': api.waiting(ev[1]); break;
@@ -409,7 +413,7 @@ G.Coop = (() => {
   // anfitrión
   function hurtShown(e, d, color) { emitNear(['hn', e.id, d, color], e.x, e.y, hitFrom); }
   function enemyAdded(e) {
-    emit(['ne', e.id, e.dex, r1(e.x), r1(e.y), e.boss ? 1 : 0, e.shiny ? 1 : 0, Math.ceil(e.maxHp), r2(e.dmg), e.behavior]);
+    emit(['ne', e.id, e.dex, r1(e.x), r1(e.y), e.boss ? 1 : 0, e.shiny ? 1 : 0, Math.ceil(e.maxHp), r2(e.dmg), e.behavior, e.elite || 0]);
   }
   function enemyGone(e, died) { emit([died ? 'ed' : 'eg', e.id]); }
   function enemyShot(p, type) { emit(['es', r1(p.x), r1(p.y), r1(p.vx), r1(p.vy), r2(p.dmg), p.r, p.life, type]); }
@@ -427,9 +431,9 @@ G.Coop = (() => {
     emit(['pc', p.id]);
     if (p.kind === 'magnet') emit(['mag']);
     if (p.kind === 'bomb') emit(['bomb', r1(who.x), r1(who.y)]);
-    if ((p.kind === 'heal' || p.kind === 'item') && who !== local) {
+    if ((p.kind === 'heal' || p.kind === 'item' || p.kind === 'potion' || p.kind === 'treasure') && who !== local) {
       const m = mates.get(who.uid);
-      if (m) m.q.push(p.kind === 'heal' ? ['heal', 0.3] : ['item', p.value]);
+      if (m) m.q.push(p.kind === 'heal' ? ['heal', 0.3] : p.kind === 'potion' ? ['heal', 1] : p.kind === 'treasure' ? ['chest'] : ['item', p.value]);
     }
   }
 

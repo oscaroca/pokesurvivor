@@ -252,6 +252,7 @@
       this.bob += dt * 6;
 
       // --- estados ---
+      if (this.elite) G.Elites.tick(this, dt);
       if (this.slowT > 0) { this.slowT -= dt; if (this.slowT <= 0) this.slow = 0; }
       if (this.burn > 0) {
         this.burnT -= dt; this.burnTick -= dt;
@@ -688,6 +689,7 @@
         ctx.restore();
       }
 
+      if (this.elite) G.Elites.drawAura(ctx, this);
       ctx.save();
       ctx.globalAlpha = alpha;
       G.Sprites.drawShadow(ctx, this.dex, this.x, this.y, this.scale);
@@ -698,6 +700,7 @@
       ctx.restore();
 
       if (this.dead) return;
+      if (this.elite) G.Elites.drawLabel(ctx, this);
 
       // Escudo: burbuja azul.
       if (this.shield > 0 || (this.net && this.net.st & 4)) {
@@ -762,6 +765,7 @@
       e.id = o.id;
       e.remote = true;
       if (o.shiny) e.makeShiny();
+      if (o.elite) G.Elites.make(e, o.elite, true);
       e.maxHp = o.hp; e.hp = o.hp;
       e.net = { x: o.x, y: o.y, vx: 0, vy: 0, age: 0, dir: 0, anim: 0, st: 0 };
       list.push(e);
@@ -911,6 +915,7 @@
           G.Abilities.onKill(pl);
           if (e.boss && !e.judge) pl.bosses++;
           G.Progress.kill(e);
+          if (e.elite) G.Elites.onDeath(e);
           corpses.push(e);
           list.splice(i, 1);
           byId.delete(e.id);

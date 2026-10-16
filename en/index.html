@@ -78,6 +78,7 @@
 <body>
 
 <canvas id="game"></canvas>
+<div id="chest-pop" class="chest-pop hidden"></div>
 <div id="spec-bar" class="spec-bar hidden"><button id="spec-prev" class="btn small" aria-label="Anterior">◀</button><span id="spec-name" translate="no"></span><button id="spec-next" class="btn small" aria-label="Siguiente">▶</button><small>Q / E para cambiar</small></div>
 <!-- En móvil se juega en horizontal -->
 <div id="rotate" class="hidden"><div class="box center"><div id="rotate-ico"></div><h2>Gira el móvil</h2><p class="sub">PokéSurvivor se juega en horizontal.</p></div></div>
@@ -183,12 +184,12 @@
         <button class="menu-item play" data-go="play">Jugar<small>Entra en la mazmorra</small></button>
         <button class="menu-item" data-go="curses">Maldiciones<small id="menu-curse-sub">Más difícil, más premio</small></button>
         <button class="menu-item" data-go="dex">Pokémon<small id="menu-dex-count">Tu colección</small></button>
-        <button class="menu-item" data-go="upgrades">Mejoras<small>Haz más fuerte cada run</small></button>
-        <button class="menu-item" data-go="talents">Talentos<small id="menu-tal-sub">Insignias por región, sin oro</small></button>
+        <button class="menu-item" data-go="upgrades">Entrenar<small id="menu-train-sub">Mejoras y talentos</small></button>
+        <button class="menu-item hidden" data-go="talents">Talentos<small id="menu-tal-sub">Insignias por región, sin oro</small></button>
         <button class="menu-item" data-go="gacha">Gacha<small>9 regiones · Pokémon y shinies</small></button>
         <button class="menu-item" data-go="goals">Misiones<small id="menu-goals-sub">Misiones, logros y perfil</small></button>
-        <button class="menu-item" data-go="friends">Amigos<small id="menu-friends-sub">Juega en grupo, hasta 4</small></button>
-        <button class="menu-item" data-go="rank">Ranking<small>Quién aguanta más</small></button>
+        <button class="menu-item" data-go="friends">Amigos<small id="menu-friends-sub">Grupo y ranking</small></button>
+        <button class="menu-item hidden" data-go="rank">Ranking<small>Quién aguanta más</small></button>
         <button class="menu-item" data-go="settings">Ajustes<small>Sonido, gráficos, controles y cuenta</small></button>
       </div>
     </div>
@@ -378,8 +379,7 @@
     <p class="sub" id="lobby-sub"></p>
     <div class="lobby-nav">
       <button class="btn small" data-nav="dex">Pokémon</button>
-      <button class="btn small" data-nav="upgrades">Mejoras</button>
-      <button class="btn small" data-nav="talents">Talentos</button>
+      <button class="btn small" data-nav="upgrades">Entrenar</button>
       <button class="btn small" data-nav="curses">Maldiciones</button>
       <button class="btn small" data-nav="gacha">Gacha</button>
     </div>
@@ -424,12 +424,37 @@
 </section>
 
 <!-- ====== Misiones, logros y perfil ====== -->
+<section id="scr-daycare" class="scr dim hidden">
+  <div class="box" style="width:min(600px,100%)">
+    <div class="row between"><h2>Guardería</h2><button class="btn small ghost" data-back>Volver</button></div>
+    <div id="dc-body"></div>
+  </div>
+</section>
+
 <section id="scr-talents" class="scr dim hidden">
   <div class="box" style="width:min(720px,100%)">
     <div class="row between"><h2>Talentos</h2><button class="btn small ghost" data-back>Volver</button></div>
     <p class="sub">Árbol de cada región sin oro: insignias por hitos</p>
     <div id="tal-regions" class="tal-regions"></div>
     <div id="tal-body"></div>
+  </div>
+</section>
+
+<section id="scr-plates" class="scr dim hidden">
+  <div class="box center" style="width:min(560px,100%)">
+    <h2>Tablas de Arceus</h2>
+    <p class="sub">Minuto <span id="plate-min">10</span>: elige una Tabla. Cambia una regla hasta el final de la partida.</p>
+    <div id="plate-cards" class="cards"></div>
+  </div>
+</section>
+
+<section id="scr-shop" class="scr dim hidden">
+  <div class="box center" style="width:min(520px,100%)">
+    <h2>Tienda de Kecleon</h2>
+    <p class="sub">Se paga con las monedas de esta partida: lo que gastes no te lo llevas al acabar.</p>
+    <p class="gold" id="shop-coins" style="font-size:18px;margin:4px 0"></p>
+    <div id="shop-cards" class="cards"></div>
+    <button id="shop-close" class="btn ghost" style="margin-top:10px">Salir de la tienda</button>
   </div>
 </section>
 
@@ -594,6 +619,6 @@
 </section>
 
 <!-- datos generados -->
-<script defer src="js/app.min.js?v=ad3a1eb732"></script>
+<script defer src="js/app.min.js?v=70919974b2"></script>
 </body>
 </html>
