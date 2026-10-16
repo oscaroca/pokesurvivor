@@ -36,6 +36,10 @@ G.CHANGELOG = [
     ['Opción de apuntar con el ratón en PC (Ajustes → Controles): tus ataques van hacia el cursor.',
      'Option to aim with the mouse on PC (Settings → Controls): your attacks go towards the cursor.']
   ], chg: [
+    ['Las naturalezas son ahora de cada familia, como las mejoras: lo que desbloqueas con Charmander vale para Charmeleon y Charizard, y se elige una para toda la familia. Se han juntado las que ya tenías.',
+     'Natures now belong to each family, like upgrades: what you unlock with Charmander also counts for Charmeleon and Charizard, and you pick one for the whole family. The ones you already had have been merged.'],
+    ['En Mejoras también puedes elegir la naturaleza, los movimientos favoritos y el movimiento inicial del Pokémon. Mejoras y Talentos, y Pokédex y Guardería, miden lo mismo, y la ficha del Pokémon es algo más alta. El volumen de la primera vez es un 30% más bajo.',
+     'In Upgrades you can now also choose the Pokémon’s nature, favourite moves and starting move. Upgrades and Talents, and Pokédex and Day Care, are the same size, and the Pokémon page is a bit taller. The first-time volume is 30% lower.'],
     ['Menú más ordenado: Pokémon (Pokédex y Guardería), Entrenar (Mejoras y Talentos) y Amigos (Amigos y Ranking) agrupan sus pantallas con pestañas arriba, y la ficha de cada Pokémon se divide en Datos, Movimientos y Misiones.',
      'Tidier menu: Pokémon (Pokédex and Day Care), Train (Upgrades and Talents) and Friends (Friends and Ranking) group their screens with tabs at the top, and each Pokémon’s page is split into Info, Moves and Missions.'],
     ['Las embestidas (Ataque Rápido, Golpe Aéreo, Acua Jet, Choque Anímico, Ultrapuño, Placaje Eléctrico, Ascenso Draco, Danza Acuática y Nitrochoque) ya no salen solas: se lanzan con Espacio (en móvil, tocando su icono) hacia donde te mueves, o hacia donde miras si estás quieto, y no recibes daño mientras cruzas. Son tu esquiva: ocupan un hueco, recargan en unos 2,5 s y hacen un 60% más de daño. El ataque activo sigue disparando solo.',

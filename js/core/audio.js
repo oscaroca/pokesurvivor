@@ -12,7 +12,9 @@
 G.Audio = (() => {
   const KEY = 'ps.audio';
   let ctx = null, master, outNode, musicBus, sfxBus, reverb, wet;
-  let settings = { music: 0.55, sfx: 0.7, muted: false };
+  // Volumen de la primera vez (16-10-2026: un 30% más bajo, antes 0,55 y 0,7).
+  // Quien ya lo había tocado conserva el suyo (va en localStorage).
+  let settings = { music: 0.385, sfx: 0.49, muted: false };
   try { Object.assign(settings, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
   let noiseBuf = null;
 

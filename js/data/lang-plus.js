@@ -19,5 +19,7 @@ if (G.I18n) G.I18n.add({
   'Derrota a los de esta especie en las partidas: cuantos más, más fácil te sale shiny.': 'Defeat this species in your runs: the more you defeat, the easier it is to find a shiny.',
   '{x} / {x} derrotados': '{x} / {x} defeated', '{x} derrotados · ¡investigación completa!': '{x} defeated · research complete!',
   'Siguiente nivel: shiny ×{x} ·': 'Next level: shiny ×{x} ·', '· nivel {x}/{x} · shiny ×{x}': '· level {x}/{x} · shiny ×{x}',
-  '¡Premio de investigación recogido!': 'Research reward claimed!'
+  '¡Premio de investigación recogido!': 'Research reward claimed!',
+  'Las naturalezas son de toda la familia.': 'Natures are shared by the whole family.',
+  'Sácala con un repetido en el gacha o en la Guardería': 'Get it from a gacha duplicate or the Day Care'
 });

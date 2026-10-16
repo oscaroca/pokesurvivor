@@ -59,7 +59,11 @@ input { font: inherit; }
 .scr.hidden { display: none; }
 /* Pantallas que se abren con la barra superior a la vista: empiezan debajo de ella. */
 @media (min-height: 521px) {
-  #scr-goals, #scr-dex, #scr-upgrades, #scr-gacha, #scr-friends, #scr-rank, #scr-lobby, #scr-profile { padding-top: 66px; }
+  #scr-goals, #scr-dex, #scr-upgrades, #scr-gacha, #scr-friends, #scr-rank, #scr-lobby, #scr-profile,
+  #scr-talents, #scr-daycare { padding-top: 66px; }
+  /* Las pantallas con pestañas (Pokédex/Guardería, Mejoras/Talentos) miden lo
+     mismo: al cambiar de pestaña la ventana no salta. */
+  #scr-dex .box, #scr-daycare .box, #scr-upgrades .box, #scr-talents .box { height: min(900px, 100%); }
 }
 .scr.dim { background: radial-gradient(circle at 50% 40%, rgba(10,20,50,.55), rgba(3,6,16,.88)); }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
@@ -222,7 +226,8 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
    desplazaba toda la ventana. Ahora se desplaza sólo ella, a la altura de la
    cuadrícula (filtros + 56vh). En móvil horizontal ya va aparte (más abajo). */
 @media (min-height: 521px) {
-  #dex-detail { max-height: calc(56vh + 48px); overflow-y: auto; scrollbar-width: thin; }
+  #dex-detail { max-height: calc(62vh + 48px); overflow-y: auto; scrollbar-width: thin; }
+  #scr-dex .grid { max-height: calc(62vh - 40px); }
 }
 .panel {
   background: rgba(0,0,0,.2); border: 2px solid rgba(244,248,255,.2); border-radius: 10px; padding: 14px;
@@ -529,6 +534,12 @@ img.pix { image-rendering: pixelated; image-rendering: crisp-edges; vertical-ali
 .start-pick select { font-size: 13px; padding: 2px 6px; max-width: 220px; }
 .fav-star { color: var(--gold); margin-right: 2px; }
 .card.off { opacity: .5; }
+/* Mejoras: naturaleza y movimientos del Pokémon, arriba a todo lo ancho */
+.upg-cfg { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(240px, 1fr) 2fr; gap: 10px; align-items: start; }
+.upg-cfg .nat-grid { margin-bottom: 0; }
+.upg-cfg .mv-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-bottom: 0;
+  max-height: 168px; overflow-y: auto; scrollbar-width: thin; padding-right: 2px; }
+@media (max-width: 760px) { .upg-cfg { grid-template-columns: 1fr; } }
 /* Pestañas de grupo (Pokémon, Entrenar, Amigos) y de la ficha */
 .hub-tabs { display: flex; gap: 4px; margin: -4px 0 10px; border-bottom: 1px solid rgba(255,255,255,.12); }
 .hub-tabs button { appearance: none; cursor: pointer; font: inherit; font-size: 14px; padding: 6px 12px; border: none;

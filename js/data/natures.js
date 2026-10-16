@@ -3,10 +3,12 @@
  * en su ficha. Como en los juegos, pero sobre los 3 stats de este:
  * una sube un stat un 10% y baja otro un 10%; las 3 neutras no tocan nada.
  *
- * Guardado:
- *   save.nat[dex]  = ['fuerte', 'audaz', ...]   desbloqueadas
- *   save.pnat[dex] = 'audaz'                     la elegida
- * Un Pokémon que tienes sin save.nat (partidas de antes) tiene 'fuerte'.
+ * Guardado (por FAMILIA desde el 16-10-2026: Charmander, Charmeleon y
+ * Charizard comparten naturalezas; la clave es la raíz, G.Family.rootOf):
+ *   save.nat[raíz]  = ['fuerte', 'audaz', ...]   desbloqueadas
+ *   save.pnat[raíz] = 'audaz'                     la elegida
+ * Una familia sin save.nat (partidas de antes) tiene 'fuerte'. Las que
+ * estaban por Pokémon se juntan con fold() (unión; la elegida, la del compañero).
  *
  * Se consiguen al conseguir el Pokémon (una al azar) y con los repetidos del
  * gacha: si el repetido trae una naturaleza que no tenías, la desbloqueas.
@@ -44,10 +46,12 @@ G.Natures = (() => {
     return `+10% ${STAT_NAME[n.up]} · −10% ${STAT_NAME[n.down]}`;
   }
 
-  /** Naturalezas desbloqueadas de un Pokémon (en el orden de ALL). */
+  const key = dex => G.Family ? G.Family.rootOf(dex) : +dex;
+
+  /** Naturalezas desbloqueadas de un Pokémon (las de su familia, en el orden de ALL). */
   function owned(save, dex) {
     if (!save || !save.owned[dex]) return [];
-    const l = save.nat && save.nat[dex];
+    const l = save.nat && save.nat[key(dex)];
     const have = new Set(Array.isArray(l) && l.length ? l : ['fuerte']);
     return ALL.filter(n => have.has(n.id)).map(n => n.id);
   }
@@ -57,30 +61,54 @@ G.Natures = (() => {
     if (!BY[id]) return false;
     save.nat = save.nat || {};
     const l = owned(save, dex);
-    if (l.includes(id)) { save.nat[dex] = l; return false; }
-    save.nat[dex] = l.concat(id);
+    if (l.includes(id)) { save.nat[key(dex)] = l; return false; }
+    save.nat[key(dex)] = l.concat(id);
     return true;
   }
 
   /** Primera naturaleza al conseguir un Pokémon nuevo (sustituye a la de por defecto). */
+  // Si la familia ya tenía naturalezas, la del nuevo se suma a ellas.
   function first(save, dex, id) {
     save.nat = save.nat || {};
-    save.nat[dex] = [BY[id] ? id : random()];
+    const k = key(dex), n = BY[id] ? id : random();
+    const l = save.nat[k];
+    save.nat[k] = Array.isArray(l) && l.length ? [...new Set(l.concat(n))] : [n];
   }
 
   /** La elegida para jugar (o la primera que tengas). */
   function chosen(save, dex) {
     const l = owned(save, dex);
-    const c = save && save.pnat && save.pnat[dex];
+    const c = save && save.pnat && save.pnat[key(dex)];
     return l.includes(c) ? c : l[0] || 'fuerte';
   }
 
   function choose(save, dex, id) {
     if (!owned(save, dex).includes(id)) return false;
     save.pnat = save.pnat || {};
-    save.pnat[dex] = id;
+    save.pnat[key(dex)] = id;
     return true;
   }
 
-  return { ALL, BY, STAT_NAME, random, mul, effect, owned, unlock, first, chosen, choose };
+  /**
+   * Junta las naturalezas guardadas por Pokémon en su familia (partidas de
+   * antes del 16-10-2026, o una copia vieja al fusionar). La elegida: la del
+   * compañero si es de la familia; si no, la de la raíz o la primera que haya.
+   */
+  function fold(save) {
+    if (!G.Family || !save) return;
+    for (const coll of ['nat', 'pnat']) {
+      const src = save[coll];
+      if (!src || typeof src !== 'object') continue;
+      const out = {};
+      const ids = Object.keys(src).sort((a, b) => (+a === +save.partner) - (+b === +save.partner) || (+a === key(a)) - (+b === key(b)));
+      for (const d of ids) {
+        const k = key(d);
+        if (coll === 'nat') out[k] = [...new Set([...(out[k] || []), ...(Array.isArray(src[d]) ? src[d] : [])])];
+        else out[k] = src[d];          // los últimos (compañero, raíz) mandan
+      }
+      save[coll] = out;
+    }
+  }
+
+  return { ALL, BY, STAT_NAME, random, mul, effect, owned, unlock, first, chosen, choose, fold };
 })();

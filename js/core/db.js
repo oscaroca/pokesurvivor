@@ -140,11 +140,13 @@ G.DB = (() => {
         f.c = Array.isArray(f.c) ? f.c.filter(x => typeof x === 'string').slice(0, 10) : [];
       }
     } else delete s.fam;
-    // Naturalezas: sólo de Pokémon que tienes y que existan.
+    // Naturalezas (por familia): sólo de familias de las que tienes alguno.
+    if (G.Natures.fold) G.Natures.fold(s);
+    const famOwned = new Set(Object.keys(s.owned).map(d => G.Family ? G.Family.rootOf(d) : +d));
     for (const coll of ['nat', 'pnat']) {
       if (!s[coll] || typeof s[coll] !== 'object') { delete s[coll]; continue; }
       for (const d of Object.keys(s[coll])) {
-        if (!s.owned[d]) { delete s[coll][d]; continue; }
+        if (!famOwned.has(+d)) { delete s[coll][d]; continue; }
         if (coll === 'nat') s.nat[d] = (Array.isArray(s.nat[d]) ? s.nat[d] : []).filter(id => G.Natures.BY[id]);
         else if (!G.Natures.BY[s.pnat[d]]) delete s.pnat[d];
       }
@@ -259,6 +261,8 @@ G.DB = (() => {
     for (const d in older.nat || {}) {
       r.nat[d] = [...new Set([...(r.nat[d] || []), ...(older.nat[d] || [])])];
     }
+    // Una copia de antes (naturalezas por Pokémon) se junta por familia.
+    if (G.Natures.fold) G.Natures.fold(r);
     for (const coll of ['legends', 'arenas', 'itemsFound', 'evoMoves', 'ach']) {
       r[coll] = r[coll] || {};
       for (const k in older[coll] || {}) if (!r[coll][k]) r[coll][k] = older[coll][k];

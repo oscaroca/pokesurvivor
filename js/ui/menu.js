@@ -411,30 +411,13 @@ G.MenuUI = (() => {
     box.querySelectorAll('.mega-seg button').forEach(b => {
       b.onclick = () => { viewForm = b.dataset.form || null; G.Audio.sfx('select'); showDetail(dex); };
     });
-    box.querySelectorAll('.nat-grid button[data-nat]').forEach(b => {
-      b.onclick = () => {
-        if (b.dataset.nat === nat || !G.Natures.choose(s, dex, b.dataset.nat)) return;
-        G.DB.commit();
-        G.Audio.sfx('select');
-        showDetail(dex);
-      };
-    });
-    box.querySelectorAll('.mv-chip[data-mv]').forEach(b => {
-      b.onclick = () => {
-        if (!G.Talents.toggleFav(s, dex, b.dataset.mv)) { G.UI.toast('Ya tienes ' + G.Talents.FAV_MAX + ' favoritos: quita uno primero'); return; }
-        G.DB.commit();
-        G.Audio.sfx('select');
-        showDetail(dex);
-      };
-    });
+    wirePrep(box, dex, () => showDetail(dex));
     const rc = $('res-claim');
     if (rc) rc.onclick = () => {
       if (!G.Research.claim(s, dex)) return;
       G.DB.commit(); G.Audio.sfx('buy'); G.UI.toast('¡Premio de investigación recogido!');
       showDetail(dex);
     };
-    const st = $('dex-start');
-    if (st) st.onchange = () => { G.Talents.setStart(s, dex, st.value); G.DB.commit(); G.Audio.sfx('select'); showDetail(dex); };
     const pick = $('dex-pick');
     if (pick) pick.onclick = () => {
       s.partner = dex;
@@ -443,6 +426,37 @@ G.MenuUI = (() => {
       G.UI.toast(p.name + (s.partnerShiny ? ' shiny' : '') + ' es ahora tu compañero');
       renderGrid(); showDetail(dex);
     };
+  }
+
+  /** Naturalezas de la familia: la elegida y la cuadrícula para cambiarla. */
+  function natBlock(dex, s) {
+    const nat = G.Natures.chosen(s, dex), have = new Set(G.Natures.owned(s, dex));
+    const fam = G.Family.members(G.Family.rootOf(dex)).length > 1;
+    return `<p style="font-size:14px;margin:0 0 4px">Naturaleza <b class="gold">${G.Natures.BY[nat].name}</b>
+        <span style="color:var(--muted)">· ${G.Natures.effect(nat)} · ${have.size}/${G.Natures.ALL.length}</span></p>
+      ${fam ? '<div class="mv-note" style="margin-bottom:4px">Las naturalezas son de toda la familia.</div>' : ''}
+      <div class="nat-grid">${G.Natures.ALL.map(n => have.has(n.id)
+        ? `<button class="${n.id === nat ? 'on' : ''}" data-nat="${n.id}" title="${G.Natures.effect(n.id)}">${n.name}</button>`
+        : `<button disabled title="Sácala con un repetido en el gacha o en la Guardería">?</button>`).join('')}</div>`;
+  }
+
+  /** Botones de naturaleza, favoritos y movimiento inicial (ficha y Mejoras). */
+  function wirePrep(root, dex, rerender) {
+    const s = G.DB.save;
+    root.querySelectorAll('.nat-grid button[data-nat]').forEach(b => {
+      b.onclick = () => {
+        if (b.classList.contains('on') || !G.Natures.choose(s, dex, b.dataset.nat)) return;
+        G.DB.commit(); G.Audio.sfx('select'); rerender();
+      };
+    });
+    root.querySelectorAll('.mv-chip[data-mv]').forEach(b => {
+      b.onclick = () => {
+        if (!G.Talents.toggleFav(s, dex, b.dataset.mv)) { G.UI.toast('Ya tienes ' + G.Talents.FAV_MAX + ' favoritos: quita uno primero'); return; }
+        G.DB.commit(); G.Audio.sfx('select'); rerender();
+      };
+    });
+    const st = root.querySelector('#dex-start');
+    if (st) st.onchange = () => { G.Talents.setStart(s, dex, st.value); G.DB.commit(); G.Audio.sfx('select'); rerender(); };
   }
 
   /** Investigación de la especie (systems/research.js): derrotados, nivel, shiny y premio. */
@@ -539,6 +553,13 @@ G.MenuUI = (() => {
     $('upg-stage').style.setProperty('--stage-c', shiny ? '#9ae6ff' : G.U.TYPE_COLOR[mon.types[0]]);
     const box = $('upg-list');
     box.innerHTML = '';
+    // Naturaleza (de la familia) y movimientos (favoritos, el de inicio) de este
+    // Pokémon, aquí también: todo lo que se prepara antes de jugar, junto.
+    const cfg = document.createElement('div');
+    cfg.className = 'upg-cfg';
+    cfg.innerHTML = `<div class="panel">${natBlock(upgDex, s)}</div><div class="panel">${movesBox(upgDex, mon, s)}</div>`;
+    wirePrep(cfg, upgDex, renderUpgrades);
+    box.appendChild(cfg);
     for (const u of G.Upgrades.LIST) {
       const lvl = levels[u.id] || 0;
       const maxed = lvl >= u.max;
