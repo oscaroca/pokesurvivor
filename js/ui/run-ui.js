@@ -3,6 +3,12 @@ G.RunUI = (() => {
   const $ = G.UI.$;
   let offers = null, offerCb = null, coopMode = false;
 
+  // Al abrirse las cartas, medio segundo sin poder elegir: si justo estabas
+  // cambiando de ataque con 1-4 (o tocando la pantalla), no coges una sin querer.
+  const OPEN_LOCK = 500;
+  let lockUntil = 0, lockTimer = 0;
+  const locked = () => performance.now() < lockUntil;
+
   /** @param coop  en grupo: tras elegir, se queda esperando a los demás */
   function showLevelUp(level, list, cb, coop = false) {
     offerCb = cb; coopMode = coop;
@@ -13,6 +19,10 @@ G.RunUI = (() => {
     renderCards(list);
     $('lvl-reroll').onclick = reroll;
     $('lvl-skip').onclick = skip;
+    lockUntil = performance.now() + OPEN_LOCK;
+    $('cards').classList.add('locked');
+    clearTimeout(lockTimer);
+    lockTimer = setTimeout(() => $('cards').classList.remove('locked'), OPEN_LOCK);
     G.UI.show('scr-levelup');
   }
 
@@ -20,7 +30,7 @@ G.RunUI = (() => {
   const SKIP = { type: 'skip', key: 'skip', apply: p => p.heal(p.maxHp * 0.1) };
   function skip() {
     const p = G.Game.player;
-    if (!offers || !p || !p.tal || !p.tal.skip) return;
+    if (!offers || !p || !p.tal || !p.tal.skip || locked()) return;
     offers = offers.concat([SKIP]);
     pick(offers.length - 1);
   }
@@ -36,7 +46,7 @@ G.RunUI = (() => {
   }
 
   function reroll() {
-    if (!offers || rerollsLeft() <= 0) return;
+    if (!offers || rerollsLeft() <= 0 || locked()) return;
     const p = G.Game.player;
     p.rerolls = (p.rerolls || 0) + 1;
     G.Audio.sfx('select');
@@ -73,7 +83,7 @@ G.RunUI = (() => {
   }
 
   function pick(i) {
-    if (!offers || !offers[i]) return;
+    if (!offers || !offers[i] || locked()) return;
     const c = offers[i], cb = offerCb;
     offers = null; offerCb = null;
     $('lvl-reroll').classList.add('hidden');
