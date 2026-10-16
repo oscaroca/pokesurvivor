@@ -638,8 +638,11 @@ G.Game = (() => {
       return;
     }
     for (let i = 0; i < 4; i++) {
-      if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) pl.setActive(i);
+      if (!(G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1)))) continue;
+      // El número de un hueco de embestida la lanza.
+      if (pl.manualSlot(i)) G.Combat.dashNow(pl, pl.slots[i][0]); else pl.setActive(i);
     }
+    if (G.Input.tap('space')) G.Combat.dashNow(pl);
     if (G.Input.tap('keyq')) pl.cycle(-1);
     if (G.Input.tap('keye') || G.Input.tap('tab')) pl.cycle(1);
   }

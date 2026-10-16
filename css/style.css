@@ -528,6 +528,14 @@ img.pix { image-rendering: pixelated; image-rendering: crisp-edges; vertical-ali
 .sig-line.locked { opacity: .7; filter: grayscale(.5); }
 .start-pick select { font-size: 13px; padding: 2px 6px; max-width: 220px; }
 .fav-star { color: var(--gold); margin-right: 2px; }
+/* Ajustes: color de la barra de vida */
+.hp-cols { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.hp-col { appearance: none; cursor: pointer; width: 24px; height: 24px; border-radius: 6px; border: 2px solid rgba(0,0,0,.4); }
+.hp-col.on { border-color: #fff; box-shadow: 0 0 0 2px var(--gold); }
+#set-hpcol { width: 32px; height: 26px; padding: 0; border: none; background: none; cursor: pointer; }
+.hp-preview { position: relative; height: 14px; border-radius: 7px; background: rgba(0,0,0,.55); overflow: hidden; margin: 2px 0 10px; }
+.hp-preview i { position: absolute; left: 0; top: 0; bottom: 0; }
+.hp-preview span { position: relative; display: block; text-align: center; font-size: 10px; line-height: 14px; color: #fff; }
 /* Talentos por región */
 .tal-regions { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
 .tal-regions button { appearance: none; cursor: pointer; font: inherit; font-size: 13px; padding: 5px 9px; border-radius: 6px;

@@ -128,8 +128,9 @@ G.Player = class Player {
     const group = [m];
     this.slots.push(group);
     this.arrange();
-    // Se cambia al nuevo, salvo si estás usando un vínculo (no te quita el grupo).
-    if (!(this.slots[this.active] && this.slots[this.active].length > 1)) this.setActive(this.slots.indexOf(group));
+    // Se cambia al nuevo, salvo si estás usando un vínculo (no te quita el grupo)
+    // o si es una embestida (va con Espacio, no se activa).
+    if (!m.manual && !(this.slots[this.active] && this.slots[this.active].length > 1)) this.setActive(this.slots.indexOf(group));
     return true;
   }
 
@@ -159,8 +160,12 @@ G.Player = class Player {
 
   hasMove(id) { return this.moves.some(m => m.id === id); }
 
+  /** ¿Hueco sólo con embestidas? (no se activa: se lanzan con Espacio) */
+  manualSlot(i) { const g = this.slots[i]; return !!g && g.length > 0 && g.every(m => m.manual); }
+
   setActive(i) {
     if (i < 0 || i >= this.slots.length || i === this.active) return;
+    if (this.manualSlot(i)) return;
     // Cinta Elección: no se puede cambiar de movimiento.
     if (this.hasItem('choiceband') && this.slots[this.active]) {
       G.FX.dmgText(this.x, this.y - this.bodyH - 8, 'Cinta Elección', '#ff8ad8');
@@ -176,8 +181,13 @@ G.Player = class Player {
   }
 
   cycle(dir) {
-    if (!this.slots.length) return;
-    this.setActive((this.active + dir + this.slots.length) % this.slots.length);
+    const n = this.slots.length;
+    if (!n) return;
+    // Se salta los huecos de embestida.
+    for (let k = 1; k < n; k++) {
+      const i = ((this.active + dir * k) % n + n) % n;
+      if (!this.manualSlot(i)) { this.setActive(i); return; }
+    }
   }
 
   // ---------------- vínculos (fusiones) ----------------

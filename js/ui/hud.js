@@ -25,6 +25,17 @@ G.HUD = (() => {
     }
   }
 
+  /** Barra de vida con los números dentro (fs = tamaño de letra; 0 = sin números). */
+  function hpBar(ctx, x, y, bw, bh, pl, col, fs) {
+    bar(ctx, x, y, bw, bh, pl.hp / pl.maxHp, col);
+    if (!fs) return;
+    ctx.font = F(700, fs);
+    ctx.fillStyle = 'rgba(255,255,255,.95)';
+    ctx.textAlign = 'center';
+    ctx.fillText(Math.ceil(pl.hp) + ' / ' + Math.round(pl.maxHp), x + bw / 2, y + bh - 2);
+    ctx.textAlign = 'left';
+  }
+
   function draw(ctx, w, h, pl, st) {
     ctx.save();
     ctx.textBaseline = 'alphabetic';
@@ -51,11 +62,14 @@ G.HUD = (() => {
     ctx.fillStyle = '#ffcb3d';
     ctx.fillText('Nv. ' + pl.level, px, py + 26);
 
-    bar(ctx, px + 48, py + 17, 168, 11, pl.hp / pl.maxHp, '#ff5f6d');
-    ctx.font = F(700, 10);
-    ctx.fillStyle = 'rgba(255,255,255,.95)';
-    ctx.textAlign = 'center';
-    ctx.fillText(Math.ceil(pl.hp) + ' / ' + Math.round(pl.maxHp), px + 48 + 84, py + 26);
+    // Barra de vida: aquí, encima del Pokémon o encima de los ataques (Ajustes → Gráficos).
+    const hpPos = G.Settings.get('hpBar'), hpCol = G.Settings.get('hpColor') || '#ff5f6d';
+    if (hpPos !== 'player' && hpPos !== 'moves') hpBar(ctx, px + 48, py + 17, 168, 11, pl, hpCol, 10);
+    else if (hpPos === 'player') {
+      const cam = G.Camera, bw = 56;
+      const hx = (pl.x - cam.left()) * cam.scale - bw / 2, hy = (pl.y - pl.bodyH - 2 - cam.top()) * cam.scale - 9;
+      if (!pl.dead) hpBar(ctx, hx, hy, bw, 9, pl, hpCol, 0);
+    }
 
     // buffs activos
     const COL = { atk: '#ff6b4d', spd: '#7fe0ff', def: '#b0b8c8', regen: '#5fe08a' };
@@ -260,6 +274,11 @@ G.HUD = (() => {
     }
     const BOND = '#ff8ad8';
     const cdOf = m => m.kind === 'orbit' ? 0 : G.U.clamp(m.t / (m.cd * pl.cdMul), 0, 1);
+    // Barra de vida encima de los ataques (Ajustes → Gráficos).
+    if (hpPos === 'moves') {
+      const nAll = Math.max(n, pl.maxMoves), bw = Math.max(200, nAll * S + (nAll - 1) * GAP);
+      hpBar(ctx, sx + totalW / 2 - bw / 2, sy - 40, bw, 12, pl, hpCol, 10);
+    }
 
     for (let i = 0; i < n; i++) {
       const g = pl.slots[i] || [];
@@ -269,7 +288,13 @@ G.HUD = (() => {
       const x = sx + i * (S + GAP);
       const y = on ? sy - 6 : sy;
       // Tocar (o hacer clic en) un icono activa ese movimiento.
-      if (m) G.Touch.addButton(x, y, S, S, () => { if (G.Game.state === 'playing' && pl.active !== i) { pl.setActive(i); G.Audio.sfx('click'); } }, GAP / 2 + 3);
+      // Si es una embestida, tocarla la lanza.
+      const manual = pl.manualSlot(i);
+      if (m) G.Touch.addButton(x, y, S, S, () => {
+        if (G.Game.state !== 'playing') return;
+        if (manual) G.Combat.dashNow(pl, m);
+        else if (pl.active !== i) { pl.setActive(i); G.Audio.sfx('click'); }
+      }, GAP / 2 + 3);
       const col = m ? G.U.TYPE_COLOR[m.type] : '#4a5468';
 
       // fondo
@@ -320,11 +345,20 @@ G.HUD = (() => {
         }
       }
 
-      // tecla
+      // tecla (las embestidas: Espacio, y brillan cuando están listas)
       ctx.font = F(800, 9);
       ctx.fillStyle = fused ? BOND : on ? col : 'rgba(180,200,230,.6)';
       ctx.textAlign = 'left';
-      ctx.fillText(String(i + 1), x + 3, y + 10);
+      if (manual) {
+        const ready = m.t <= 0;
+        ctx.fillStyle = ready ? col : 'rgba(180,200,230,.6)';
+        ctx.fillText(touch ? 'TOCA' : 'ESP', x + 3, y + 10);
+        if (ready) {
+          roundRect(ctx, x, y, S, S, 12);
+          ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.globalAlpha = 0.5 + Math.sin(performance.now() / 160) * 0.3;
+          ctx.stroke(); ctx.globalAlpha = 1;
+        }
+      } else ctx.fillText(String(i + 1), x + 3, y + 10);
 
       // nombre encima del activo (con un vínculo: "Ascuas +2")
       if (on) {
@@ -385,7 +419,7 @@ G.HUD = (() => {
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(180,200,230,.55)';
       ctx.fillText(touch ? 'Arrastra el dedo para moverte  ·  toca un ataque para cambiarlo'
-                         : 'WASD moverse  ·  1-4 / Q / E o clic en un ataque para cambiarlo  ·  Esc pausa', w / 2, h - 4);
+                         : 'WASD moverse  ·  1-4 / Q / E o clic en un ataque para cambiarlo  ·  Espacio embestida  ·  Esc pausa', w / 2, h - 4);
     }
 
     ctx.restore();

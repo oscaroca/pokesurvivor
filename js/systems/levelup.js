@@ -83,7 +83,7 @@ G.LevelUp = (() => {
         out.push({
           w, type: 'new', key: 'new:' + id, fav: stars.has(id),
           icon: 'move:' + id, color: G.U.TYPE_COLOR[d.type],
-          tag: G.U.TYPE_NAME[d.type] + (d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''),
+          tag: G.U.TYPE_NAME[d.type] + (d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : '') + (d.manual ? ' · Espacio' : ''),
           title: d.name, desc: d.desc,
           apply: p => p.addMove(id)
         });

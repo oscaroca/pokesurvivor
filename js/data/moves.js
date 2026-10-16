@@ -128,7 +128,7 @@
       cd: 0.50, dmg: 13, radius: 48, arc: 1.7, knock: 90 },
 
     { id: 'quick-attack', name: 'Ataque Rápido', type: 'normal', kind: 'dash',
-      desc: 'Cruzas como un rayo hacia el enemigo y golpeas todo el camino.',
+      desc: 'Cruzas como un rayo y golpeas todo el camino.',
       cd: 0.75, dmg: 20, radius: 110, width: 34, knock: 40 },
 
     { id: 'swords-dance', name: 'Danza Espada', type: 'normal', kind: 'buff',
@@ -421,7 +421,7 @@
       cd: 0.9, dmg: 15, speed: 320, count: 1, radius: 220, size: 8, knock: 30 },
 
     { id: 'aqua-jet', name: 'Acua Jet', type: 'water', kind: 'dash',
-      desc: 'Te lanzas envuelto en agua hacia el enemigo.',
+      desc: 'Te lanzas envuelto en agua y arrollas lo que pillas.',
       cd: 0.75, dmg: 19, radius: 115, width: 36, knock: 50 },
 
     { id: 'bullet-seed', name: 'Recurrente', type: 'grass', kind: 'projectile',
@@ -493,6 +493,18 @@
     if (m.arc) m.arc = Math.min(3, +(m.arc * 1.25).toFixed(2));
   }
 
+  // Embestidas (16-10-2026): ya no salen solas. Se lanzan con Espacio (o tocando
+  // su icono) hacia donde te mueves, sin recibir daño: son tu esquiva. Por eso
+  // recargan mucho más (≈2,5 s) y pegan más (×1,6), que ahora se apuntan a mano.
+  const DASH_CD = 3.3, DASH_DMG = 1.6;
+  function manualDash(m) {
+    if (m.kind !== 'dash') return;
+    m.cd = +(m.cd * DASH_CD).toFixed(2);
+    m.dmg = Math.round(m.dmg * DASH_DMG);
+    m.manual = true;
+  }
+  for (const m of RAW) manualDash(m);
+
   // Pool de movimientos por tipo. El pool `normal` lo tienen todos.
   const POOL = {};
   for (const m of RAW) (POOL[m.type] = POOL[m.type] || []).push(m.id);
@@ -526,6 +538,7 @@
     def.cat = def.kind === 'buff' ? null : def.cat || 'special';
     def.ups = LADDERS[def.kind];
     def.maxLvl = def.ups.length + 1;
+    manualDash(def);
     RAW.push(def);
     BY_ID[def.id] = def;
     return def;

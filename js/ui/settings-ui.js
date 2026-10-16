@@ -53,6 +53,8 @@ G.SettingsUI = (() => {
     setTimeout(() => { if (isOpen()) render(); }, 300);
   }
 
+  const HP_COLORS = ['#ff5f6d', '#5fe08a', '#4fb4ff', '#ffd23f', '#c47bff', '#ff9a3d', '#f4f8ff'];
+
   // ---------------- piezas ----------------
   function section(title, sub) { return `<h3 class="set-h">${esc(title)}</h3>${sub ? `<p class="sub">${sub}</p>` : ''}`; }
   function toggle(key, label, desc) {
@@ -83,12 +85,18 @@ G.SettingsUI = (() => {
         + toggle('dmgNumbers', 'Números de daño', 'Los números que salen al golpear y al recibir daño.')
         + toggle('calm', 'Menos sacudidas y destellos', 'La cámara tiembla menos y los fogonazos son suaves.')
         + toggle('fps', 'Mostrar FPS', 'Fotogramas por segundo, en la esquina de abajo.')
+        + section('Barra de vida', 'Dónde se ve tu vida durante la partida y de qué color.')
+        + choice('hpBar', [['top', 'Arriba a la izquierda'], ['player', 'Encima de tu Pokémon'], ['moves', 'Encima de los ataques']])
+        + `<div class="set-row"><div class="grow"><b>Color</b></div>
+             <div class="hp-cols">${HP_COLORS.map(c => `<button class="hp-col${c === G.Settings.get('hpColor') ? ' on' : ''}" data-col="${c}" style="background:${c}" title="${c}"></button>`).join('')}
+             <input type="color" id="set-hpcol" value="${esc(G.Settings.get('hpColor') || '#ff5f6d')}" title="Otro color"></div></div>
+           <div class="hp-preview"><i style="width:68%;background:${esc(G.Settings.get('hpColor') || '#ff5f6d')}"></i><span>68 / 100</span></div>`
         + (canFull() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>Sin barras del navegador.</small></div>
              <button class="btn small" id="set-full">${isFull() ? 'Salir' : 'Activar'}</button></div>`
            : iosTip() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>${esc(IOS_TIP)}</small></div></div>` : '');
     } else if (tab === 'ctl') {
       box.innerHTML = section('En móvil o tablet')
-        + `<p class="sub">Pon el dedo en cualquier parte y arrastra para moverte: el joystick aparece donde tocas. Toca un ataque de abajo para cambiarlo y el botón de arriba a la derecha para pausar. Se juega en horizontal.</p>`
+        + `<p class="sub">Pon el dedo en cualquier parte y arrastra para moverte: el joystick aparece donde tocas. Toca un ataque de abajo para cambiarlo (si es una embestida, tocarlo la lanza) y el botón de arriba a la derecha para pausar. Se juega en horizontal.</p>`
         + `<div class="set-row"><div class="grow"><b>Tamaño del joystick</b><small>Cuánto hay que arrastrar el dedo.</small></div></div>`
         + choice('stick', [[0.8, 'Pequeño'], [1, 'Normal'], [1.25, 'Grande']])
         + `<div class="set-row"><div class="grow"><b>Colocar los botones</b><small>Pon los ataques, la pausa y el joystick (fijo, si quieres) donde quieras de la pantalla.</small></div>
@@ -98,8 +106,10 @@ G.SettingsUI = (() => {
              <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> o flechas</div><span>moverse</span>
              <div><kbd>1</kbd>–<kbd>4</kbd> o clic en el icono</div><span>elegir ataque</span>
              <div><kbd>Q</kbd> / <kbd>E</kbd></div><span>ataque anterior / siguiente</span>
+             <div><kbd>Espacio</kbd></div><span>embestida (si llevas una): esquiva hacia donde te mueves</span>
              <div><kbd>Esc</kbd> o <kbd>P</kbd></div><span>pausa</span>
-             <div><kbd>1</kbd>–<kbd>3</kbd></div><span>elegir carta al subir de nivel</span>
+             <div><kbd>1</kbd>–<kbd>4</kbd></div><span>elegir carta al subir de nivel</span>
+             <div><kbd>R</kbd> / <kbd>X</kbd></div><span>cambiar las cartas / saltar (con su talento)</span>
            </div>`;
     } else if (tab === 'acc') {
       renderAccount(box);
@@ -150,6 +160,8 @@ G.SettingsUI = (() => {
     box.querySelectorAll('.chip[data-k]').forEach(b => {
       b.onclick = () => { const v = b.dataset.v; G.Settings.set(b.dataset.k, isNaN(+v) ? v : +v); render(); };
     });
+    box.querySelectorAll('[data-col]').forEach(b => { b.onclick = () => { G.Settings.set('hpColor', b.dataset.col); render(); }; });
+    const hc = $('set-hpcol'); if (hc) hc.onchange = () => { G.Settings.set('hpColor', hc.value); render(); };
     const full = $('set-full'); if (full) full.onclick = toggleFull;
     const lay = $('set-layout'); if (lay) lay.onclick = () => G.LayoutUI.open();
     box.querySelectorAll('[data-lang]').forEach(b => { b.onclick = () => { if (b.dataset.lang !== G.I18n.lang) G.I18n.set(b.dataset.lang); }; });

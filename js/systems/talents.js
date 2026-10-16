@@ -189,7 +189,8 @@ G.Talents = (() => {
     if (!accountOn(save, 'start')) return out;
     const sig = G.Signatures && G.Signatures.forDex(dex, save);
     for (const id of G.Moves.poolFor(G.DEX_BY[dex], save)) {
-      if (out.includes(id) || G.Moves.BY_ID[id].kind === 'buff') continue;
+      // Ni potenciadores ni embestidas (van con Espacio: no atacarías solo).
+      if (out.includes(id) || G.Moves.BY_ID[id].kind === 'buff' || G.Moves.BY_ID[id].manual) continue;
       if (id === sig || (save.evoMoves && save.evoMoves[id])) out.push(id);
     }
     return out;

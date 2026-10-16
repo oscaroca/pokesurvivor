@@ -21,6 +21,8 @@ G.Combat = (() => {
   function tick(dt, pl, now) {
     if (pl.dead) return;
     G.Talents.zTick(pl, dt);
+    // Embestidas (manuales): recargan aunque no sean el hueco activo.
+    for (const m of pl.moves) if (m.manual && m.t > 0) m.t -= dt;
     // Eco (Talentos → Área): el ataque se repite un momento después.
     if (pl.echo && (pl.echo.t -= dt) <= 0) {
       const m = pl.echo.m;
@@ -33,6 +35,7 @@ G.Combat = (() => {
 
   function tickMove(dt, pl, m, now) {
     if (m.kind === 'orbit') { orbit(pl, m, dt, now); return; }
+    if (m.manual) return;                 // la embestida va con Espacio (dashNow)
 
     m.t -= dt;
     if (m.t > 0) return;
@@ -52,6 +55,25 @@ G.Combat = (() => {
     run(pl, m);
     if (z) G.Talents.zEnd(pl);
     if (pl.tal && pl.tal.eco && m.kind !== 'buff' && !pl.echo && Math.random() < 0.12) pl.echo = { m, t: 0.18 };
+  }
+
+  /**
+   * Embestida manual (Espacio o tocar su icono): la primera que esté lista, hacia
+   * donde te mueves o, quieto, hacia donde miras. Devuelve si se ha lanzado.
+   */
+  function dashNow(pl, only = null) {
+    if (!pl || pl.dead) return false;
+    const m = only || pl.moves.find(x => x.manual && x.t <= 0);
+    if (!m || !m.manual || m.t > 0) return false;
+    pl.aim = pl.walking ? pl.moveAngle : pl.aim;
+    m.t = Math.max(0.05, m.cd * pl.cdMul);
+    pl.cast(m);
+    if (G.Coop.active) G.Coop.cast(pl, m);
+    m.castAt = performance.now();
+    const z = G.Talents.zBegin(pl);
+    run(pl, m);
+    if (z) G.Talents.zEnd(pl);
+    return true;
   }
 
   function run(pl, m) {
@@ -682,6 +704,6 @@ G.Combat = (() => {
     }
   }
 
-  return { tick, resolve, ghostCast, ghostOrbit, updateFields, drawGroundFields, drawAirFields, clearFields,
+  return { tick, dashNow, resolve, ghostCast, ghostOrbit, updateFields, drawGroundFields, drawAirFields, clearFields,
            get fieldCount() { return fields.length; } };
 })();
