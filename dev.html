@@ -189,6 +189,7 @@
         <button class="menu-item" data-go="curses">Maldiciones<small id="menu-curse-sub">Más difícil, más premio</small></button>
         <button class="menu-item" data-go="dex">Pokémon<small id="menu-dex-count">Tu colección</small></button>
         <button class="menu-item" data-go="upgrades">Mejoras<small>Haz más fuerte cada run</small></button>
+        <button class="menu-item" data-go="talents">Talentos<small id="menu-tal-sub">Insignias por región, sin oro</small></button>
         <button class="menu-item" data-go="gacha">Gacha<small>9 regiones · Pokémon y shinies</small></button>
         <button class="menu-item" data-go="goals">Misiones<small id="menu-goals-sub">Misiones, logros y perfil</small></button>
         <button class="menu-item" data-go="friends">Amigos<small id="menu-friends-sub">Juega en grupo, hasta 4</small></button>
@@ -384,6 +385,7 @@
     <div class="lobby-nav">
       <button class="btn small" data-nav="dex">Pokémon</button>
       <button class="btn small" data-nav="upgrades">Mejoras</button>
+      <button class="btn small" data-nav="talents">Talentos</button>
       <button class="btn small" data-nav="curses">Maldiciones</button>
       <button class="btn small" data-nav="gacha">Gacha</button>
     </div>
@@ -428,6 +430,15 @@
 </section>
 
 <!-- ====== Misiones, logros y perfil ====== -->
+<section id="scr-talents" class="scr dim hidden">
+  <div class="box" style="width:min(720px,100%)">
+    <div class="row between"><h2>Talentos</h2><button class="btn small ghost" data-back>Volver</button></div>
+    <p class="sub">Árbol de cada región sin oro: insignias por hitos</p>
+    <div id="tal-regions" class="tal-regions"></div>
+    <div id="tal-body"></div>
+  </div>
+</section>
+
 <section id="scr-curses" class="scr dim hidden">
   <div class="box" style="width:min(560px,100%)">
     <div class="row between"><h2>Maldiciones</h2><button class="btn small ghost" data-back>Volver</button></div>
@@ -537,9 +548,12 @@
 <section id="scr-levelup" class="scr dim hidden">
   <div class="box center">
     <h2>¡Nivel <span id="lvl-num">2</span>!</h2>
-    <p class="sub">Elige una recompensa · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
+    <p class="sub">Elige una recompensa · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd><span id="lvl-k4" class="hidden"> <kbd>4</kbd></span></p>
     <div id="cards" class="cards"></div>
-    <button id="lvl-reroll" class="btn small ghost hidden" data-sfx="none" style="margin-top:10px">Cambiar opciones (<span id="lvl-rr-n">1</span>) · <kbd>R</kbd></button>
+    <div class="row" style="justify-content:center;gap:8px;margin-top:10px">
+      <button id="lvl-reroll" class="btn small ghost hidden" data-sfx="none">Cambiar opciones (<span id="lvl-rr-n">1</span>) · <kbd>R</kbd></button>
+      <button id="lvl-skip" class="btn small ghost hidden" data-sfx="none">Saltar (+10% vida) · <kbd>X</kbd></button>
+    </div>
     <p id="lvl-wait" class="note hidden"></p>
   </div>
 </section>
@@ -608,6 +622,7 @@
 <script defer src="js/core/camera.js"></script>
 <!-- datos de juego -->
 <script defer src="js/data/moves.js"></script>
+<script defer src="js/data/signatures.js"></script>
 <script defer src="js/data/types.js"></script>
 <script defer src="js/data/starters.js"></script>
 <script defer src="js/data/enemies.js"></script>
@@ -643,6 +658,7 @@
 <script defer src="js/systems/family.js"></script>
 <script defer src="js/systems/curses.js"></script>
 <script defer src="js/systems/buffs.js"></script>
+<script defer src="js/systems/talents.js"></script>
 <script defer src="js/systems/hazards.js"></script>
 <!-- red: amigos, salas, cooperativo y ranking -->
 <script defer src="js/net/social.js"></script>
@@ -660,6 +676,7 @@
 <script defer src="js/ui/slots.js"></script>
 <script defer src="js/ui/gacha-ui.js"></script>
 <script defer src="js/ui/curses-ui.js"></script>
+<script defer src="js/ui/talents-ui.js"></script>
 <script defer src="js/ui/run-ui.js"></script>
 <script defer src="js/ui/social-ui.js"></script>
 <script defer src="js/ui/ranking-ui.js"></script>

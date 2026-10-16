@@ -12,7 +12,17 @@ G.RunUI = (() => {
     $('cards').classList.remove('done');
     renderCards(list);
     $('lvl-reroll').onclick = reroll;
+    $('lvl-skip').onclick = skip;
     G.UI.show('scr-levelup');
+  }
+
+  /** Saltar carta (Talentos → Entrenador): no coges nada y te curas un 10%. */
+  const SKIP = { type: 'skip', key: 'skip', apply: p => p.heal(p.maxHp * 0.1) };
+  function skip() {
+    const p = G.Game.player;
+    if (!offers || !p || !p.tal || !p.tal.skip) return;
+    offers = offers.concat([SKIP]);
+    pick(offers.length - 1);
   }
 
   /**
@@ -38,6 +48,9 @@ G.RunUI = (() => {
     const left = rerollsLeft();
     $('lvl-rr-n').textContent = left;
     $('lvl-reroll').classList.toggle('hidden', left <= 0);
+    const pl = G.Game.player;
+    $('lvl-skip').classList.toggle('hidden', !(pl && pl.tal && pl.tal.skip));
+    $('lvl-k4').classList.toggle('hidden', list.length < 4);
     const box = $('cards');
     box.innerHTML = '';
     list.forEach((c, i) => {
@@ -51,7 +64,7 @@ G.RunUI = (() => {
       if (c.type === 'evo') el.classList.add('evo');
       el.innerHTML =
         `<div class="ico" style="background:${c.color}33">${G.Icons.html(c.icon, 32)}</div>
-         <div class="txt"><div class="nm">${c.title} ${tag}</div><div class="ds">${c.desc}</div></div>
+         <div class="txt"><div class="nm">${c.fav ? '<span class="fav-star" title="Favorito">★</span>' : ''}${c.title} ${tag}</div><div class="ds">${c.desc}</div></div>
          <div class="key">${i + 1}</div>`;
       el.dataset.sfx = 'none';             // el juego pone su propio sonido al elegir
       el.onclick = () => pick(i);
@@ -64,6 +77,7 @@ G.RunUI = (() => {
     const c = offers[i], cb = offerCb;
     offers = null; offerCb = null;
     $('lvl-reroll').classList.add('hidden');
+    $('lvl-skip').classList.add('hidden');
     if (coopMode) {
       // Se queda la carta elegida a la vista mientras eligen los demás.
       $('cards').querySelectorAll('.card').forEach((el, j) => el.classList.toggle('picked', j === i));
@@ -238,5 +252,5 @@ G.RunUI = (() => {
     $('btn-quit').onclick = onQuit;
   }
 
-  return { showLevelUp, reroll, showItemChoice, showBond, pickBond, bondBack, pick, setWaiting, closeLevelUp, showOver, wirePause, showPause };
+  return { showLevelUp, reroll, skip, showItemChoice, showBond, pickBond, bondBack, pick, setWaiting, closeLevelUp, showOver, wirePause, showPause };
 })();

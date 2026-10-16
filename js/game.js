@@ -119,18 +119,23 @@ G.Game = (() => {
     if (G.Curses.on('fragile')) { pl.maxHp = Math.round(pl.maxHp * 0.7); pl.hp = pl.maxHp; }
     // Familia buffada hoy (systems/buffs.js): más vida, daño, velocidad y monedas.
     const buffed = G.Buffs.apply(pl, mon.dex);
+    // Talentos de su región y del entrenador (systems/talents.js), antes de aprender nada.
+    G.Talents.apply(pl, save, mon.dex);
+    pl.favs = G.Talents.favs(save, mon.dex).slice();
     banked = { t1: 0, t10: 0 };
     caught = [];
     // Atajos: movimientos con hueco fijo (save.pbind[dex] = [id del 1, id del 2, ...]),
     // antes de aprender nada: addMove ya los coloca.
     (save.pbind && save.pbind[mon.dex] || []).forEach((id, i) => { if (id) pl.bind[id] = i; });
-    pl.addMove(G.startMoveOf(mon.dex));
+    pl.addMove(G.Talents.startMove(save, mon.dex));
     // Mejora "Veto": movimientos que no quieres que te salgan.
     pl.banned = new Set((save.pban && save.pban[mon.dex] || []).slice(0, perks.bans));
     // Mejora "Repertorio": un segundo movimiento de ataque al azar.
     if (perks.startMoves >= 2) {
       const pool = G.Moves.poolFor(mon).filter(id => !pl.hasMove(id) && !pl.banned.has(id) && G.Moves.BY_ID[id].kind !== 'buff');
-      if (pool.length) pl.addMove(G.U.pick(pool));
+      // Si tienes favoritos de ataque, sale uno de ellos.
+      const fav = pool.filter(id => pl.favs.includes(id));
+      if (pool.length) pl.addMove(G.U.pick(fav.length ? fav : pool));
       pl.setActive(0);
     }
 
@@ -569,7 +574,7 @@ G.Game = (() => {
       return;
     }
     if (p.kind === 'heal') {
-      if (mine) pl.heal(pl.maxHp * 0.3 * G.Abilities.berryMul(pl));
+      if (mine) pl.heal(pl.maxHp * 0.3 * G.Abilities.berryMul(pl) * G.Talents.berryMul(pl));
       G.FX.ring(who.x, who.y, 6, 60, '#5fe08a', 0.4, 3);
       return;
     }
@@ -599,10 +604,11 @@ G.Game = (() => {
       return;
     }
     if (state === 'levelup') {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) G.RunUI.pick(i);
       }
       if (G.Input.tap('keyr')) G.RunUI.reroll();
+      if (G.Input.tap('keyx')) G.RunUI.skip();
       return;
     }
     if (G.UI.isOpen('scr-bond')) {

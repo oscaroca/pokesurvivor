@@ -513,6 +513,51 @@ img.pix { image-rendering: pixelated; image-rendering: crisp-edges; vertical-ali
 .cell.buffed { box-shadow: inset 0 0 0 2px rgba(95,224,138,.45); }
 .buff-line { font-size: 12px; color: #5fe08a; margin: 2px 0 6px; }
 .move-icons { display: flex; flex-wrap: wrap; gap: 3px; margin: 0 0 10px; }
+/* Ficha: movimientos, favoritos y ataque único */
+.mv-note { font-size: 12px; color: var(--muted); }
+.mv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin: 2px 0 10px; }
+.mv-chip { appearance: none; cursor: pointer; font: inherit; font-size: 13px; text-align: left; position: relative;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px 22px 5px 6px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.25); color: #dfe8ff; }
+.mv-chip small { flex-basis: 100%; font-size: 11px; color: var(--muted); }
+.mv-chip i { position: absolute; right: 6px; top: 4px; font-style: normal; color: var(--gold); }
+.mv-chip.on { background: rgba(255,210,63,.18); border-color: var(--gold); }
+.mv-chip.sig { box-shadow: inset 0 0 0 1px #e98cff; }
+.sig-line { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; padding: 8px; border-radius: 8px;
+  background: rgba(233,140,255,.12); border: 1px solid rgba(233,140,255,.4); font-size: 13px; }
+.sig-line.locked { opacity: .7; filter: grayscale(.5); }
+.start-pick select { font-size: 13px; padding: 2px 6px; max-width: 220px; }
+.fav-star { color: var(--gold); margin-right: 2px; }
+/* Talentos por región */
+.tal-regions { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+.tal-regions button { appearance: none; cursor: pointer; font: inherit; font-size: 13px; padding: 5px 9px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.25); color: #dfe8ff; }
+.tal-regions button.on { background: rgba(255,210,63,.2); border-color: var(--gold); color: var(--gold); }
+.tal-regions button b { color: var(--gold); font-size: 11px; margin-left: 3px; }
+.tal-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.tal-pts { font-size: 15px; }
+.tal-tree { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tal-br h4 { margin: 4px 0; font-size: 14px; color: var(--gold); }
+.tal-node { appearance: none; cursor: pointer; font: inherit; text-align: left; width: 100%; margin: 0 0 5px; padding: 7px 8px;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.28); color: #dfe8ff; font-size: 13px; }
+.tal-node b { font-size: 14px; }
+.tal-node .pips { float: right; letter-spacing: 2px; color: var(--gold); }
+.tal-node .why { display: block; font-size: 11px; color: #ff9a9a; margin-top: 2px; }
+.tal-node.full { border-color: var(--gold); background: rgba(255,210,63,.14); }
+.tal-node.can { border-color: #5fe08a; }
+.tal-node.no { cursor: default; opacity: .65; }
+.tal-node.cap { grid-column: 1 / -1; }
+.tal-cap { grid-column: 1 / -1; }
+.tal-cap .tal-node { background: rgba(233,140,255,.12); }
+.tal-cap .tal-node.full { border-color: #e98cff; }
+.tal-hitos { margin: 8px 0; font-size: 13px; }
+.tal-hitos summary { cursor: pointer; color: var(--gold); }
+.tal-hito { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; color: var(--muted); }
+.tal-hito.done { color: #dfe8ff; }
+.tal-hito.done span::before { content: '✓ '; color: #5fe08a; }
+.tal-acc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+.tal-acc .tal-node { cursor: default; }
+@media (max-width: 560px) { .tal-tree, .tal-acc { grid-template-columns: 1fr; } .mv-grid { grid-template-columns: 1fr; } }
 .card .ico img { display: block; }
 .upg-item .ic { display: flex; justify-content: center; }
 

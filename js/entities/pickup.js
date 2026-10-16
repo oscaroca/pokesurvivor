@@ -89,7 +89,8 @@ G.Pickups = (() => {
     if (Math.random() < TICKET_RATE) push(orb('ticket', x + G.U.rand(-6, 6), y, 1));
 
     // Drops ocasionales.
-    const r = Math.random();
+    // Buscador (Talentos → Entrenador): +30% de bayas, imanes y bombas.
+    const r = Math.random() / G.Talents.lootMul();
     if (r < 0.012) { if (!G.Curses.on('noheal')) push(orb('heal', x + G.U.rand(-8, 8), y, 0)); }
     else if (r < 0.020) push(orb('magnet', x, y, 0));
     else if (r < 0.026) push(orb('bomb', x, y, 0));

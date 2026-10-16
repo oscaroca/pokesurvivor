@@ -6,7 +6,7 @@ G.MenuUI = (() => {
   let dexFilter = 'own', dexGen = 0, dexSel = null;
 
   function init() {
-    const ICON = { play: 'ball', curses: 'bomb', dex: 'book', upgrades: 'up', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
+    const ICON = { play: 'ball', curses: 'bomb', dex: 'book', upgrades: 'up', talents: 'medal2', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
     document.querySelectorAll('#scr-menu [data-go]').forEach(b => {
       b.insertAdjacentHTML('afterbegin', `<span class="mi-ico">${G.Icons.html(ICON[b.dataset.go], 26)}</span>`);
       b.dataset.sfx = b.dataset.go === 'play' ? 'confirm' : 'click';
@@ -16,6 +16,7 @@ G.MenuUI = (() => {
         else if (go === 'curses') G.CursesUI.open();
         else if (go === 'dex') openDex();
         else if (go === 'upgrades') openUpgrades();
+        else if (go === 'talents') G.TalentsUI.open();
         else if (go === 'gacha') G.GachaUI.open();
         else if (go === 'goals') G.GoalsUI.open();
         else if (go === 'friends') G.FriendsUI.open();
@@ -88,6 +89,9 @@ G.MenuUI = (() => {
     const pend = G.Progress.pending();
     $('menu-goals-sub').textContent = pend ? pend + (pend === 1 ? ' premio por recoger' : ' premios por recoger') : 'Misiones, logros y perfil';
     $('menu-goals-sub').classList.toggle('gold', pend > 0);
+    const tf = G.TalentsUI.freeTotal();
+    $('menu-tal-sub').textContent = tf ? 'Insignias sin gastar: ' + tf : 'Insignias por región, sin oro';
+    $('menu-tal-sub').classList.toggle('gold', tf > 0);
     // Con cuenta en la nube: amigos en línea, invitaciones y (una vez) el apodo.
     if (G.DB.online && !G.Social.started) {
       G.Social.start().then(r => {
@@ -333,10 +337,7 @@ G.MenuUI = (() => {
         ${ab ? `<p style="font-size:14px;margin:6px 0 4px">Habilidad <b class="gold">${ab.name}</b><br>
           <span style="color:${ab.fam ? 'var(--text, #dfe8ff)' : 'var(--muted)'};font-size:13px">${ab.desc}</span></p>` : ''}
         ${famBox}
-        <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.Moves.BY_ID[G.startMoveOf(dex)].name}</b>
-          ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>
-        <p class="move-icons" title="Movimientos que puede aprender">
-          ${G.Moves.poolFor(p).map(id => { const d = G.Moves.BY_ID[id]; return `<span title="${d.name}${d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''}">${G.Icons.html('move:' + id, 16)}</span>`; }).join('')}</p>
+        ${movesBox(dex, p, s)}
       ` : `<p class="center" style="color:var(--muted)">Aún no lo tienes.<br>Consíguelo en el banner de <b class="gold">${GEN_NAMES[p.gen - 1]}</b>
             o derrotándolo cuando salga shiny.</p>`}
     `;
@@ -368,6 +369,16 @@ G.MenuUI = (() => {
         showDetail(dex);
       };
     });
+    box.querySelectorAll('.mv-chip[data-mv]').forEach(b => {
+      b.onclick = () => {
+        if (!G.Talents.toggleFav(s, dex, b.dataset.mv)) { G.UI.toast('Ya tienes ' + G.Talents.FAV_MAX + ' favoritos: quita uno primero'); return; }
+        G.DB.commit();
+        G.Audio.sfx('select');
+        showDetail(dex);
+      };
+    });
+    const st = $('dex-start');
+    if (st) st.onchange = () => { G.Talents.setStart(s, dex, st.value); G.DB.commit(); G.Audio.sfx('select'); showDetail(dex); };
     const pick = $('dex-pick');
     if (pick) pick.onclick = () => {
       s.partner = dex;
@@ -376,6 +387,46 @@ G.MenuUI = (() => {
       G.UI.toast(p.name + (s.partnerShiny ? ' shiny' : '') + ' es ahora tu compañero');
       renderGrid(); showDetail(dex);
     };
+  }
+
+  /**
+   * Movimientos de la ficha: con qué empieza (elegible con Talentos →
+   * Movimiento inicial), su ataque único y la lista de los que puede aprender,
+   * donde se marcan hasta 4 favoritos (salen más en las cartas).
+   */
+  function movesBox(dex, p, s) {
+    const T = G.Talents;
+    const favs = T.favs(s, dex);
+    const opts = T.startOptions(s, dex);
+    const start = T.startMove(s, dex);
+    const M = G.Moves.BY_ID;
+    const sig = G.Signatures.of(dex);
+    const sigOn = sig && G.Signatures.unlocked(s, dex);
+    const startLine = opts.length > 1
+      ? `<label class="start-pick">Empieza con <select id="dex-start" class="field">${opts.map(id =>
+          `<option value="${id}" ${id === start ? 'selected' : ''}>${M[id].name}${id === G.startMoveOf(dex) ? ' (de siempre)' : ''}</option>`).join('')}</select></label>`
+      : `Empieza con <b class="gold">${M[start].name}</b>`;
+    const lockStart = !T.accountOn(s, 'start')
+      ? `<div class="mv-note">${G.Icons.html('ban', 12)} Elegir el movimiento inicial: Talentos → Entrenador (evoluciona 10 movimientos).</div>`
+      : opts.length < 2 ? '<div class="mv-note">Evoluciona en partida alguno de sus movimientos para poder empezar con él.</div>' : '';
+    const sigLine = !sig ? '' : `<div class="sig-line${sigOn ? '' : ' locked'}">${G.Icons.html('move:' + sig.id, 18)}
+        <div><b>Ataque único: ${sig.name}</b> <span class="mv-note">· ${G.U.TYPE_NAME[sig.type]}</span><br><span class="mv-note">${sig.desc}</span><br>
+        <span class="mv-note">${sigOn ? 'Desbloqueado: sale en las cartas.' : G.DEX_BY[sig.of].leg
+          ? 'Bloqueado: derrótalo en una grieta o completa la misión de familia de 15 minutos.'
+          : 'Bloqueado: completa la misión de familia «Aguanta 15 minutos» y recoge el premio.'}</span></div></div>`;
+    const ids = G.Moves.poolFor(p, s).sort((a, b) => (favs.includes(b) - favs.includes(a)) || M[a].name.localeCompare(M[b].name, 'es'));
+    const chips = ids.map(id => {
+      const d = M[id], on = favs.includes(id);
+      return `<button class="mv-chip${on ? ' on' : ''}${d.sig ? ' sig' : ''}" data-mv="${id}" title="${d.desc}">${G.Icons.html('move:' + id, 16)} ${d.name}` +
+        `<small>${G.U.TYPE_NAME[d.type]}${d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''}</small>${on ? '<i>★</i>' : ''}</button>`;
+    }).join('');
+    return `<p style="font-size:14px;margin:10px 0 4px">${startLine}
+        ${G.Moves.favors(p) ? `<span style="color:var(--muted)">· Pega más con movimientos ${G.Moves.favors(p) === 'physical' ? 'físicos' : 'especiales'}</span>` : ''}</p>
+      ${lockStart}
+      ${sigLine}
+      <p style="font-size:14px;margin:10px 0 2px"><b class="gold">Movimientos</b> <span style="color:var(--muted)">· Favoritos ${favs.length}/${T.FAV_MAX}</span></p>
+      <div class="mv-note" style="margin-bottom:4px">Toca hasta ${T.FAV_MAX} favoritos: con los ${T.FAV_MAX} marcados, sale al menos uno en unas 7 de cada 10 subidas de nivel.</div>
+      <div class="mv-grid">${chips}</div>`;
   }
 
   // ---------------- mejoras ----------------
@@ -511,7 +562,11 @@ G.MenuUI = (() => {
         const l = banList(), id = b.dataset.id, i = l.indexOf(id);
         if (i >= 0) l.splice(i, 1);
         else if (l.length >= max) { G.UI.toast('Ya tienes ' + max + ' vetados: quita uno primero'); return; }
-        else l.push(id);
+        else {
+          l.push(id);
+          // Un movimiento vetado deja de ser favorito.
+          if (G.Talents.favs(G.DB.save, upgDex).includes(id)) G.Talents.toggleFav(G.DB.save, upgDex, id);
+        }
         G.DB.commit();
         G.Audio.sfx('select');
         renderUpgrades();

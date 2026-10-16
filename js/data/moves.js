@@ -504,11 +504,31 @@
     BY_ID[m.id] = m;
   }
 
-  /** Movimientos que este Pokémon puede aprender (sus tipos + normal). */
-  function poolFor(mon) {
+  /**
+   * Movimientos que este Pokémon puede aprender (sus tipos + normal), más el
+   * ataque único de su familia si la partida `save` lo tiene desbloqueado
+   * (data/signatures.js).
+   */
+  function poolFor(mon, save = G.DB && G.DB.save) {
     const ids = new Set(POOL.normal);
     for (const t of mon.types) for (const id of (POOL[t] || [])) ids.add(id);
+    const sig = G.Signatures && save ? G.Signatures.forDex(mon.dex, save) : null;
+    if (sig) ids.add(sig);
     return [...ids];
+  }
+
+  /**
+   * Añade un movimiento después de cargar (ataques únicos): con su escalera
+   * de mejoras y su categoría, pero fuera de los pools por tipo.
+   */
+  function register(def) {
+    if (BY_ID[def.id]) return BY_ID[def.id];
+    def.cat = def.kind === 'buff' ? null : def.cat || 'special';
+    def.ups = LADDERS[def.kind];
+    def.maxLvl = def.ups.length + 1;
+    RAW.push(def);
+    BY_ID[def.id] = def;
+    return def;
   }
 
   /**
@@ -669,6 +689,6 @@
     return true;
   }
 
-  G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, instance, levelUp, nextUpText, startFor, favors, CAT_NAME,
+  G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, register, instance, levelUp, nextUpText, startFor, favors, CAT_NAME,
               EVO, NEED_NAME, evoInfo, evolve };
 })();

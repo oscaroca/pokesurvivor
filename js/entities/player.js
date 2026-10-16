@@ -103,7 +103,12 @@ G.Player = class Player {
   get atk() { return this.baseAtk * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
   get spa() { return this.baseSpa * this.atkMul * (1 + this.buffs.atk.n * this.buffs.atk.amount); }
   /** Multiplicador de daño de un movimiento: Ataque si es físico, Ataque Especial si es especial. */
-  atkFor(m) { return (m && m.cat === 'special' ? this.spa : this.atk) * G.Abilities.dmgMul(this, m); }
+  atkFor(m) {
+    let k = (m && m.cat === 'special' ? this.spa : this.atk) * G.Abilities.dmgMul(this, m) * G.Talents.dmgMul(this, m);
+    // Última Baza (ataque único de Eevee): más daño por cada otro movimiento al máximo.
+    if (m && m.perMax) k *= 1 + m.perMax * this.moves.filter(o => o !== m && o.lvl >= o.def.maxLvl).length;
+    return k;
+  }
   get spd() {
     const free = G.Abilities.noSlow(this);
     const s = this.baseSpd * this.spdMul * (1 + this.buffs.spd.n * this.buffs.spd.amount) * (this.slowT > 0 && !free ? 0.5 : 1);
@@ -118,6 +123,7 @@ G.Player = class Player {
   addMove(id) {
     if (this.slots.length >= this.maxMoves || this.hasMove(id)) return false;
     const m = G.Moves.instance(id, 1);
+    G.Talents.applyMove(m, this.tal);       // árbol de la región (systems/talents.js)
     this.moves.push(m);
     const group = [m];
     this.slots.push(group);
@@ -161,6 +167,7 @@ G.Player = class Player {
       return;
     }
     this.active = i;
+    this.rotUntil = performance.now() + 2500;   // Rotación (nodo de Teselia)
     G.Projectiles.clearOrbs(this);
     G.Audio.sfx('select');
     for (const m of this.slots[i]) m.t = Math.min(m.t, m.cd * 0.35);
@@ -261,7 +268,7 @@ G.Player = class Player {
     // Con un ataque cuerpo a cuerpo activo se recibe un 25 % menos: hay que
     // estar encima de los enemigos para pegar (iban muy por detrás).
     const close = this.activeGroup().some(m => m.kind === 'melee') ? 0.75 : 1;
-    const d = pure ? Math.max(1, amount) : Math.max(1, amount * (1 - this.reduction) * close);
+    const d = pure ? Math.max(1, amount) : Math.max(1, amount * (1 - this.reduction) * close * G.Talents.takenMul(this));
     this.hp -= d;
     this.invuln = 0.45;
     this.flash = 0.14;
@@ -283,7 +290,9 @@ G.Player = class Player {
       G.FX.dmgText(this.x, this.y - this.bodyH - 16, '¡' + this.ability.name + '!', '#ffd23f', true);
       G.FX.ring(this.x, this.y, 6, 70, '#ffd23f', 0.5, 4);
     }
-    if (this.hp > 0) G.Abilities.onHurt(this);
+    // Segunda oportunidad (Talentos → Entrenador): una vez por partida.
+    if (this.hp <= 0) G.Talents.saveFromDeath(this);
+    if (this.hp > 0) { G.Abilities.onHurt(this); G.Talents.onHurt(this); }
     if (this.hp <= 0) {
       this.hp = 0; this.dead = true;
       this.anim.play('Faint', { hold: true });
@@ -303,7 +312,7 @@ G.Player = class Player {
 
   // ---------------- evolución en la run ----------------
   /** Bonus por haber empezado en una forma anterior: +20% por evolución. */
-  get evoMul() { return 1 + 0.2 * this.evos; }
+  get evoMul() { return 1 + G.Talents.evoStep(this) * this.evos; }
 
   // ---------------- megaevolución ----------------
   /** Formas a las que puede megaevolucionar ya (sólo en forma final y una vez por run). */

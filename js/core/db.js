@@ -177,6 +177,8 @@ G.DB = (() => {
       }
     }
     s.pupgRefund = n(s.pupgRefund);
+    // Talentos, favoritos y movimiento inicial (systems/talents.js).
+    if (G.Talents) G.Talents.sanitize(s);
     foldFamilies(s);
   }
 

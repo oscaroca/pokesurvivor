@@ -17,7 +17,9 @@ G.Family = (() => {
     { id: 'lv20',  stat: 'level',  goal: 20,  reward: { t1: 2 },  text: 'Llega al nivel 20 en una run' },
     { id: 'boss5', stat: 'bosses', goal: 5,   reward: { t1: 3 },  text: 'Derrota a 5 jefes' },
     { id: 'final', stat: 'final',  goal: 1,   reward: { t1: 3 },  text: 'Evoluciona hasta su forma final en una run', evolves: true },
-    { id: 't12',   stat: 'time',   goal: 720, reward: { t10: 1 }, text: 'Aguanta 12 minutos en una run' }
+    { id: 't12',   stat: 'time',   goal: 720, reward: { t10: 1 }, text: 'Aguanta 12 minutos en una run' },
+    // Sólo las familias con ataque único (data/signatures.js): el premio es desbloquearlo.
+    { id: 'sig',   stat: 'time',   goal: 900, reward: { sig: 1 }, text: 'Aguanta 15 minutos en una run', sig: true }
   ];
 
   // dex -> raíz de su familia (sube por las evoluciones hasta el primero).
@@ -46,7 +48,10 @@ G.Family = (() => {
   /** ¿La familia evoluciona? */
   function evolves(root) { return !!(G.EVO && G.EVO[root] && G.EVO[root].length); }
   /** Misiones de la familia de `dex`. */
-  function defsFor(dex) { const r = rootOf(dex); return DEFS.filter(m => !m.evolves || evolves(r)); }
+  function defsFor(dex) {
+    const r = rootOf(dex);
+    return DEFS.filter(m => (!m.evolves || evolves(r)) && (!m.sig || (G.Signatures && G.Signatures.idFor(r))));
+  }
 
   function rec(save, dex) {
     save.fam = save.fam || {};

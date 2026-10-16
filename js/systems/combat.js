@@ -20,6 +20,13 @@ G.Combat = (() => {
 
   function tick(dt, pl, now) {
     if (pl.dead) return;
+    G.Talents.zTick(pl, dt);
+    // Eco (Talentos → Área): el ataque se repite un momento después.
+    if (pl.echo && (pl.echo.t -= dt) <= 0) {
+      const m = pl.echo.m;
+      pl.echo = null;
+      if (pl.activeGroup().includes(m)) { if (G.Coop.active) G.Coop.cast(pl, m); run(pl, m); }
+    }
     // Vínculos: todos los movimientos del hueco activo, cada uno con su recarga.
     for (const m of pl.activeGroup()) tickMove(dt, pl, m, now);
   }
@@ -41,7 +48,10 @@ G.Combat = (() => {
     // enemigo, como Ascuas tras Ataque Rápido, casi no se ve).
     m.castAt = performance.now();
 
+    const z = G.Talents.zBegin(pl);       // Movimiento Z (nodo de Alola): este ataque, ×3
     run(pl, m);
+    if (z) G.Talents.zEnd(pl);
+    if (pl.tal && pl.tal.eco && m.kind !== 'buff' && !pl.echo && Math.random() < 0.12) pl.echo = { m, t: 0.18 };
   }
 
   function run(pl, m) {

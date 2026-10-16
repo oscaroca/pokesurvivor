@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <base href="../">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>PokéSurvivor – Free online Pokémon survival game (Survivor.io style)</title>
-<meta name="description" content="Survive hordes of Pokémon with your partner in this free fan game for browser and mobile: 966 Pokémon, shinies, legendaries and online co-op with friends. No downloads, no ads.">
-<link rel="canonical" href="https://pokesurvivor.com/en/">
+<title>PokéSurvivor Plus+ – Free online Pokémon survival game (Survivor.io style)</title>
+<meta name="description" content="Survive hordes of Pokémon with your partner in this free fan game for browser and mobile: 980 Pokémon, shinies, legendaries and online co-op with friends. No downloads, no ads.">
+<link rel="canonical" href="https://oscaroca-pokesurvivor.vercel.app/en/">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#0a1430">
 <meta name="color-scheme" content="dark">
@@ -14,17 +14,17 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PokéSurvivor">
 <meta property="og:locale" content="en_US">
-<meta property="og:url" content="https://pokesurvivor.com/en/">
+<meta property="og:url" content="https://oscaroca-pokesurvivor.vercel.app/en/">
 <meta property="og:title" content="PokéSurvivor – Survive the Pokémon hordes">
-<meta property="og:description" content="A free fan game for browser and mobile: 966 Pokémon, shinies, legendaries and co-op with up to 4 friends. No downloads, no ads.">
-<meta property="og:image" content="https://pokesurvivor.com/assets/og-image.jpg">
+<meta property="og:description" content="A free fan game for browser and mobile: 980 Pokémon, shinies, legendaries and co-op with up to 4 friends. No downloads, no ads.">
+<meta property="og:image" content="https://oscaroca-pokesurvivor.vercel.app/assets/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="PokéSurvivor: un Pokémon rodeado de hordas en un mapa pixel art">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="PokéSurvivor – Survive the Pokémon hordes">
 <meta name="twitter:description" content="A free fan game for browser and mobile, with co-op for up to 4. No downloads, no ads.">
-<meta name="twitter:image" content="https://pokesurvivor.com/assets/og-image.jpg">
+<meta name="twitter:image" content="https://oscaroca-pokesurvivor.vercel.app/assets/og-image.jpg">
 <script>window.PS_PAGES = true;</script>
 <link rel="manifest" href="manifest.webmanifest">
 <!-- Google sólo enseña en los resultados iconos de 48 px o múltiplos -->
@@ -36,7 +36,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PokéSurvivor">
+<meta name="apple-mobile-web-app-title" content="PokéSurvivor Plus+">
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preload" href="assets/fonts/PixelifyPS-400.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="assets/fonts/PixelifyPS-700.ttf" as="font" type="font/ttf" crossorigin>
@@ -47,18 +47,18 @@
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://pokesurvivor.com/#web",
-      "url": "https://pokesurvivor.com/",
+      "@id": "https://oscaroca-pokesurvivor.vercel.app/#web",
+      "url": "https://oscaroca-pokesurvivor.vercel.app/",
       "name": "PokéSurvivor",
       "inLanguage": ["es", "en"]
     },
     {
       "@type": ["VideoGame", "WebApplication"],
-      "@id": "https://pokesurvivor.com/#juego",
+      "@id": "https://oscaroca-pokesurvivor.vercel.app/#juego",
       "name": "PokéSurvivor",
-      "url": "https://pokesurvivor.com/",
+      "url": "https://oscaroca-pokesurvivor.vercel.app/",
       "description": "A free Pokémon survival fan game (bullet heaven, Survivor.io style): pick a partner, survive the hordes, level up, evolve your moves, fight legendaries in rifts and play co-op with up to 4 friends.",
-      "image": "https://pokesurvivor.com/assets/og-image.jpg",
+      "image": "https://oscaroca-pokesurvivor.vercel.app/assets/og-image.jpg",
       "inLanguage": ["es", "en"],
       "genre": ["Roguelike", "Bullet heaven", "Acción", "Supervivencia"],
       "gamePlatform": ["Navegador web", "PC", "Android", "iOS"],
@@ -68,7 +68,7 @@
       "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 4 },
       "isAccessibleForFree": true,
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" },
-      "isPartOf": { "@id": "https://pokesurvivor.com/#web" }
+      "isPartOf": { "@id": "https://oscaroca-pokesurvivor.vercel.app/#web" }
     }
   ]
 }
@@ -78,6 +78,7 @@
 <body>
 
 <canvas id="game"></canvas>
+<div id="spec-bar" class="spec-bar hidden"><button id="spec-prev" class="btn small" aria-label="Anterior">◀</button><span id="spec-name" translate="no"></span><button id="spec-next" class="btn small" aria-label="Siguiente">▶</button><small>Q / E para cambiar</small></div>
 <!-- En móvil se juega en horizontal -->
 <div id="rotate" class="hidden"><div class="box center"><div id="rotate-ico"></div><h2>Gira el móvil</h2><p class="sub">PokéSurvivor se juega en horizontal.</p></div></div>
 
@@ -85,11 +86,11 @@
 <section id="scr-login" class="scr hidden">
   <div class="box" style="width:min(420px,100%)">
     <div class="logo">
-      <div class="t1">PokéSurvivor</div>
+      <div class="t1">PokéSurvivor<span class="plus">Plus+</span></div>
       <div class="t2">Mundo Misterioso</div>
     </div>
     <p class="login-tag">Sobrevive a las hordas con tu compañero Pokémon · gratis, en PC y móvil</p>
-    <p class="login-official">Web oficial: pokesurvivor.com · si alguien te pide pagar, no somos nosotros</p>
+    <p class="login-official">Versión no oficial de pokesurvivor.com · siempre gratis</p>
     <div class="tabs">
       <div class="tab on" data-tab="login">Entrar</div>
       <div class="tab" data-tab="register">Crear cuenta</div>
@@ -161,8 +162,12 @@
 <!-- ====== Menú principal ====== -->
 <section id="scr-menu" class="scr hidden">
   <div class="menu-left">
+    <div class="menu-side" id="menu-side">
+      <div class="box menu-top hidden" id="menu-top" style="padding:12px 16px"></div>
+      <div class="box menu-buffs hidden" id="menu-buffs"></div>
+    </div>
     <div class="logo">
-      <div class="t1">PokéSurvivor</div>
+      <div class="t1">PokéSurvivor<span class="plus">Plus+</span></div>
       <div class="t2">Mundo Misterioso</div>
     </div>
     <div class="partner-card">
@@ -176,8 +181,10 @@
     <div class="box">
       <div class="menu-list">
         <button class="menu-item play" data-go="play">Jugar<small>Entra en la mazmorra</small></button>
+        <button class="menu-item" data-go="curses">Maldiciones<small id="menu-curse-sub">Más difícil, más premio</small></button>
         <button class="menu-item" data-go="dex">Pokémon<small id="menu-dex-count">Tu colección</small></button>
         <button class="menu-item" data-go="upgrades">Mejoras<small>Haz más fuerte cada run</small></button>
+        <button class="menu-item" data-go="talents">Talentos<small id="menu-tal-sub">Insignias por región, sin oro</small></button>
         <button class="menu-item" data-go="gacha">Gacha<small>9 regiones · Pokémon y shinies</small></button>
         <button class="menu-item" data-go="goals">Misiones<small id="menu-goals-sub">Misiones, logros y perfil</small></button>
         <button class="menu-item" data-go="friends">Amigos<small id="menu-friends-sub">Juega en grupo, hasta 4</small></button>
@@ -188,6 +195,7 @@
     <div class="box" style="padding:14px 18px">
       <div id="menu-stats" style="font-size:14px;color:var(--muted)"></div>
     </div>
+
   </div>
 </section>
 
@@ -255,13 +263,14 @@
   <div class="box legal" style="width:min(640px,100%)">
     <div class="row between"><h2>Aviso legal</h2><button class="btn small ghost" id="legal-close">Cerrar</button></div>
     <h3>Proyecto de fan</h3>
-    <p><b>PokéSurvivor</b> es un juego hecho por fans, <b>gratuito y sin ánimo de lucro</b>.
-      No tiene anuncios ni compras. Se puede apoyar con donaciones voluntarias, que se usan sólo para pagar los servidores y el dominio, y que no dan ninguna ventaja en el juego.</p>
+    <p><b>PokéSurvivor Plus+</b> es una versión modificada de <a href="https://github.com/JPTER78/pokesurvivor" target="_blank" rel="noopener">PokéSurvivor</a>,
+      el juego de JPTER78, con evoluciones en partida, naturalezas, habilidades, megaevoluciones, misiones por familia y maldiciones.
+      Es un juego hecho por fans, <b>gratuito y sin ánimo de lucro</b>: no tiene anuncios, compras ni donaciones.</p>
     <p>No está afiliado, patrocinado ni aprobado por Nintendo, Creatures Inc., GAME FREAK ni
       The Pokémon Company. Pokémon y todos los nombres y personajes relacionados son marcas y
       propiedad de sus respectivos dueños.</p>
     <h3>Web oficial</h3>
-    <p>La única web oficial de PokéSurvivor es pokesurvivor.com. El juego es y será gratis: si alguien te pide pagar, no somos nosotros.</p>
+    <p>La web oficial del juego original es pokesurvivor.com. PokéSurvivor Plus+ es una versión aparte y no oficial; las dos son gratis: si alguien te pide pagar, no somos nosotros.</p>
     <h3>Criptomonedas</h3>
     <p>PokéSurvivor no tiene ninguna criptomoneda, token ni NFT oficial, y su autor no ha creado ninguno. Cualquier token que use el nombre del juego lo han creado terceros: no nos hacemos cargo de ninguna compra, venta o inversión que hagas con ellos, y nada de lo que hay aquí es una recomendación de inversión.</p>
     <h3>Contenido de terceros</h3>
@@ -270,8 +279,8 @@
       <a href="https://pokeapi.co/" target="_blank" rel="noopener">PokeAPI</a>. Fuente Pixelify Sans (OFL).
       La música y los efectos de sonido son originales del proyecto.</p>
     <h3>Contacto y retirada de contenido</h3>
-    <p>Si eres titular de derechos y quieres que retiremos algo, escríbenos y lo quitaremos lo
-      antes posible: <a id="legal-mail" href="#"></a></p>
+    <p>Si eres titular de derechos y quieres que retiremos algo, abre una incidencia y lo quitaremos lo
+      antes posible: <a id="legal-mail" href="#" target="_blank" rel="noopener"></a></p>
     <p>Código fuente: <a id="legal-repo" href="#" target="_blank" rel="noopener"></a></p>
     <p>Licencia del código: PolyForm Noncommercial 1.0.0 (se puede usar, estudiar y modificar, pero no para ganar dinero). Las versiones hasta el 14-10-2026 siguen bajo MIT.</p>
     <h3>Privacidad</h3>
@@ -326,7 +335,7 @@
     <div class="boot-in">
       <h1>PokéSurvivor</h1>
       <p>PokéSurvivor necesita JavaScript para funcionar. Actívalo para jugar.</p>
-      <p>Fan game gratuito de supervivencia con 966 Pokémon de las 9 regiones: elige tu compañero, sobrevive a las hordas, evoluciona tus ataques, enfréntate a legendarios y juega en cooperativo con hasta 4 amigos.</p>
+      <p>Fan game gratuito de supervivencia con 980 Pokémon de las 9 regiones: elige tu compañero, sobrevive a las hordas, evoluciona tus ataques, enfréntate a legendarios y juega en cooperativo con hasta 4 amigos.</p>
       <p><a href="en/guide/">Guía del juego</a> · <a href="en/pokedex/">Pokédex: todos los Pokémon jugables</a></p>    </div>
   </div>
 </noscript>
@@ -365,12 +374,20 @@
 <section id="scr-lobby" class="scr dim hidden">
   <div class="box wide">
     <div class="row between"><h2>Sala</h2>
-      <div class="row"><button id="lobby-menu" class="btn small ghost">Menú</button><button id="lobby-leave" class="btn small ghost">Salir de la sala</button></div></div>
+      <div class="row"><button id="lobby-leave" class="btn small ghost">Salir de la sala</button></div></div>
     <p class="sub" id="lobby-sub"></p>
+    <div class="lobby-nav">
+      <button class="btn small" data-nav="dex">Pokémon</button>
+      <button class="btn small" data-nav="upgrades">Mejoras</button>
+      <button class="btn small" data-nav="talents">Talentos</button>
+      <button class="btn small" data-nav="curses">Maldiciones</button>
+      <button class="btn small" data-nav="gacha">Gacha</button>
+    </div>
     <div id="lobby-members" class="lobby-members"></div>
     <h3 id="lobby-inv-title" style="margin:14px 0 6px">Invitar amigos</h3>
     <div id="lobby-invite" class="fr-list"></div>
     <div class="row" style="margin-top:14px">
+      <button id="lobby-ready" class="btn grow">Listo</button>
       <button id="lobby-start" class="btn gold grow">Empezar partida</button>
     </div>
     <p class="note" id="lobby-note"></p>
@@ -407,6 +424,25 @@
 </section>
 
 <!-- ====== Misiones, logros y perfil ====== -->
+<section id="scr-talents" class="scr dim hidden">
+  <div class="box" style="width:min(720px,100%)">
+    <div class="row between"><h2>Talentos</h2><button class="btn small ghost" data-back>Volver</button></div>
+    <p class="sub">Árbol de cada región sin oro: insignias por hitos</p>
+    <div id="tal-regions" class="tal-regions"></div>
+    <div id="tal-body"></div>
+  </div>
+</section>
+
+<section id="scr-curses" class="scr dim hidden">
+  <div class="box" style="width:min(560px,100%)">
+    <div class="row between"><h2>Maldiciones</h2><button class="btn small ghost" data-back>Volver</button></div>
+    <p class="sub">Hacen la partida más difícil, pero cada punto mejora el premio. Sólo en solitario.</p>
+    <div id="curse-list" class="curse-list"></div>
+    <div id="curse-group" class="curse-group hidden">Estás en grupo: se usan las maldiciones del anfitrión. Si eres tú, estas se aplicarán a todos.</div>
+    <div id="curse-sum" class="curse-sum"></div>
+  </div>
+</section>
+
 <section id="scr-goals" class="scr dim hidden">
   <div class="box wide">
     <div class="row between"><h2>Misiones</h2><button class="btn small ghost" data-back>Volver</button></div>
@@ -458,11 +494,12 @@
     <div class="upg-head">
       <canvas id="upg-stage" class="stage" width="120" height="96"></canvas>
       <div class="grow">
-        <p class="sub" style="margin:0">Cada Pokémon tiene sus propias mejoras: sólo cuentan cuando juegas con él.</p>
+        <p class="sub" style="margin:0">Las mejoras son de cada familia: valen para todas sus evoluciones.</p>
         <div class="row" style="margin-top:8px">
-          <label for="upg-mon" style="margin:0">Pokémon</label>
+          <label for="upg-mon" style="margin:0">Familia</label>
           <select id="upg-mon" class="field" style="width:auto;min-width:220px"></select>
         </div>
+        <p id="upg-fam" class="sub" style="margin:6px 0 0;font-size:13px"></p>
       </div>
     </div>
     <div class="upg" id="upg-list"></div>
@@ -505,9 +542,12 @@
 <section id="scr-levelup" class="scr dim hidden">
   <div class="box center">
     <h2>¡Nivel <span id="lvl-num">2</span>!</h2>
-    <p class="sub">Elige una recompensa · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
+    <p class="sub">Elige una recompensa · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd><span id="lvl-k4" class="hidden"> <kbd>4</kbd></span></p>
     <div id="cards" class="cards"></div>
-    <button id="lvl-reroll" class="btn small ghost hidden" data-sfx="none" style="margin-top:10px">Cambiar opciones (<span id="lvl-rr-n">1</span>) · <kbd>R</kbd></button>
+    <div class="row" style="justify-content:center;gap:8px;margin-top:10px">
+      <button id="lvl-reroll" class="btn small ghost hidden" data-sfx="none">Cambiar opciones (<span id="lvl-rr-n">1</span>) · <kbd>R</kbd></button>
+      <button id="lvl-skip" class="btn small ghost hidden" data-sfx="none">Saltar (+10% vida) · <kbd>X</kbd></button>
+    </div>
     <p id="lvl-wait" class="note hidden"></p>
   </div>
 </section>
@@ -554,6 +594,6 @@
 </section>
 
 <!-- datos generados -->
-<script defer src="js/app.min.js?v=bc2124ff1d"></script>
+<script defer src="js/app.min.js?v=26352e187d"></script>
 </body>
 </html>

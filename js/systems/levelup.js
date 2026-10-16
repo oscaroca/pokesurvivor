@@ -30,6 +30,10 @@ G.LevelUp = (() => {
   // Megaevolución (data/megas.js): probabilidad de que salga la carta en cada
   // subida de nivel, si estás en forma final, desde este nivel.
   const MEGA_CHANCE = 0.02, MEGA_MIN_LEVEL = 10;
+  // Favoritos: peso en el sorteo de movimientos nuevos y en la carta (ver candidates).
+  // Medido (16-10-2026): con 4 favoritos por aprender sale al menos uno en el
+  // 66-78 % de las subidas según el Pokémon (~80 % con la Cuarta carta).
+  const FAV = { share: 1.1, cap: 12, w: 1.15 };
   const MEGA_ITEM = {
     'stone':         { name: 'Megapiedra',    icon: 'star', color: '#e98cff' },
     'red-orb':       { name: 'Orbe Rojo',     icon: 'fire', color: '#ff5a3d' },
@@ -58,10 +62,25 @@ G.LevelUp = (() => {
         !pl.hasMove(id) && !(pl.banned && pl.banned.has(id)) && !(buffs >= 2 && G.Moves.BY_ID[id].kind === 'buff'));
       // Los de la categoría que le conviene (Ataque o Ataque Especial) salen más.
       const fav = G.Moves.favors(pl.mon);
-      for (const id of G.U.pickN(pool, 6)) {
+      // Favoritos (ficha del Pokémon, hasta 4): entran en el sorteo de 6 con más
+      // facilidad, en proporción a cuántos movimientos NO favoritos hay (así no
+      // depende de si el Pokémon aprende 13 movimientos o 25) y pesan algo más
+      // en la carta: sale al menos uno en ~7 de cada 10 subidas.
+      const stars = new Set((pl.favs || []).filter(id => pool.includes(id)));
+      const others = pool.length - stars.size;
+      const fw = stars.size ? Math.min(FAV.cap, Math.max(1, FAV.share * others / stars.size)) : 1;
+      const draw = [], left = pool.slice();
+      while (draw.length < 6 && left.length) {
+        const ws = left.map(id => stars.has(id) ? fw : 1);
+        let r = Math.random() * ws.reduce((a, b) => a + b, 0), i = 0;
+        while (i < left.length - 1 && (r -= ws[i]) > 0) i++;
+        draw.push(left.splice(i, 1)[0]);
+      }
+      for (const id of draw) {
         const d = G.Moves.BY_ID[id];
+        const w = (!fav || !d.cat ? 10 : d.cat === fav ? 14 : 6) * (stars.has(id) ? FAV.w : 1);
         out.push({
-          w: !fav || !d.cat ? 10 : d.cat === fav ? 14 : 6, type: 'new', key: 'new:' + id,
+          w, type: 'new', key: 'new:' + id, fav: stars.has(id),
           icon: 'move:' + id, color: G.U.TYPE_COLOR[d.type],
           tag: G.U.TYPE_NAME[d.type] + (d.cat ? ' · ' + G.Moves.CAT_NAME[d.cat] : ''),
           title: d.name, desc: d.desc,
@@ -122,8 +141,8 @@ G.LevelUp = (() => {
     }
 
     // --- megaevolución: muy rara, sólo en forma final ---
-    const megas = pl.level >= MEGA_MIN_LEVEL ? pl.megaOptions() : [];
-    if (megas.length && Math.random() < MEGA_CHANCE) {
+    const megas = pl.level >= G.Talents.megaLevel(pl, MEGA_MIN_LEVEL) ? pl.megaOptions() : [];
+    if (megas.length && Math.random() < G.Talents.megaChance(pl, MEGA_CHANCE)) {
       const f = G.U.pick(megas);
       const it = MEGA_ITEM[f.item];
       out.push({
@@ -148,7 +167,7 @@ G.LevelUp = (() => {
   }
 
   /** Devuelve 3 cartas distintas, elegidas por peso. */
-  function offer(pl, n = 3) {
+  function offer(pl, n = G.Talents.cards(pl)) {
     const pool = candidates(pl);
     const picked = [];
     const used = new Set();
@@ -171,5 +190,5 @@ G.LevelUp = (() => {
     return picked;
   }
 
-  return { offer, STATS, MEGA_CHANCE };
+  return { offer, STATS, MEGA_CHANCE, FAV };
 })();
