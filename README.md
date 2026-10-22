@@ -1,3 +1,19 @@
+# PokéSurvivor Plus+ se ha mudado
+
+> **Este repositorio ya no se actualiza.** PokéSurvivor Plus+ sigue en
+> **[github.com/oscaroca/pokesurvivorplus](https://github.com/oscaroca/pokesurvivorplus)**:
+> código, novedades y [issues](https://github.com/oscaroca/pokesurvivorplus/issues) están allí.
+>
+> **This repository is no longer updated.** PokéSurvivor Plus+ now lives at
+> **[github.com/oscaroca/pokesurvivorplus](https://github.com/oscaroca/pokesurvivorplus)**.
+>
+> Jugar / Play: https://oscaroca-pokesurvivor.vercel.app
+>
+> PokéSurvivor Plus+ es una versión modificada de
+> [PokéSurvivor](https://github.com/JPTER78/pokesurvivor), de JPTER78.
+
+---
+
 # PokéSurvivor · Mundo Misterioso
 
 Bullet-heaven con Pokémon al estilo de Survivor.io y Megabonk, con sprites de
